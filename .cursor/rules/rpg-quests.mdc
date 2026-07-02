@@ -1,0 +1,56 @@
+---
+description: Quest YAML and quest-system design conventions
+globs: "**/quests/**,**/quest/**"
+alwaysApply: false
+---
+
+# Quest design
+
+## Archetypes (starter lines)
+
+Mirror Civs tutorials — one line each:
+
+- **warrior** — combat (`EnterCombatEvent`), AuraSkills Fighting/Archery
+- **builder** — regions (`RegionCreatedEvent`), Civs building structures
+- **merchant** — economy (Vault balance), town/social (`PlayerAcceptsTownInviteEvent`)
+
+## Quest YAML shape
+
+```yaml
+id: welcome
+archetype: warrior          # optional
+requires:
+  permission: rpg.quest.welcome
+  auraskills:
+    fighting: 0             # min level, not RPG-owned XP
+  civs:
+    in-town: false
+triggers:
+  - type: SKILL_LEVEL_UP
+    skill: FIGHTING
+    level: 10
+rewards:
+  vault: 100
+  auraskills-xp:
+    FIGHTING: 500           # one-time grant via API, not stored locally
+  luckperms:
+    - rpg.tree.warrior.tier1
+messages:
+  start: "<gold>Quest started</gold>"
+  complete: "<green>Complete!</green>"
+```
+
+## Rules
+
+- Quest **step progress** lives in RPG player profile YAML — not in AuraSkills or Civs.
+- Max active quests: respect `config.yml` → `quests.max-active`.
+- Permission prefix: `rpg.quest.<id>` (config: `integrations.luckperms.quest-permission-prefix`).
+- Reuse PAPI in quest text: `%civs_townname%`, `%auraskills_fighting_level%`, `%rpg_quest_progress%`.
+- Do not reimplement Civs tutorial state — set `replaces-civs-tutorial: tut-warrior` when superseding.
+
+## Reward priority
+
+1. LuckPerms node (persistent unlock)
+2. AuraSkills XP via API (one-shot or event multiplier)
+3. Vault money
+4. Items/kits (Essentials softdepend) — last resort

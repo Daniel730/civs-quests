@@ -1,0 +1,18 @@
+id: builder_path
+name: "Caminho do Construtor"
+archetype: builder
+description: "Siga os primeiros passos do tutorial construtor do Civs."
+objectives:
+  - id: build_shelter
+    type: build_region
+    region: shelter
+    description: "Construa um abrigo (shelter)"
+  - id: build_council_room
+    type: build_region
+    region: council_room
+    description: "Construa uma sala do conselho (council_room)"
+  - id: foraging_level
+    type: skill_level
+    skill: foraging
+    level: 5
+    description: "Alcance nível 5 em Coleta (Foraging)"

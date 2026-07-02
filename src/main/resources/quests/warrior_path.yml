@@ -1,0 +1,18 @@
+id: warrior_path
+name: "Caminho do Guerreiro"
+archetype: warrior
+description: "Siga os primeiros passos do tutorial guerreiro do Civs."
+objectives:
+  - id: build_shelter
+    type: build_region
+    region: shelter
+    description: "Construa um abrigo (shelter)"
+  - id: build_altar
+    type: build_region
+    region: altar
+    description: "Construa um altar"
+  - id: fighting_level
+    type: skill_level
+    skill: fighting
+    level: 5
+    description: "Alcance nível 5 em Combate (Fighting)"

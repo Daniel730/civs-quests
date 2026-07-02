@@ -1,0 +1,18 @@
+id: merchant_path
+name: "Caminho do Mercador"
+archetype: merchant
+description: "Siga os primeiros passos do tutorial mercador do Civs."
+objectives:
+  - id: build_plot
+    type: build_region
+    region: plot7x7
+    description: "Construa um lote comercial (plot7x7)"
+  - id: build_shack
+    type: build_region
+    region: shack
+    description: "Construa uma cabana (shack)"
+  - id: farming_level
+    type: skill_level
+    skill: farming
+    level: 5
+    description: "Alcance nível 5 em Agricultura (Farming)"

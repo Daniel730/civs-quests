@@ -1,0 +1,15 @@
+---
+description: Build and git workflow for RPG Server plugin
+alwaysApply: true
+---
+
+# RPG Server build & git
+
+- **Stack:** Paper 26.1.2, Java 25, Maven shade → `target/rpg-server-*.jar`
+- **Maven:** `C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd`
+- **Civs JAR:** `../Civs-1.11.6/target/civs-1.11.6.jar` (build Civs first if missing)
+- **Separate commits** per logical fix/feature; imperative message.
+- Run **`mvn compile`** (or `mvn test` when tests exist) before push.
+- Commit **`.cursor/skills/`** and **`.cursor/rules/`**; do not commit other `.cursor/` IDE state.
+- Do **not** edit Civs source from this repo — integration via JAR + events only.
+- Deploy JAR to server `plugins/`; user validates on Linux game server.

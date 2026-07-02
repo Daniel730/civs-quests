@@ -1,0 +1,37 @@
+# RPG Server Plugin — configuração inicial
+# Versão: 0.1.0-SNAPSHOT
+
+settings:
+  debug: false
+  locale: pt_BR
+
+integrations:
+  civs:
+    enabled: true
+    require-town-for-quests: false
+  auraskills:
+    enabled: true
+    sync-on-join: true
+  vault:
+    enabled: true
+    require-economy: true
+  placeholderapi:
+    enabled: true
+    register-expansion: true
+  luckperms:
+    enabled: true
+    quest-permission-prefix: "rpg.quest."
+
+progression:
+  autosave-minutes: 5
+  default-track: main
+
+quests:
+  enabled: true
+  max-active: 3
+  starter-quest-id: welcome
+
+messages:
+  prefix: "<gray>[<gold>RPG</gold>]</gray> "
+  no-permission: "<red>Sem permissão.</red>"
+  reload-success: "<green>Configuração recarregada.</green>"

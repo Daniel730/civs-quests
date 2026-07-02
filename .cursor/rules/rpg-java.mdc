@@ -1,0 +1,44 @@
+---
+description: Java conventions for RPG Server plugin source
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# RPG Java conventions
+
+## Package layout
+
+```
+dev.daniel730.rpgserver
+├── RpgServerPlugin
+├── hook/          # CivsHook, AuraSkillsHook, VaultHook, LuckPermsHook, PlaceholderHook
+├── quest/         # QuestManager, QuestDefinition, listeners
+└── progression/   # SkillTreeManager, Archetype, PlayerProfile
+```
+
+## Hook pattern
+
+- One class per external plugin; implement `Hook` interface with `enable()` / `disable()` / `isAvailable()`.
+- Register Civs/AuraSkills listeners inside hook `enable()`, not in main class.
+- Async only for file I/O (player profile YAML); Bukkit API on main thread.
+
+## AuraSkills access
+
+```java
+// ✅ after SkillsLoadEvent
+SkillsUser user = AuraSkillsApi.get().getUser(uuid);
+user.addSkillXp(Skill.FIGHTING, amount);
+
+// ❌ in onEnable before SkillsLoadEvent
+```
+
+## Stat modifiers for perks
+
+```java
+user.addStatModifier(new StatModifier("rpg_berserk", Stats.STRENGTH, 2.0, Operation.ADD));
+// always remove with same id on perk revoke
+```
+
+## Minimal diffs
+
+Match surrounding style. No NMS. Prefer events over polling managers.

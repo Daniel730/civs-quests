@@ -1,0 +1,40 @@
+name: RPGServer
+main: dev.daniel730.rpgserver.RpgServerPlugin
+version: ${project.version}
+api-version: '1.21'
+description: Camada RPG com quests, progressão e integrações de servidor.
+author: Daniel730
+load: POSTWORLD
+
+depend:
+  - Vault
+
+softdepend:
+  - Civs
+  - AuraSkills
+  - PlaceholderAPI
+  - LuckPerms
+
+commands:
+  rpg:
+    description: Comandos principais do RPG Server
+    usage: /rpg [help|reload|profile|quest]
+    aliases: [rpgserver]
+
+permissions:
+  rpg.admin:
+    description: Acesso administrativo ao RPG Server
+    default: op
+  rpg.profile:
+    description: Ver perfil de progressão
+    default: true
+  rpg.quest:
+    description: Listar e ver status de quests
+    default: true
+
+loadafter:
+  - Vault
+  - Civs
+  - AuraSkills
+  - PlaceholderAPI
+  - LuckPerms

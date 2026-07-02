@@ -1,0 +1,42 @@
+---
+description: Integration rules for Civs, AuraSkills, Vault, LuckPerms, PAPI
+alwaysApply: true
+---
+
+# RPG integrations
+
+## Separation of concerns
+
+| Layer | Plugin | RPG plugin may |
+|-------|--------|----------------|
+| Skill XP & levels | AuraSkills | Listen events, grant XP via API, apply StatModifiers |
+| Towns & regions | Civs | Listen events, read managers, use `%civs_*%` |
+| Money | Vault | deposit/withdraw, balance checks |
+| Unlocks | LuckPerms | grant nodes/tracks on quest/perk completion |
+| Display | PAPI | Register `%rpg_*%`; consume `%civs_*%` / `%auraskills_*%` |
+
+## Do NOT duplicate AuraSkills XP
+
+- No parallel skill level storage, XP tables, or level-up logic in RPG plugin.
+- Quest rewards: `user.addSkillXp(Skill, amount)` or temporary multiplier on `XpGainEvent.setAmount()`.
+- Perk bonuses: `StatModifier` with id `rpg_<perk_id>` — remove on perk revoke.
+- Wait for `SkillsLoadEvent` before any AuraSkills API access.
+
+## Civs integration
+
+- Prefer **Bukkit events** over direct manager calls for quest triggers.
+- Safe events: `RegionCreatedEvent`, `TownCreatedEvent`, `TownEvolveEvent`, `EnterCombatEvent`, `PlayerAcceptsTownInviteEvent`.
+- Avoid: `GainExpEvent`, `SpellPreCastEvent` (not fired in Civs 1.11.6).
+- Civs mana (`%civs_mana%`) and AuraSkills mana are separate — document which a perk uses.
+
+## Hooks must degrade gracefully
+
+When `config.yml` sets `integrations.<plugin>.enabled: false` or plugin absent, hook no-ops without errors.
+
+## plugin.yml load order
+
+```yaml
+depend: [Vault]
+softdepend: [Civs, AuraSkills, PlaceholderAPI, LuckPerms]
+loadafter: [Vault, Civs, AuraSkills, PlaceholderAPI, LuckPerms]
+```
