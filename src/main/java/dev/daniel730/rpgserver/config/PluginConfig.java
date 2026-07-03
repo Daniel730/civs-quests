@@ -11,6 +11,12 @@ public final class PluginConfig {
     private final boolean requireEconomy;
     private final boolean placeholderEnabled;
     private final boolean luckPermsEnabled;
+    private final boolean chestShopEnabled;
+    private final boolean essentialsEnabled;
+    private final boolean essentialsKitRewardsEnabled;
+    private final boolean essentialsWarpRewardsEnabled;
+    private final boolean interactiveBooksEnabled;
+    private final boolean veinMinerEnabled;
     private final String questPermissionPrefix;
     private final int autosaveMinutes;
     private final int maxActiveQuests;
@@ -26,6 +32,12 @@ public final class PluginConfig {
         this.requireEconomy = config.getBoolean("integrations.vault.require-economy", true);
         this.placeholderEnabled = config.getBoolean("integrations.placeholderapi.enabled", true);
         this.luckPermsEnabled = config.getBoolean("integrations.luckperms.enabled", true);
+        this.chestShopEnabled = config.getBoolean("integrations.chestshop.enabled", true);
+        this.essentialsEnabled = config.getBoolean("integrations.essentials.enabled", true);
+        this.essentialsKitRewardsEnabled = config.getBoolean("integrations.essentials.kit-rewards", true);
+        this.essentialsWarpRewardsEnabled = config.getBoolean("integrations.essentials.warp-rewards", true);
+        this.interactiveBooksEnabled = config.getBoolean("integrations.interactivebooks.enabled", true);
+        this.veinMinerEnabled = config.getBoolean("integrations.veinminer.enabled", false);
         this.questPermissionPrefix = config.getString("integrations.luckperms.quest-permission-prefix", "rpg.quest.");
         this.autosaveMinutes = config.getInt("progression.autosave-minutes", 5);
         this.maxActiveQuests = config.getInt("quests.max-active", 3);
@@ -60,6 +72,30 @@ public final class PluginConfig {
 
     public boolean isLuckPermsEnabled() {
         return luckPermsEnabled;
+    }
+
+    public boolean isChestShopEnabled() {
+        return chestShopEnabled;
+    }
+
+    public boolean isEssentialsEnabled() {
+        return essentialsEnabled;
+    }
+
+    public boolean isEssentialsKitRewardsEnabled() {
+        return essentialsKitRewardsEnabled;
+    }
+
+    public boolean isEssentialsWarpRewardsEnabled() {
+        return essentialsWarpRewardsEnabled;
+    }
+
+    public boolean isInteractiveBooksEnabled() {
+        return interactiveBooksEnabled;
+    }
+
+    public boolean isVeinMinerEnabled() {
+        return veinMinerEnabled;
     }
 
     public String getQuestPermissionPrefix() {
