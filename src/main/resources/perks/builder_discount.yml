@@ -1,0 +1,9 @@
+id: builder_discount
+name: "Desconto do Construtor"
+archetype: builder
+requires:
+  - sprint2_civs_skills
+type: civs-territorial
+stat: shop_discount
+value: 0.05
+operation: add

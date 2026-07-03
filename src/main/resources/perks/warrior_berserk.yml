@@ -1,0 +1,9 @@
+id: warrior_berserk
+name: "Fúria do Guerreiro"
+archetype: warrior
+requires:
+  - warrior_path
+type: auraskills-stat
+stat: strength
+value: 2.0
+operation: add
