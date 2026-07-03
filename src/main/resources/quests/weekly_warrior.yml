@@ -2,7 +2,7 @@ id: weekly_warrior
 name: "Caçador Semanal"
 archetype: warrior
 schedule: weekly
-description: "Desafio semanal: elimine 30 zumbis, conjure magias Civs e alcance Combate nível 8."
+description: "Uma semana de fúria: cace legiões de mortos-vivos, canalize magias Civs pelo /cv menu e eleve Combate ao nível 8."
 requires:
   - warrior_path
   - sprint2_spells

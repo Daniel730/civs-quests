@@ -3,7 +3,7 @@ name: "Construtor Mestre"
 archetype: builder
 description: "Graduação construtor: erga um armazém territorial e domine Mineração Civs nível 5."
 requires:
-  - sprint2_civs_skills
+  - construtor_armazem
 objectives:
   - id: build_warehouse
     type: build_region

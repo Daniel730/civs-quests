@@ -1,0 +1,23 @@
+id: construtor_armazem
+name: "Armazém Territorial"
+archetype: builder
+description: "Após dominar a mineração Civs, erga um armazém no seu território via /cv menu e alcance Mineração nível 3."
+requires:
+  - sprint2_civs_skills
+objectives:
+  - id: build_warehouse
+    type: build_region
+    region: warehouse
+    description: "Construa um armazém (warehouse) no seu território"
+  - id: mining_level_3
+    type: civs_skill_level
+    skill: mining
+    level: 3
+    description: "Alcance nível 3 em Mineração Civs"
+rewards:
+  money: 100
+  civs-skill-xp:
+    building: 75
+  skill-xp:
+    foraging: 150
+  permission: rpg.quest.construtor_armazem

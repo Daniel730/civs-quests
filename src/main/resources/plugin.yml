@@ -6,9 +6,6 @@ description: Camada RPG com quests, progressão e integrações de servidor.
 author: Daniel730
 load: POSTWORLD
 
-libraries:
-  - net.luckperms:api:5.4
-
 depend:
   - Vault
 

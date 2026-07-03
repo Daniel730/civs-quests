@@ -1,0 +1,23 @@
+id: weekly_boss_hunter
+name: "Caçador de Chefes"
+archetype: warrior
+schedule: weekly
+description: "Desafio semanal: derrote o Chefe Bandido e elimine hordas de zumbis."
+requires:
+  - bandit_chief_slayer
+objectives:
+  - id: slay_bandit_chief
+    type: custom_mob_kill
+    mob: bandit_chief
+    amount: 1
+    description: "Derrote o Chefe Bandido"
+  - id: cull_zombies
+    type: kill_mob
+    mob: zombie
+    amount: 20
+    description: "Mate 20 zumbis"
+rewards:
+  money: 400
+  skill-xp:
+    fighting: 900
+  permission: rpg.quest.weekly_boss_hunter

@@ -69,10 +69,13 @@ public final class QuestManager {
             plugin.saveResource("quests/sprint2_spells.yml", false);
             plugin.saveResource("quests/mercador_fortuna.yml", false);
             plugin.saveResource("quests/mercador_mestre.yml", false);
+            plugin.saveResource("quests/construtor_armazem.yml", false);
             plugin.saveResource("quests/construtor_mestre.yml", false);
             plugin.saveResource("quests/daily_mercado.yml", false);
             plugin.saveResource("quests/daily_miner.yml", false);
             plugin.saveResource("quests/daily_vendas.yml", false);
+            plugin.saveResource("quests/daily_farm.yml", false);
+            plugin.saveResource("quests/weekly_boss_hunter.yml", false);
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -255,6 +258,26 @@ public final class QuestManager {
             }
         }
         return names;
+    }
+
+    public Optional<Quest> findNextAvailableQuest(Player player, PlayerProfile profile) {
+        String archetype = profile.getArchetype();
+        if (archetype == null || archetype.isBlank()) {
+            return Optional.empty();
+        }
+        for (Quest quest : getArchetypeStoryQuests(player, profile, archetype)) {
+            QuestStatus status = getQuestStatus(player, profile, quest);
+            if (status == QuestStatus.NOT_STARTED || status == QuestStatus.IN_PROGRESS) {
+                return Optional.of(quest);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public String formatNextQuestName(Player player, PlayerProfile profile) {
+        return findNextAvailableQuest(player, profile)
+                .map(Quest::getName)
+                .orElse("Nenhuma");
     }
 
     public Optional<Quest> findNextQuestInChain(Player player, PlayerProfile profile, Quest quest) {

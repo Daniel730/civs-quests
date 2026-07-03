@@ -5,6 +5,7 @@ import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.Quest;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +54,13 @@ public final class RpgPlaceholderExpansion extends PlaceholderExpansion {
         }
         if (normalized.equals("tracked_progress")) {
             return plugin.getQuestManager().formatTrackedQuestProgress(profile);
+        }
+        if (normalized.equals("next_quest")) {
+            Player online = player.getPlayer();
+            if (online != null) {
+                return plugin.getQuestManager().formatNextQuestName(online, profile);
+            }
+            return "";
         }
         if (normalized.startsWith("quest_progress_")) {
             String questId = params.substring("quest_progress_".length());

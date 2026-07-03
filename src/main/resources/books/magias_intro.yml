@@ -1,0 +1,33 @@
+name: "Grimório de Combate"
+title: "Iniciação às Magias"
+author: "Ordem do Reino"
+generation: ORIGINAL
+lore:
+  - "Feitiços Civs pelo altar e /cv menu"
+open_command: ''
+pages:
+  '1':
+    - '<gradient:#4B0082:#FF4500:#4B0082><bold>✦ Iniciação às Magias</bold></gradient>'
+    - ''
+    - '<gray>O guerreiro que só brande espada cai</gray>'
+    - '<gray>ante quem domina o fogo. Magias Civs</gray>'
+    - '<gray>são conjuradas pelo <white>altar</white> e pelo</gray>'
+    - '<gray>menu territorial — não por comandos.</gray>'
+    - ''
+    - '<yellow><italic>« A chama obedece a quem ergueu o altar. »</italic></yellow>'
+  '2':
+    - '<gold><bold>Como Conjurar</bold></gold>'
+    - ''
+    - '<gray>① Construa um <white>altar</white> no território</gray>'
+    - '<gray>② Abra <white>/cv menu</white> → Magias</gray>'
+    - '<gray>③ Escolha um feitiço e conjure em combate</gray>'
+    - '<gray>④ Pratique <white>fireball</white> contra inimigos</gray>'
+  '3':
+    - '<aqua><bold>Seu Desafio</bold></aqua>'
+    - ''
+    - '<gray>• Conjure 5 magias (qualquer tipo)</gray>'
+    - '<gray>• Conjure 3 vezes o feitiço fireball</gray>'
+    - '<gray>• /rpg journal — acompanhe o progresso</gray>'
+    - ''
+    - '<click:run_command:/rpg quest accept sprint2_spells><green><underlined>[ Aceitar Missão ]</underlined></green></click>'
+    - '<click:run_command:/cv menu><gray><underlined>[ Abrir /cv menu ]</underlined></gray></click>'

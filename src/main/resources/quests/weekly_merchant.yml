@@ -2,7 +2,7 @@ id: weekly_merchant
 name: "Comerciante Semanal"
 archetype: merchant
 schedule: weekly
-description: "Desafio semanal: movimente a economia com compras, vendas ChestShop e leilão Civs."
+description: "Domine o comércio do reino: negocie em ChestShops, movimente o leilão Civs (/cv menu → Casa de Leilões) e prove que ouro flui pelas suas mãos."
 requires:
   - merchant_path
   - sprint2_auction

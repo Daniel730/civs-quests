@@ -2,7 +2,7 @@ id: weekly_builder
 name: "Construtor Semanal"
 archetype: builder
 schedule: weekly
-description: "Desafio semanal: extraia pedra, ganhe XP de Mineração Civs e construa um armazém."
+description: "O desafio dos pedreiros: extraia pedra em massa, acumule XP de Mineração Civs e erga um armazém digno do seu território via /cv menu."
 requires:
   - builder_path
   - sprint2_civs_skills

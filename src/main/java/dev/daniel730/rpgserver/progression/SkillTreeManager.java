@@ -53,6 +53,8 @@ public final class SkillTreeManager {
             plugin.saveResource("perks/merchant_bazaar.yml", false);
             plugin.saveResource("perks/merchant_golden_touch.yml", false);
             plugin.saveResource("perks/builder_master.yml", false);
+            plugin.saveResource("perks/warrior_duelist.yml", false);
+            plugin.saveResource("perks/merchant_trader.yml", false);
         }
 
         File[] files = perksFolder.listFiles((dir, name) -> name.endsWith(".yml"));

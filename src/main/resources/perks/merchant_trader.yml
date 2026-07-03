@@ -1,0 +1,9 @@
+id: merchant_trader
+name: "Comerciante Mestre"
+archetype: merchant
+requires:
+  - mercador_mestre
+type: civs-territorial
+stat: shop_discount
+value: 0.05
+operation: add

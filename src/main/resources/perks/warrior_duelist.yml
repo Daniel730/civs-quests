@@ -1,0 +1,9 @@
+id: warrior_duelist
+name: "Duelista"
+archetype: warrior
+requires:
+  - warrior_champion
+type: auraskills-stat
+stat: crit_chance
+value: 2.5
+operation: add

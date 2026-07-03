@@ -8,6 +8,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -22,22 +23,28 @@ public final class LuckPermsHook {
     }
 
     public void enable() {
-        if (!plugin.getPluginConfig().isLuckPermsEnabled()) {
+        if (enabled || !plugin.getPluginConfig().isLuckPermsEnabled()) {
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("LuckPerms") == null) {
             plugin.getLogger().warning("LuckPerms não encontrado.");
             return;
         }
-        try {
-            luckPerms = LuckPermsProvider.get();
-            enabled = luckPerms != null;
-            if (enabled) {
-                plugin.getLogger().info("LuckPerms API conectada.");
-            }
-        } catch (IllegalStateException ex) {
-            plugin.getLogger().warning("LuckPerms API indisponível: " + ex.getMessage());
+        RegisteredServiceProvider<LuckPerms> services =
+                Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (services != null) {
+            luckPerms = services.getProvider();
         }
+        if (luckPerms == null) {
+            try {
+                luckPerms = LuckPermsProvider.get();
+            } catch (IllegalStateException ex) {
+                plugin.getLogger().warning("LuckPerms API indisponível: " + ex.getMessage());
+                return;
+            }
+        }
+        enabled = true;
+        plugin.getLogger().info("LuckPerms API conectada.");
     }
 
     public boolean isEnabled() {

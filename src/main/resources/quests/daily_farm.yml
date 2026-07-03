@@ -1,0 +1,14 @@
+id: daily_farm
+name: "Fazenda Diária"
+schedule: daily
+description: "Colha trigo maduro nos campos hoje — recompensa diária de Agricultura."
+objectives:
+  - id: harvest_wheat
+    type: mine_block
+    block: wheat
+    amount: 32
+    description: "Colha 32 trigos maduros"
+rewards:
+  money: 40
+  skill-xp:
+    farming: 100
