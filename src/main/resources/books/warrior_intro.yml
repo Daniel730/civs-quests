@@ -1,0 +1,25 @@
+name: "Introdução Guerreiro"
+title: "Caminho do Guerreiro"
+author: "RPG Server"
+generation: ORIGINAL
+lore:
+  - "Lore do arquetipo guerreiro"
+open_command: ''
+pages:
+  '1':
+    - '<gold><bold>Caminho do Guerreiro</bold></gold>'
+    - ''
+    - '<gray>Bem-vindo, guerreiro! Este livro apresenta'
+    - '<gray>o caminho territorial do Civs para quem'
+    - '<gray>busca força em combate e defesa.</gray>'
+    - ''
+    - '<yellow>Construa abrigos, altares e prove seu'
+    - '<yellow>valor derrotando hostis.</yellow>'
+  '2':
+    - '<aqua>Dicas</aqua>'
+    - ''
+    - '<gray>• Use /rpg journal para ver todas as quests'
+    - '<gray>• Use /rpg quest book warrior_path para o livro de progresso'
+    - ''
+    - '<click:run_command:/rpg quest accept warrior_path><green><underlined>[Aceitar Quest]</underlined></green></click>'
+    - '<hover:show_text:"<gray>Iniciar Caminho do Guerreiro</gray>">'

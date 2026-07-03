@@ -1,0 +1,23 @@
+name: "Introdução Mercador"
+title: "Caminho do Mercador"
+author: "RPG Server"
+generation: ORIGINAL
+lore:
+  - "Lore do arquetipo mercador"
+open_command: ''
+pages:
+  '1':
+    - '<gold><bold>Caminho do Mercador</bold></gold>'
+    - ''
+    - '<gray>O comércio move o reino. Construa seu'
+    - '<gray>lote, abra sua loja ChestShop e'
+    - '<gray>prospere com a economia do servidor.</gray>'
+    - ''
+    - '<yellow>Domine agricultura e faça sua primeira venda!</yellow>'
+  '2':
+    - '<aqua>Dicas</aqua>'
+    - ''
+    - '<gray>• Coloque uma placa ChestShop no seu lote'
+    - '<gray>• Use /rpg quest book merchant_path para progresso'
+    - ''
+    - '<click:run_command:/rpg quest accept merchant_path><green><underlined>[Aceitar Quest]</underlined></green></click>'
