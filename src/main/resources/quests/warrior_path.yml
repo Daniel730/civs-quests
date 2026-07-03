@@ -1,7 +1,7 @@
 id: warrior_path
 name: "Caminho do Guerreiro"
 archetype: warrior
-description: "Siga os primeiros passos do tutorial guerreiro do Civs."
+description: "Tutorial guerreiro Civs: construa abrigo e altar, enfrente hostis e suba em Combate."
 lore-book: warrior_intro
 objectives:
   - id: build_shelter

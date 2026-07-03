@@ -1,7 +1,7 @@
 id: builder_path
 name: "Caminho do Construtor"
 archetype: builder
-description: "Siga os primeiros passos do tutorial construtor do Civs."
+description: "Tutorial construtor Civs: abrigo, sala do conselho e progresso em Coleta (Foraging)."
 objectives:
   - id: build_shelter
     type: build_region

@@ -1,7 +1,7 @@
 id: sprint2_spells
-name: "Sprint 2 — Magias Civs"
+name: "Iniciação às Magias"
 archetype: warrior
-description: "Exemplos de objetivos cast_spell via Civs SpellPreCastEvent (requer Civs Sprint 2+)."
+description: "Aprenda a conjurar feitiços Civs pelo menu (/cv menu) e pratique em combate."
 requires:
   - warrior_path
 objectives:

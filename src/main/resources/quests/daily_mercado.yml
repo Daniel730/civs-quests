@@ -1,0 +1,16 @@
+id: daily_mercado
+name: "Mercado Diário"
+archetype: merchant
+schedule: daily
+description: "Compre itens em lojas ChestShop hoje para movimentar o mercado."
+requires:
+  - merchant_path
+objectives:
+  - id: shop_purchases
+    type: shop_buy
+    amount: 5
+    description: "Compre 5 vezes em lojas ChestShop"
+rewards:
+  money: 30
+  skill-xp:
+    farming: 75

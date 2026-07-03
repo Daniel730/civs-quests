@@ -1,7 +1,7 @@
 id: sprint2_auction
-name: "Sprint 2 — Leilão Civs"
+name: "Primeiro Leilão"
 archetype: merchant
-description: "Exemplos de objetivos do leilão nativo Civs (AuctionListEvent / AuctionPurchaseEvent)."
+description: "Participe do leilão Civs: liste um item à venda e compre de outro jogador."
 requires:
   - merchant_path
 objectives:

@@ -1,7 +1,7 @@
 id: sprint2_civs_skills
-name: "Sprint 2 — Skills Civs"
+name: "Expansão Territorial"
 archetype: builder
-description: "Exemplos de objetivos territoriais via GainExpEvent (skills internas Civs)."
+description: "Desenvolva skills territoriais Civs minerando e evoluindo a região da sua cidade."
 requires:
   - builder_path
 objectives:

@@ -1,15 +1,10 @@
 id: warrior_champion
 name: "Campeão Guerreiro"
 archetype: warrior
-description: "Após derrotar o Chefe Bandido, prove domínio em combate."
+description: "Capstone guerreiro: domine magias Civs e alcance nível 10 em Combate."
 requires:
   - bandit_chief_slayer
 objectives:
-  - id: kill_hostiles
-    type: kill_mob
-    mob: zombie
-    amount: 20
-    description: "Mate 20 zumbis"
   - id: cast_spells
     type: cast_spell
     amount: 10

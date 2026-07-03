@@ -1,0 +1,20 @@
+id: mercador_fortuna
+name: "Fortuna do Mercador"
+archetype: merchant
+description: "Após o primeiro leilão, acumule receita de loja e mantenha um saldo mínimo."
+requires:
+  - sprint2_auction
+objectives:
+  - id: shop_income
+    type: shop_revenue
+    amount: 500
+    description: "Receba 500 moedas de vendas na sua loja"
+  - id: rich_enough
+    type: balance_min
+    amount: 1000
+    description: "Tenha pelo menos 1000 moedas no saldo"
+rewards:
+  money: 100
+  skill-xp:
+    farming: 200
+  permission: rpg.quest.mercador_fortuna

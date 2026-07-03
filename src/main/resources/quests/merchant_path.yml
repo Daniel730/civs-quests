@@ -1,7 +1,7 @@
 id: merchant_path
 name: "Caminho do Mercador"
 archetype: merchant
-description: "Siga os primeiros passos do tutorial mercador do Civs."
+description: "Tutorial mercador Civs: lote comercial, cabana, Agricultura e primeira venda ChestShop."
 lore-book: merchant_intro
 objectives:
   - id: build_plot

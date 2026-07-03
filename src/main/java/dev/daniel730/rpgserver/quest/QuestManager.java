@@ -51,7 +51,6 @@ public final class QuestManager {
             plugin.saveResource("quests/warrior_path.yml", false);
             plugin.saveResource("quests/builder_path.yml", false);
             plugin.saveResource("quests/merchant_path.yml", false);
-            plugin.saveResource("quests/sprint1_examples.yml", false);
             plugin.saveResource("quests/sprint2_examples.yml", false);
             plugin.saveResource("quests/sprint2_auction.yml", false);
             plugin.saveResource("quests/sprint3_daily.yml", false);
@@ -62,6 +61,8 @@ public final class QuestManager {
             plugin.saveResource("quests/weekly_merchant.yml", false);
             plugin.saveResource("quests/weekly_builder.yml", false);
             plugin.saveResource("quests/sprint2_spells.yml", false);
+            plugin.saveResource("quests/mercador_fortuna.yml", false);
+            plugin.saveResource("quests/daily_mercado.yml", false);
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -499,11 +500,28 @@ public final class QuestManager {
         }
         if (grantRewards) {
             rewardExecutor.grantRewards(player, quest);
+            unlockFollowUpQuestPermissions(player, quest.getId());
             if (quest.getUnlocksPerk() != null && !quest.getUnlocksPerk().isBlank()) {
                 plugin.getSkillTreeManager().tryUnlock(player, quest.getUnlocksPerk());
             }
         }
         return 1;
+    }
+
+    /**
+     * Grants {@code rpg.quest.<id>} for quests that list the completed quest in {@code requires},
+     * so follow-up chains unlock without duplicating permission nodes on every parent reward.
+     */
+    private void unlockFollowUpQuestPermissions(Player player, String completedQuestId) {
+        if (!plugin.getLuckPermsHook().isEnabled()) {
+            return;
+        }
+        for (Quest followUp : quests.values()) {
+            if (followUp.getRequiredQuestIds().contains(completedQuestId)) {
+                plugin.getLuckPermsHook().grantPermission(
+                        player, plugin.getLuckPermsHook().questPermission(followUp.getId()));
+            }
+        }
     }
 
     private void maybeSetArchetype(PlayerProfile profile, Quest quest) {
