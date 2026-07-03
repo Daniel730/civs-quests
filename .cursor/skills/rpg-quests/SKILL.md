@@ -26,8 +26,11 @@ description: >-
 | `earn_money` | Vault balance delta | `amount: 1000` |
 | `balance_min` | Essentials/Vault | `amount: 500` |
 | `shop_buy` / `shop_sell` / `shop_revenue` | ChestShop `TransactionEvent` | `amount`, optional filters |
+| `harvest_crop` | — | **Not implemented** — use `mine_block` with crop material (e.g. `wheat`) |
 | `join_town` | Civs `PlayerAcceptsTownInviteEvent` | optional `town:` filter |
 | `vein_mine` | VeinMiner `PlayerVeinMineEvent` | optional `block:`, `amount` |
+
+**Crop harvest proxy:** no `harvest_crop` type yet — `daily_farm` uses `mine_block: wheat` on mature crop break.
 
 Add new types: register in `ObjectiveTypes` + parser in registry + listener method.
 

@@ -1,8 +1,37 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-03 (night — quest narrative polish + capstones deploy)  
+**Updated:** 2026-07-03 (late night — playtest fixes + clean redeploy)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
+
+---
+
+## Playtest fixes (2026-07-03 ~20:26 UTC deploy)
+
+### Root cause
+
+Civs JAR was **copied while the server was running** (hot-swap at 20:06, boot at 20:03). Running classloader kept stale bytecode → `NoClassDefFoundError` for `CivSkills`, `BuiltInCivState`, `MobSpawnFeedback`, `StatOperation` despite classes being present in the on-disk JAR.
+
+### Fixes shipped
+
+| Issue | Fix |
+|-------|-----|
+| Civs `ClassNotFoundException` spam (Task #30, mob spawn, combat) | **Full stop → scp → start** via `scripts/wsl-deploy-bot-server.sh` |
+| RPG join crash (`StatOperation` on perk apply) | Same — Civs JAR reload with clean restart |
+| LuckPerms API never connected | Removed `libraries: net.luckperms:api` from `plugin.yml` (isolated loader); hook uses `ServicesManager.getRegistration(LuckPerms.class)` |
+| Auction my-listings blank confusion | Empty-state lore on title icon (`auction-my-empty`) |
+
+### Live verification (20:26 UTC)
+
+```
+Loaded 3 custom mob definition(s)
+[RPGServer] LuckPerms API conectada.
+[RPGServer] Carregadas 22 quests.
+[RPGServer] Carregados 9 perks.
+Done (112s) — no Civs/RPG ERROR lines
+```
+
+Backup: `plugins-backup-20260703-2024`. Deploy script: `scripts/wsl-deploy-bot-server.sh` (**always stops before scp**).
 
 ---
 
