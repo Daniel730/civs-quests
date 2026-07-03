@@ -1,15 +1,41 @@
 ---
-description: Build and git workflow for RPG Server plugin
+description: Build and git workflow for Civs Custom + RPG Server plugin
 alwaysApply: true
 ---
 
-# RPG Server build & git
+# Build & git
 
-- **Stack:** Paper 26.1.2, Java 25, Maven shade → `target/rpg-server-*.jar`
-- **Maven:** `C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd`
-- **Civs JAR:** `../Civs-1.11.6/target/civs-1.11.6.jar` (build Civs first if missing)
-- **Separate commits** per logical fix/feature; imperative message.
-- Run **`mvn compile`** (or `mvn test` when tests exist) before push.
-- Commit **`.cursor/skills/`** and **`.cursor/rules/`**; do not commit other `.cursor/` IDE state.
-- Do **not** edit Civs source from this repo — integration via JAR + events only.
-- Deploy JAR to server `plugins/`; user validates on Linux game server.
+## Stack
+
+Paper **26.1.2**, Java **25**, Maven shade → RPG JAR.
+
+Maven: `C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd`
+
+## Two repositories
+
+| Project | Path | Output |
+|---------|------|--------|
+| Civs Custom | `../Civs-1.11.6/` | `target/civs-1.11.6.jar` |
+| RPG Server | `rpg-server-plugin/` | `target/rpg-server-0.1.0-SNAPSHOT.jar` |
+
+Build Civs first when RPG needs updated Civs JAR (`system` scope in `pom.xml`).
+
+Both repos may be edited. Deploy **both** JARs to Linux server `plugins/`.
+
+## Commands
+
+```powershell
+& "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" -f "..\Civs-1.11.6\pom.xml" compile
+& "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" compile
+```
+
+## Git
+
+- Separate commits per logical fix/feature; imperative message.
+- Run `mvn compile` (or `mvn test`) before push.
+- Commit `.cursor/skills/` and `.cursor/rules/`; do not commit other `.cursor/` state.
+- Do **not** commit `../reference-plugins/` (local study clones).
+
+## Agent brain
+
+Scope and skills: `.cursor/rules/project-scope.mdc`, `.cursor/skills/project-stack/SKILL.md`.

@@ -57,8 +57,14 @@ Plugin Paper para adicionar uma camada RPG ao servidor Civs, com quests iniciais
 | **AuraSkills** | `softdepend` | **Obrigatório** — objetivos `skill_level` |
 | **PlaceholderAPI** | `softdepend` | **Obrigatório** — classes carregadas no startup |
 | **LuckPerms** | `softdepend` | **Obrigatório** — classes carregadas no startup |
+| **ChestShop** | `softdepend` | Opcional — quests merchant (`TransactionEvent`); Sprint 1+ |
+| **Essentials** | `softdepend` | Opcional — provider Vault, kits/warps como recompensa |
+| **InteractiveBooks** | `softdepend` | Opcional — lore de quest em livros |
+| **VeinMiner** | `softdepend` | Opcional — objetivo `vein_mine` (desligado no config por padrão) |
 
-Apesar de Civs, AuraSkills, PlaceholderAPI e LuckPerms estarem marcados como `softdepend`, o código importa classes deles diretamente. **Sem esses JARs na pasta `plugins/`, o plugin provavelmente falha ao carregar** (`NoClassDefFoundError`). Trate-os como dependências reais do MVP v0.1.
+Civs, AuraSkills, PlaceholderAPI e LuckPerms são **hard runtime deps** do MVP v0.1 (imports directos). ChestShop, Essentials e InteractiveBooks degradam graciosamente quando ausentes ou `integrations.*.enabled: false`.
+
+Stack completo e backlog: `.cursor/skills/rpg-server-plugin/FEATURE-EXTRACTION.md`.
 
 ---
 

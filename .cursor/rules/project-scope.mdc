@@ -1,0 +1,67 @@
+---
+description: Project scope, architecture, and anti-patterns for Civs Custom + RPG Server
+alwaysApply: true
+---
+
+# Civs + RPG — project scope
+
+## What we are building
+
+Two custom plugins for one territorial RPG server (Paper 26.1.2, Java 25):
+
+| Plugin | Path | Role |
+|--------|------|------|
+| **Civs Custom** | `../Civs-1.11.6/` | World engine: towns, regions, combat, spells, economy infra, internal skills, future AH/mobs/turrets |
+| **RPG Server** | `rpg-server-plugin/` | Orchestration: quests, archetypes, perks, LuckPerms gates, softdepend hooks |
+
+**Product decision:** Civs `TutorialManager` = onboarding; RPG quests = mid/endgame parallel paths (option 2). Unify later (Sprint 4+).
+
+## Server stack (19 plugins — use softdepend, do not reimplement)
+
+**Integrate:** Civs, AuraSkills, ChestShop, Essentials, InteractiveBooks, LuckPerms, PlaceholderAPI, Vault, VeinMiner (optional).
+
+**Skip:** MiniMOTD, ChestSort, ChunkLoader, Chunky, GSit, EssentialsChat, NBTAPI, prism.
+
+**Reference only** (`../reference-plugins/`): KingdomX, Heroes, BeautyQuests, MythicMobs, Citizens, AuctionHouse — study patterns; implement natively in Civs/RPG when no server plugin exists.
+
+## Ownership (never violate)
+
+| Domain | Owner |
+|--------|-------|
+| Player skill XP & combat stats | **AuraSkills** |
+| Territorial skills, shop discounts, building XP | **Civs internal** (`GainExpEvent`) |
+| Towns, regions, siege, town bank | **Civs** |
+| Player shops | **ChestShop** |
+| Quest step state | **RPG YAML only** — never duplicate XP ledger |
+| Money | **Vault** (Essentials provider) |
+| Unlocks | **LuckPerms** |
+
+## What NOT to do
+
+- Do **not** install reference plugins (KingdomX, BeautyQuests, MythicMobs, etc.) on the server.
+- Do **not** replace AuraSkills with Civs skills for player progression.
+- Do **not** build native Civs chest shop while ChestShop is on server.
+- Do **not** copy GPL/CC-BY-ND reference code verbatim — reimplement patterns.
+- Do **not** duplicate quest engines (BeautyQuests) — extend RPG `ObjectiveTypeRegistry`.
+- Do **not** call Civs managers for writes from RPG — use events + public APIs + reward delegation.
+- Do **not** commit `.cursor/` IDE state except `skills/` and `rules/`.
+
+## Build & deploy
+
+- Maven: `C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd`
+- Build Civs first → `../Civs-1.11.6/target/civs-1.11.6.jar`
+- RPG JAR → `target/rpg-server-0.1.0-SNAPSHOT.jar`
+- Deploy both to Linux server `plugins/`; user validates in-game.
+- `mvn compile` before push; separate commits per logical change.
+
+## Agent skills (read before implementing)
+
+| Skill | When |
+|-------|------|
+| `project-stack` | Any task — scope, backlog, sprint status |
+| `civs-custom` | Editing Civs source |
+| `rpg-server-plugin` | RPG bootstrap, hooks, build |
+| `rpg-quests` | Quest YAML, objectives, rewards |
+| `reference-plugins` | Borrowing patterns from cloned repos |
+
+Details: `.cursor/skills/*/SKILL.md`, `FEATURE-EXTRACTION.md`, `SPRINT-1-STATUS.md`.

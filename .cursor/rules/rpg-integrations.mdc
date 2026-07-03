@@ -1,42 +1,91 @@
 ---
-description: Integration rules for Civs, AuraSkills, Vault, LuckPerms, PAPI
+description: Integration rules for Civs, AuraSkills, ChestShop, Essentials, Vault, LuckPerms, PAPI
 alwaysApply: true
 ---
 
 # RPG integrations
 
+## Server stack vs reference-only
+
+**On server (integrate via softdepend):** AuraSkills, ChestShop, Civs, Essentials, InteractiveBooks, LuckPerms, PlaceholderAPI, Vault, VeinMiner (optional).
+
+**Reference only** (`../reference-plugins/`, not on server): KingdomX, Heroes, BeautyQuests, MythicMobs, Citizens, AuctionHouse — study patterns; implement missing domains **natively in Civs** or **quest logic in RPG**.
+
+**No integration:** MiniMOTD, ChestSort, ChunkLoader, Chunky, GSit, EssentialsChat (PAPI optional), NBTAPI, prism.
+
 ## Separation of concerns
 
-| Layer | Plugin | RPG plugin may |
-|-------|--------|----------------|
-| Skill XP & levels | AuraSkills | Listen events, grant XP via API, apply StatModifiers |
-| Towns & regions | Civs | Listen events, read managers, use `%civs_*%` |
-| Money | Vault | deposit/withdraw, balance checks |
-| Unlocks | LuckPerms | grant nodes/tracks on quest/perk completion |
-| Display | PAPI | Register `%rpg_*%`; consume `%civs_*%` / `%auraskills_*%` |
+| Layer | Owner | RPG plugin may |
+|-------|-------|----------------|
+| Player skill XP & levels | **AuraSkills** | `AuraSkillsHook`: objectives, rewards, `StatModifier` perks — never duplicate XP ledger |
+| Territorial / building skills, shop discounts | **Civs** (SkillManager) | Listen `GainExpEvent` for Civs-internal objectives only |
+| Stats / attributes (combat progression) | **AuraSkills** | Perk `StatModifier` id `rpg_<perk_id>` |
+| Territorial stat perks | **Civs** (StatManager) | Modifier id `rpg_<perk_id>` when perk is town/region scoped |
+| Towns, regions, siege, AH, custom mobs | **Civs** | Listen Bukkit events; use `%civs_*%` |
+| Player shops | **ChestShop** | `ChestShopHook`: `TransactionEvent` for merchant quests |
+| Kits, warps, balance checks | **Essentials** (+ Vault) | `EssentialsHook`: rewards and `balance_min` objectives |
+| Quest lore books | **InteractiveBooks** | Grant books on quest start/complete (optional) |
+| Quest progress & archetypes | **RPG** | YAML profile only |
+| Money | **Vault** | deposit/withdraw, balance checks (Essentials = economy provider) |
+| Unlocks | **LuckPerms** | grant nodes/tracks on quest/perk completion |
+| Display | **PAPI** | Register `%rpg_*%`; consume `%civs_*%`, `%auraskills_*%` |
 
-## Do NOT duplicate AuraSkills XP
+## Dual skill system
+
+- **AuraSkills** = primary player progression (Fighting, Mining, Farming, quest `skill_level`, perk stats).
+- **Civs internal skills** = territorial/building bonuses and **shop discounts** — separate ledger.
+- Do **not** migrate to `CivsSkillHook` as AuraSkills replacement; keep **`AuraSkillsHook`**.
+- Quest rewards: `SkillsUser.addSkillXp()` via AuraSkills API.
+- Civs-internal rewards (rare): `civilian.addSkillXp()` via Civs API (fires `GainExpEvent`).
+- Perk combat bonuses: AuraSkills `StatModifier`; territorial bonuses: Civs StatManager.
+
+## Do NOT duplicate skill XP in RPG
 
 - No parallel skill level storage, XP tables, or level-up logic in RPG plugin.
-- Quest rewards: `user.addSkillXp(Skill, amount)` or temporary multiplier on `XpGainEvent.setAmount()`.
-- Perk bonuses: `StatModifier` with id `rpg_<perk_id>` — remove on perk revoke.
-- Wait for `SkillsLoadEvent` before any AuraSkills API access.
+- Quest "progress" is step state in RPG YAML, not skill levels.
 
 ## Civs integration
 
 - Prefer **Bukkit events** over direct manager calls for quest triggers.
-- Safe events: `RegionCreatedEvent`, `TownCreatedEvent`, `TownEvolveEvent`, `EnterCombatEvent`, `PlayerAcceptsTownInviteEvent`.
-- Avoid: `GainExpEvent`, `SpellPreCastEvent` (not fired in Civs 1.11.6).
-- Civs mana (`%civs_mana%`) and AuraSkills mana are separate — document which a perk uses.
+- Safe events: `RegionCreatedEvent`, `TownCreatedEvent`, `TownEvolveEvent`, `EnterCombatEvent`, `PlayerAcceptsTownInviteEvent`, `PlayerEnterRegionEvent`.
+- **GainExpEvent:** now fired by Civs `Civilian.awardSkill()` / `addSkillXp()` (Sprint 1). Consume via `CivsInternalSkillListener`.
+- **SpellPreCastEvent:** class exists but not fired yet — P1 Civs fix.
+- Civs-native events (no plugin on server): `AuctionListEvent`, `AuctionPurchaseEvent`, `CustomMobKillEvent`.
+- **Do not build native chest shop in Civs** while ChestShop is on server — use ChestShop `TransactionEvent`; native shop = fallback only.
+- Civs mana (`%civs_mana%`) for Civs spells; AuraSkills mana for AuraSkills abilities — perks must declare which.
+
+## ChestShop integration
+
+- `ChestShopHook` listens to `com.Acrobot.ChestShop.Events.TransactionEvent`.
+- Objectives: `shop_buy`, `shop_sell`, `shop_revenue` (merchant archetype).
+- Degrade gracefully when ChestShop absent or `integrations.chestshop.enabled: false`.
+
+## Essentials integration
+
+- Vault economy provider — balance checks for `earn_money` / `balance_min` objectives.
+- Optional: grant kit (`/kit <name>`), warp player for location-based quest steps.
+- Degrade when Essentials absent.
+
+## InteractiveBooks integration
+
+- Optional quest YAML field `lore-book: <book-id>` — grant via InteractiveBooks API on quest start.
+- Degrade when absent.
+
+## VeinMiner (optional)
+
+- Optional `vein_mine` objective via block-break events or VeinMiner API if exposed.
+- Low priority; config-gated.
 
 ## Hooks must degrade gracefully
 
 When `config.yml` sets `integrations.<plugin>.enabled: false` or plugin absent, hook no-ops without errors.
 
-## plugin.yml load order
+## plugin.yml load order (target)
 
 ```yaml
 depend: [Vault]
-softdepend: [Civs, AuraSkills, PlaceholderAPI, LuckPerms]
-loadafter: [Vault, Civs, AuraSkills, PlaceholderAPI, LuckPerms]
+softdepend: [Civs, AuraSkills, ChestShop, Essentials, InteractiveBooks, PlaceholderAPI, LuckPerms, VeinMiner]
+loadafter: [Vault, Civs, AuraSkills, ChestShop, Essentials, PlaceholderAPI, LuckPerms]
 ```
+
+See `.cursor/skills/rpg-server-plugin/FEATURE-EXTRACTION.md` for full backlog and Sprint 1 tickets.
