@@ -54,7 +54,7 @@ Skip: MiniMOTD, ChestSort, ChunkLoader, Chunky, GSit, EssentialsChat, NBTAPI, pr
 
 ## Sprint status (2026-07-03)
 
-**Sprint 1 & 2 DONE, Sprint 3 in progress (all local/uncommitted).** See [SPRINT-1-STATUS.md](../rpg-server-plugin/SPRINT-1-STATUS.md), [SPRINT-2-STATUS.md](../rpg-server-plugin/SPRINT-2-STATUS.md), [SPRINT-3-STATUS.md](../rpg-server-plugin/SPRINT-3-STATUS.md). Live-server deploy + return checklist: [FINAL-HANDOFF.md](../rpg-server-plugin/FINAL-HANDOFF.md).
+**Sprint 1 & 2 DONE, Sprint 3 deployed to bot-server (2026-07-03).** See [SPRINT-3-STATUS.md](../rpg-server-plugin/SPRINT-3-STATUS.md). Live state: [FINAL-HANDOFF.md](../rpg-server-plugin/FINAL-HANDOFF.md) — **22 quests, 9 perks, 3 custom mobs, clean boot**.
 
 | Sprint | Area | Done |
 |--------|------|------|

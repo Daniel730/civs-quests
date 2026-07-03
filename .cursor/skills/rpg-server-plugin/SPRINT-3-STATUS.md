@@ -1,6 +1,6 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-03 (night — quest narrative polish + capstones deploy)  
+**Updated:** 2026-07-03 (night batch — builder mid-chain, daily farm, spells lore)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
 
@@ -17,7 +17,11 @@
 | P2 RPG | Builder daily content | `daily_quarry`, `daily_miner` | ✅ deployed |
 | P2 RPG | Merchant dailies | `daily_mercado`, `daily_vendas` | ✅ deployed |
 | P2 RPG | RPG-016 Weekly quest content | `weekly_*` + path prerequisites | ✅ deployed |
-| P2 RPG | Lore books | `leilao_intro`, `chefe_bandido` (InteractiveBooks) | ✅ this session |
+| P2 RPG | Builder mid-chain | `construtor_armazem` (warehouse + mining 3) | ✅ this session |
+| P2 RPG | Warrior spell polish | `sprint2_spells` lore book + fighting XP 250 | ✅ this session |
+| P2 RPG | Daily farm content | `daily_farm` (mine_block wheat ×32) | ✅ this session |
+| P2 RPG | Weekly PT copy | `/cv menu` gameplay descriptions | ✅ this session |
+| P2 RPG | Lore books | 4 intro books + magias_intro on server | ✅ this session |
 | P2 RPG | RPG-009 VeinMiner optional objective | hook stubbed; `integrations.veinminer.enabled: false` | ⏸ deferred |
 | P2 RPG | Rewards & progression polish | Consolidated reward summary, `civs-skill-xp`, LP auto-grant, 4 perks, capstone balance | ✅ deployed |
 
@@ -53,7 +57,8 @@
 | Path | `warrior_path` | 10 | fighting 75 | — | warrior_berserk |
 | Path | `builder_path` | 25 | foraging 75 | building 50 | — |
 | Path | `merchant_path` | 25 | farming 50 | — | — |
-| Mid | `sprint2_*` | 25–50 | archetype | mining 100 (civs skills) | builder_discount |
+| Mid | `construtor_armazem` | 100 | foraging 150 | building 75 | — |
+| Mid | `sprint2_spells` | 40 | fighting 250 | — | — |
 | Mid | `mercador_fortuna` | 100 | farming 200 | — | merchant_bazaar |
 | Weekly | `weekly_*` | 300–400 | 500–750 | building/mining (builder) | builder_fortress |
 | Boss | `bandit_chief_slayer` | 500 | fighting 1000 | — | — |
@@ -61,6 +66,7 @@
 | Capstone | `construtor_mestre` | 400 | foraging 300 | mining 400, building 200 | builder_master + lp-group |
 | Capstone | `mercador_mestre` | 500 | farming 600 | — | merchant_golden_touch + lp-group |
 | Daily | `daily_*` | 30–50 | 40–100 | mining 60–100 (builder) | — |
+| Daily | `daily_farm` | 40 | farming 100 | — | — |
 
 ### Test checklist
 
@@ -69,6 +75,55 @@
 3. Capstone complete → LP node `rpg.quest.<id>`, optional `lp-group`, perk auto-unlock once in summary.
 4. `/papi parse me %rpg_perks_unlocked%` after perk unlock.
 5. `/rpg reload` → 7 perks loaded, 18+ quests.
+
+---
+
+## Session handoff (2026-07-03 night batch) — mid-chain + daily farm
+
+### What shipped
+
+- **Builder mid-chain:** `construtor_armazem` — warehouse + Civs mining level 3; requires `sprint2_civs_skills`; `construtor_mestre` now requires `construtor_armazem` (LP chain via `unlockFollowUpQuestPermissions`).
+- **Warrior spells polish:** `sprint2_spells` — `lore-book: magias_intro`, fighting XP 250 (proportional to 8 spell casts vs path 75/4 objs), `/cv menu` description.
+- **Daily variety:** `daily_farm` — harvest proxy via `mine_block: wheat` ×32, farming XP 100.
+- **Weekly descriptions:** PT copy tied to `/cv menu`, ChestShop, and real Civs gameplay.
+- **InteractiveBooks:** `warrior_intro`, `merchant_intro`, `builder_intro`, `magias_intro` (+ chain books) deployed to `plugins/InteractiveBooks/books/`.
+- **Deploy:** `mvn package` → bot-server; log: **Carregadas 22 quests**, 9 perks; backup `plugins-backup-20260703-2024`.
+
+### Quest inventory (21 production YAML → server loads 22 incl. legacy)
+
+`warrior_path`, `builder_path`, `merchant_path`, `sprint2_civs_skills`, `sprint2_auction`, `sprint2_spells`, `construtor_armazem`, `construtor_mestre`, `mercador_fortuna`, `mercador_mestre`, `bandit_chief_slayer`, `warrior_champion`, `daily_hunter`, `daily_quarry`, `daily_miner`, `daily_mercado`, `daily_vendas`, `daily_farm`, `weekly_warrior`, `weekly_merchant`, `weekly_builder`.
+
+**Not loaded:** `quests/dev/sprint1_examples.yml`.
+
+### Path chains (updated)
+
+| Archetype | Chain |
+|-----------|-------|
+| Warrior | `warrior_path` → `sprint2_spells` → `bandit_chief_slayer` → `warrior_champion` |
+| Merchant | `merchant_path` → `sprint2_auction` → `mercador_fortuna` → `mercador_mestre` |
+| Builder | `builder_path` → `sprint2_civs_skills` → `construtor_armazem` → `construtor_mestre` |
+
+### Capstone reward audit ✅
+
+| Quest | lp-group | unlocks-perk | Chain unlock |
+|-------|----------|--------------|--------------|
+| `warrior_champion` | `rpg-warrior` | `warrior_veteran` | requires `bandit_chief_slayer` |
+| `construtor_mestre` | `rpg-builder` | `builder_master` | requires `construtor_armazem` |
+| `mercador_mestre` | `rpg-merchant` | `merchant_golden_touch` | requires `mercador_fortuna` |
+
+Mid-chain LP nodes: `construtor_armazem` grants `rpg.quest.construtor_armazem`; completing it auto-grants `rpg.quest.construtor_mestre` via follow-up unlock.
+
+### Lore books (InteractiveBooks)
+
+| Book ID | Quest |
+|---------|-------|
+| `warrior_intro` | `warrior_path` |
+| `merchant_intro` | `merchant_path` |
+| `builder_intro` | `builder_path` |
+| `magias_intro` | `sprint2_spells` |
+| `leilao_intro` | `sprint2_auction` |
+| `boss_guide` | `bandit_chief_slayer` |
+| `chefe_bandido` | (boss context) |
 
 ---
 

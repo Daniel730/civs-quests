@@ -135,7 +135,7 @@ Study `../reference-plugins/` — patterns only, no copy-paste GPL.
 
 ## Testing
 
-1. `mvn compile` → deploy `target/civs-1.11.6.jar`.
+1. `mvn package` → deploy `target/civs-1.11.6.jar` via **full restart** (`rpg-server-plugin/scripts/wsl-deploy-bot-server.sh` or stop → scp → start). **Never hot-swap JARs while server runs** — causes `NoClassDefFoundError` for new classes.
 2. Mine/harvest/fish/kill → Civs skill XP + messages.
 3. `/papi parse me %civs_skill_mining_level%`.
 4. Cancel `GainExpEvent` in test listener → XP blocked.

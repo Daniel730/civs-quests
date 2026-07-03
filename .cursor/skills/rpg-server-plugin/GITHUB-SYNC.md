@@ -77,16 +77,27 @@ Cross-repo: use full `owner/repo#N` when one PR only closes issues in the other 
 
 ---
 
-## Current snapshot (2026-07-03 evening)
+## Current snapshot (2026-07-03 late night)
 
 ### Open (prioritize)
 
 | # | Repo | Ticket | Notes |
 |---|------|--------|-------|
-| 9 | Civs | CIVS-009 | Turret MVP local; town shields open; not deployed |
+| 9 | Civs | CIVS-009 | Turret MVP local; town shields open |
 | 9 | RPG | RPG-009 | VeinMiner hook stubbed; config default false — deferred |
 
-### Recently closed
+### Recently closed / fixed this session
+
+| # | Repo | Ticket | Notes |
+|---|------|--------|-------|
+| — | both | Playtest hot-swap | NoClassDefFoundError — fixed by full-restart deploy (`wsl-deploy-bot-server.sh`) |
+| — | RPG | LuckPerms hook | ServicesManager fix; removed Paper library loader |
+
+### Deploy rule (agents)
+
+**Never scp JARs while server is running.** Always `wsl-deploy-bot-server.sh` or stop → scp → start.
+
+### Previously closed
 
 | # | Repo | Ticket |
 |---|------|--------|
