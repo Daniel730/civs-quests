@@ -19,6 +19,7 @@ import dev.daniel730.rpgserver.listener.CivsInternalSkillListener;
 import dev.daniel730.rpgserver.listener.CivsQuestListener;
 import dev.daniel730.rpgserver.listener.CivsSpellQuestListener;
 import dev.daniel730.rpgserver.listener.EconomyQuestListener;
+import dev.daniel730.rpgserver.listener.LuckPermsBootstrapListener;
 import dev.daniel730.rpgserver.listener.PlayerProfileListener;
 import dev.daniel730.rpgserver.listener.QuestJournalListener;
 import dev.daniel730.rpgserver.profile.ProfileManager;
@@ -85,7 +86,7 @@ public final class RpgServerPlugin extends JavaPlugin {
         essentialsHook.enable();
         interactiveBooksHook.enable();
         placeholderHook.enable();
-        luckPermsHook.enable();
+        // LuckPerms API registers after plugin enable — defer to ServerLoadEvent listener.
 
         profileManager = new ProfileManager(this);
         questManager = new QuestManager(this);
@@ -109,6 +110,7 @@ public final class RpgServerPlugin extends JavaPlugin {
         getCommand("rpg").setTabCompleter(rpgCommand);
 
         getServer().getPluginManager().registerEvents(new PlayerProfileListener(this), this);
+        getServer().getPluginManager().registerEvents(new LuckPermsBootstrapListener(this), this);
         getServer().getPluginManager().registerEvents(new QuestJournalListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitQuestListener(this), this);
         registerIntegrationListeners();

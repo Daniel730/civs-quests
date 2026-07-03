@@ -22,11 +22,19 @@ public final class LuckPermsHook {
     }
 
     public void enable() {
-        if (!plugin.getPluginConfig().isLuckPermsEnabled()) {
+        if (enabled || !plugin.getPluginConfig().isLuckPermsEnabled()) {
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("LuckPerms") == null) {
             plugin.getLogger().warning("LuckPerms não encontrado.");
+            return;
+        }
+        tryConnect(0);
+    }
+
+    /** Retries briefly if LuckPerms provider is not registered yet. */
+    private void tryConnect(int attempt) {
+        if (enabled) {
             return;
         }
         try {
@@ -36,7 +44,12 @@ public final class LuckPermsHook {
                 plugin.getLogger().info("LuckPerms API conectada.");
             }
         } catch (IllegalStateException ex) {
-            plugin.getLogger().warning("LuckPerms API indisponível: " + ex.getMessage());
+            if (attempt >= 20) {
+                plugin.getLogger().warning("LuckPerms API indisponível após retries: " + ex.getMessage());
+                return;
+            }
+            long delay = attempt == 0 ? 1L : 10L;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> tryConnect(attempt + 1), delay);
         }
     }
 
