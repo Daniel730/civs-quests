@@ -29,6 +29,17 @@ description: >-
 | `join_town` | Civs `PlayerAcceptsTownInviteEvent` | optional `town:` filter |
 | `vein_mine` | VeinMiner `PlayerVeinMineEvent` | optional `block:`, `amount` |
 
+**Crop harvest:** no `harvest_crop` type — use `mine_block: wheat` on mature crop break (`daily_farm`).
+
+### Sprint 3 quest examples
+
+| ID | Schedule | Chain / notes |
+|----|----------|---------------|
+| `construtor_armazem` | — | Mid builder: warehouse + `civs_skill_level` mining 3; requires `sprint2_civs_skills` |
+| `construtor_mestre` | — | Capstone: requires `construtor_armazem`; `lp-group` + `builder_master` perk |
+| `daily_farm` | daily | `mine_block: wheat` ×32; farming XP |
+| `sprint2_spells` | — | `lore-book: magias_intro`; fighting XP ~250 for 8 spell casts |
+
 Add new types: register in `ObjectiveTypes` + parser in registry + listener method.
 
 ## Quest YAML schema (actual — matches `QuestManager.parseQuest` + `RewardDefinition`)
