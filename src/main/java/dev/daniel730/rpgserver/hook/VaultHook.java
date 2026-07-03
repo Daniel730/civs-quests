@@ -2,6 +2,7 @@ package dev.daniel730.rpgserver.hook;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 public final class VaultHook {
@@ -39,5 +40,19 @@ public final class VaultHook {
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    public double getBalance(Player player) {
+        if (!enabled || player == null) {
+            return 0;
+        }
+        return economy.getBalance(player);
+    }
+
+    public boolean deposit(Player player, double amount) {
+        if (!enabled || player == null || amount <= 0) {
+            return false;
+        }
+        return economy.depositPlayer(player, amount).transactionSuccess();
     }
 }

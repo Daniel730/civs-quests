@@ -3,7 +3,12 @@ package dev.daniel730.rpgserver.hook;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class LuckPermsHook {
 
@@ -46,10 +51,28 @@ public final class LuckPermsHook {
         return plugin.getPluginConfig().getQuestPermissionPrefix() + questId;
     }
 
-    public boolean hasQuestPermission(org.bukkit.entity.Player player, String questId) {
+    public boolean hasQuestPermission(Player player, String questId) {
         if (!enabled) {
             return true;
         }
         return player.hasPermission(questPermission(questId));
+    }
+
+    public boolean grantPermission(Player player, String permission) {
+        if (!enabled || permission == null || permission.isBlank()) {
+            return false;
+        }
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+            return false;
+        }
+        Node node = Node.builder(permission).build();
+        user.data().add(node);
+        CompletableFuture<Void> save = luckPerms.getUserManager().saveUser(user);
+        save.exceptionally(ex -> {
+            plugin.getLogger().warning("Falha ao salvar permissão LuckPerms: " + ex.getMessage());
+            return null;
+        });
+        return true;
     }
 }
