@@ -16,3 +16,8 @@ objectives:
     skill: foraging
     level: 5
     description: "Alcance nível 5 em Coleta (Foraging)"
+rewards:
+  money: 10
+  skill-xp:
+    foraging: 75
+  permission: rpg.quest.builder_path

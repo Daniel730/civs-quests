@@ -1,0 +1,48 @@
+# Exemplos Sprint 1 — tipos de objetivo e recompensas
+# Conceda permissão rpg.quest.sprint1_examples para testar in-game.
+
+id: sprint1_examples
+name: "Exemplos Sprint 1"
+archetype: merchant
+description: "Referência YAML para objetivos kill_mob, mine_block, earn_money, shop_*, balance_min."
+lore-book: sprint1_guide
+requires:
+  - merchant_path
+objectives:
+  - id: kill_zombies
+    type: kill_mob
+    mob: zombie
+    amount: 5
+    description: "Mate 5 zumbis"
+  - id: mine_stone
+    type: mine_block
+    block: stone
+    amount: 10
+    description: "Mine 10 pedras"
+  - id: earn_coins
+    type: earn_money
+    amount: 100
+    description: "Ganhe 100 moedas (saldo desde início da quest)"
+  - id: shop_purchases
+    type: shop_buy
+    amount: 3
+    description: "Compre 3 vezes em lojas ChestShop"
+  - id: shop_sales
+    type: shop_sell
+    amount: 3
+    description: "Venda 3 vezes em lojas ChestShop"
+  - id: shop_income
+    type: shop_revenue
+    amount: 500
+    description: "Receba 500 moedas de vendas na sua loja"
+  - id: rich_enough
+    type: balance_min
+    amount: 1000
+    description: "Tenha pelo menos 1000 moedas no saldo"
+rewards:
+  money: 50
+  skill-xp:
+    foraging: 100
+  permission: rpg.quest.sprint1_done
+  essentials-kit: merchant_bonus
+  warp: marketplace

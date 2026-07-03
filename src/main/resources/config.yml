@@ -21,6 +21,16 @@ integrations:
   luckperms:
     enabled: true
     quest-permission-prefix: "rpg.quest."
+  chestshop:
+    enabled: true
+  essentials:
+    enabled: true
+    kit-rewards: true
+    warp-rewards: true
+  interactivebooks:
+    enabled: true
+  veinminer:
+    enabled: false
 
 progression:
   autosave-minutes: 5

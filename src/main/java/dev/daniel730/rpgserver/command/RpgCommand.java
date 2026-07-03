@@ -130,7 +130,12 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             for (Quest.Objective objective : quest.getObjectives()) {
                 boolean done = profile.isObjectiveComplete(quest.getId(), objective.getId());
                 String mark = done ? "<green>✓</green>" : "<red>○</red>";
-                plugin.getMessageUtil().send(player, "  " + mark + " " + objective.getDescription());
+                String progress = "";
+                if (!done && objective.isCountBased()) {
+                    int current = profile.getObjectiveProgress(quest.getId(), objective.getId());
+                    progress = " <dark_gray>(" + current + "/" + objective.getAmount() + ")</dark_gray>";
+                }
+                plugin.getMessageUtil().send(player, "  " + mark + " " + objective.getDescription() + progress);
             }
         }
     }

@@ -12,8 +12,12 @@ depend:
 softdepend:
   - Civs
   - AuraSkills
+  - ChestShop
+  - Essentials
+  - InteractiveBooks
   - PlaceholderAPI
   - LuckPerms
+  - VeinMiner
 
 commands:
   rpg:
@@ -36,5 +40,7 @@ loadafter:
   - Vault
   - Civs
   - AuraSkills
+  - ChestShop
+  - Essentials
   - PlaceholderAPI
   - LuckPerms

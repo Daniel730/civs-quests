@@ -2,6 +2,7 @@ id: merchant_path
 name: "Caminho do Mercador"
 archetype: merchant
 description: "Siga os primeiros passos do tutorial mercador do Civs."
+lore-book: merchant_intro
 objectives:
   - id: build_plot
     type: build_region
@@ -16,3 +17,12 @@ objectives:
     skill: farming
     level: 5
     description: "Alcance nível 5 em Agricultura (Farming)"
+  - id: first_sale
+    type: shop_sell
+    amount: 1
+    description: "Faça sua primeira venda em loja ChestShop"
+rewards:
+  money: 25
+  skill-xp:
+    farming: 50
+  permission: rpg.quest.merchant_path

@@ -11,8 +11,18 @@ objectives:
     type: build_region
     region: altar
     description: "Construa um altar"
+  - id: kill_hostiles
+    type: kill_mob
+    mob: zombie
+    amount: 3
+    description: "Mate 3 zumbis"
   - id: fighting_level
     type: skill_level
     skill: fighting
     level: 5
     description: "Alcance nível 5 em Combate (Fighting)"
+rewards:
+  money: 10
+  skill-xp:
+    fighting: 75
+  permission: rpg.quest.warrior_path
