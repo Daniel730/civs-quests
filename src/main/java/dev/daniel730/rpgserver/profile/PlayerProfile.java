@@ -1,7 +1,9 @@
 package dev.daniel730.rpgserver.profile;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,6 +14,9 @@ public final class PlayerProfile {
     private final Set<String> activeQuestIds = new LinkedHashSet<>();
     private final Set<String> completedQuestIds = new LinkedHashSet<>();
     private final Set<String> completedObjectiveKeys = new LinkedHashSet<>();
+    private final Set<String> startedQuestIds = new LinkedHashSet<>();
+    private final Map<String, Integer> objectiveProgress = new HashMap<>();
+    private final Map<String, Double> questStartBalances = new HashMap<>();
 
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
@@ -58,12 +63,55 @@ public final class PlayerProfile {
         addActiveQuest(questId);
     }
 
+    public int getObjectiveProgress(String questId, String objectiveId) {
+        return objectiveProgress.getOrDefault(objectiveKey(questId, objectiveId), 0);
+    }
+
+    public void setObjectiveProgress(String questId, String objectiveId, int progress) {
+        objectiveProgress.put(objectiveKey(questId, objectiveId), Math.max(0, progress));
+    }
+
+    public void addObjectiveProgress(String questId, String objectiveId, int delta) {
+        if (delta <= 0) {
+            return;
+        }
+        setObjectiveProgress(questId, objectiveId, getObjectiveProgress(questId, objectiveId) + delta);
+    }
+
+    public Double getQuestStartBalance(String questId) {
+        return questStartBalances.get(questId);
+    }
+
+    public void setQuestStartBalance(String questId, double balance) {
+        questStartBalances.put(questId, balance);
+    }
+
+    public boolean markQuestStarted(String questId) {
+        return startedQuestIds.add(questId);
+    }
+
+    public boolean hasQuestStarted(String questId) {
+        return startedQuestIds.contains(questId);
+    }
+
     private static String objectiveKey(String questId, String objectiveId) {
         return questId + ":" + objectiveId;
     }
 
     public Set<String> getCompletedObjectiveKeys() {
         return Collections.unmodifiableSet(completedObjectiveKeys);
+    }
+
+    public Map<String, Integer> getObjectiveProgressSnapshot() {
+        return Collections.unmodifiableMap(objectiveProgress);
+    }
+
+    public Map<String, Double> getQuestStartBalancesSnapshot() {
+        return Collections.unmodifiableMap(questStartBalances);
+    }
+
+    public Set<String> getStartedQuestIds() {
+        return Collections.unmodifiableSet(startedQuestIds);
     }
 
     public void setActiveQuestIds(Set<String> ids) {
@@ -79,5 +127,20 @@ public final class PlayerProfile {
     public void setCompletedObjectiveKeys(Set<String> keys) {
         completedObjectiveKeys.clear();
         completedObjectiveKeys.addAll(keys);
+    }
+
+    public void setStartedQuestIds(Set<String> ids) {
+        startedQuestIds.clear();
+        startedQuestIds.addAll(ids);
+    }
+
+    public void setObjectiveProgressMap(Map<String, Integer> progress) {
+        objectiveProgress.clear();
+        objectiveProgress.putAll(progress);
+    }
+
+    public void setQuestStartBalances(Map<String, Double> balances) {
+        questStartBalances.clear();
+        questStartBalances.putAll(balances);
     }
 }

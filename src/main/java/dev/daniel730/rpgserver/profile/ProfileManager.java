@@ -53,6 +53,23 @@ public final class ProfileManager {
                 profile.setActiveQuestIds(new HashSet<>(yaml.getStringList("active-quests")));
                 profile.setCompletedQuestIds(new HashSet<>(yaml.getStringList("completed-quests")));
                 profile.setCompletedObjectiveKeys(new HashSet<>(yaml.getStringList("completed-objectives")));
+                profile.setStartedQuestIds(new HashSet<>(yaml.getStringList("started-quests")));
+                if (yaml.isConfigurationSection("objective-progress")) {
+                    var progressSection = yaml.getConfigurationSection("objective-progress");
+                    java.util.Map<String, Integer> progress = new java.util.HashMap<>();
+                    for (String key : progressSection.getKeys(false)) {
+                        progress.put(key, progressSection.getInt(key));
+                    }
+                    profile.setObjectiveProgressMap(progress);
+                }
+                if (yaml.isConfigurationSection("quest-start-balances")) {
+                    var balanceSection = yaml.getConfigurationSection("quest-start-balances");
+                    java.util.Map<String, Double> balances = new java.util.HashMap<>();
+                    for (String key : balanceSection.getKeys(false)) {
+                        balances.put(key, balanceSection.getDouble(key));
+                    }
+                    profile.setQuestStartBalances(balances);
+                }
             }
             return profile;
         });
@@ -101,6 +118,9 @@ public final class ProfileManager {
         yaml.set("active-quests", profile.getActiveQuestIds().stream().toList());
         yaml.set("completed-quests", profile.getCompletedQuestIds().stream().toList());
         yaml.set("completed-objectives", profile.getCompletedObjectiveKeys().stream().toList());
+        yaml.set("started-quests", profile.getStartedQuestIds().stream().toList());
+        yaml.set("objective-progress", profile.getObjectiveProgressSnapshot());
+        yaml.set("quest-start-balances", profile.getQuestStartBalancesSnapshot());
         try {
             yaml.save(file);
             return true;

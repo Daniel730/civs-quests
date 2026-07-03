@@ -2,7 +2,8 @@ package dev.daniel730.rpgserver.quest;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.daniel730.rpgserver.quest.objective.ObjectiveTypeRegistry;
+import dev.daniel730.rpgserver.quest.objective.ObjectiveTypes;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -14,15 +15,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 public final class QuestManager {
 
     private final RpgServerPlugin plugin;
+    private final ObjectiveTypeRegistry objectiveTypeRegistry;
+    private final RewardExecutor rewardExecutor;
     private final Map<String, Quest> quests = new LinkedHashMap<>();
 
     public QuestManager(RpgServerPlugin plugin) {
         this.plugin = plugin;
+        this.objectiveTypeRegistry = new ObjectiveTypeRegistry();
+        this.objectiveTypeRegistry.registerDefaults();
+        this.rewardExecutor = new RewardExecutor(plugin);
+    }
+
+    public ObjectiveTypeRegistry getObjectiveTypeRegistry() {
+        return objectiveTypeRegistry;
     }
 
     public void loadQuests() {
@@ -33,6 +44,7 @@ public final class QuestManager {
             plugin.saveResource("quests/warrior_path.yml", false);
             plugin.saveResource("quests/builder_path.yml", false);
             plugin.saveResource("quests/merchant_path.yml", false);
+            plugin.saveResource("quests/sprint1_examples.yml", false);
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -59,33 +71,15 @@ public final class QuestManager {
         String name = config.getString("name", id);
         String archetype = config.getString("archetype", "");
         String description = config.getString("description", "");
+        String loreBook = config.getString("lore-book");
+        List<String> requiredQuestIds = config.getStringList("requires");
         List<Map<?, ?>> rawObjectives = config.getMapList("objectives");
         List<Quest.Objective> objectives = new ArrayList<>();
         for (Map<?, ?> raw : rawObjectives) {
-            objectives.add(parseObjective(raw));
+            objectives.add(objectiveTypeRegistry.parseObjective(raw));
         }
-        return new Quest(id, name, archetype, description, objectives);
-    }
-
-    private Quest.Objective parseObjective(Map<?, ?> raw) {
-        Object idObj = raw.get("id");
-        if (idObj == null) {
-            throw new IllegalArgumentException("Objetivo sem 'id'");
-        }
-        String id = String.valueOf(idObj);
-        Object typeObj = raw.get("type");
-        Quest.ObjectiveType type = Quest.ObjectiveType.fromConfig(typeObj == null ? null : String.valueOf(typeObj));
-        String description = raw.get("description") == null ? id : String.valueOf(raw.get("description"));
-        String region = raw.get("region") == null ? null : String.valueOf(raw.get("region"));
-        String skill = raw.get("skill") == null ? null : String.valueOf(raw.get("skill"));
-        int level = 1;
-        Object levelObj = raw.get("level");
-        if (levelObj instanceof Number number) {
-            level = number.intValue();
-        } else if (levelObj != null) {
-            level = Integer.parseInt(String.valueOf(levelObj));
-        }
-        return new Quest.Objective(id, type, description, region, skill, level);
+        RewardDefinition rewards = RewardDefinition.fromConfig(config.getConfigurationSection("rewards"));
+        return new Quest(id, name, archetype, description, loreBook, requiredQuestIds, objectives, rewards);
     }
 
     public Quest getQuest(String id) {
@@ -101,33 +95,9 @@ public final class QuestManager {
             return;
         }
         String normalizedRegion = regionKey.toLowerCase(Locale.ROOT);
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
-        boolean changed = false;
-
-        for (Quest quest : quests.values()) {
-            if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
-                continue;
-            }
-            for (Quest.Objective objective : quest.getObjectives()) {
-                if (objective.getType() != Quest.ObjectiveType.BUILD_REGION) {
-                    continue;
-                }
-                if (objective.getRegion() != null
-                        && objective.getRegion().equalsIgnoreCase(normalizedRegion)
-                        && !profile.isObjectiveComplete(quest.getId(), objective.getId())) {
-                    profile.completeObjective(quest.getId(), objective.getId());
-                    maybeSetArchetype(profile, quest);
-                    changed = true;
-                    plugin.getMessageUtil().send(player,
-                            "<yellow>Objetivo concluído:</yellow> " + objective.getDescription());
-                }
-            }
-        }
-
-        if (changed) {
-            checkQuestCompletions(player, profile);
-            plugin.getProfileManager().markDirty(player.getUniqueId());
-        }
+        processInstantObjectives(player, ObjectiveTypes.BUILD_REGION, objective ->
+                objective.getRegion() != null
+                        && objective.getRegion().equalsIgnoreCase(normalizedRegion));
     }
 
     public void handleSkillLevelUp(Player player, String skillKey, int level) {
@@ -135,34 +105,187 @@ public final class QuestManager {
             return;
         }
         String normalizedSkill = skillKey.toLowerCase(Locale.ROOT);
+        processInstantObjectives(player, ObjectiveTypes.SKILL_LEVEL, objective ->
+                objective.getSkill() != null
+                        && objective.getSkill().equalsIgnoreCase(normalizedSkill)
+                        && level >= objective.getTargetLevel());
+    }
+
+    public void handleKillMob(Player player, String mobKey) {
+        if (mobKey == null || mobKey.isBlank()) {
+            return;
+        }
+        String normalizedMob = mobKey.toLowerCase(Locale.ROOT);
+        processCountObjectives(player, ObjectiveTypes.KILL_MOB, objective ->
+                objective.getMob() == null
+                        || objective.getMob().equalsIgnoreCase(normalizedMob)
+                        || normalizedMob.contains(objective.getMob().toLowerCase(Locale.ROOT)), 1);
+        checkEconomyObjectives(player);
+    }
+
+    public void handleMineBlock(Player player, String blockKey) {
+        if (blockKey == null || blockKey.isBlank()) {
+            return;
+        }
+        String normalizedBlock = blockKey.toLowerCase(Locale.ROOT);
+        processCountObjectives(player, ObjectiveTypes.MINE_BLOCK, objective ->
+                objective.getBlock() == null
+                        || objective.getBlock().equalsIgnoreCase(normalizedBlock), 1);
+    }
+
+    public void handleShopBuy(Player player, int increment) {
+        processCountObjectives(player, ObjectiveTypes.SHOP_BUY, objective -> true, increment);
+        checkEconomyObjectives(player);
+    }
+
+    public void handleShopSell(Player player, int increment) {
+        processCountObjectives(player, ObjectiveTypes.SHOP_SELL, objective -> true, increment);
+        checkEconomyObjectives(player);
+    }
+
+    public void handleShopRevenue(Player player, int increment) {
+        processCountObjectives(player, ObjectiveTypes.SHOP_REVENUE, objective -> true, increment);
+        checkEconomyObjectives(player);
+    }
+
+    public void checkEconomyObjectives(Player player) {
+        if (!plugin.getVaultHook().isEnabled()) {
+            return;
+        }
         PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        double balance = plugin.getVaultHook().getBalance(player);
         boolean changed = false;
 
         for (Quest quest : quests.values()) {
-            if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+            if (!canWorkOnQuest(player, profile, quest)) {
                 continue;
             }
+            ensureQuestStarted(player, profile, quest);
+
             for (Quest.Objective objective : quest.getObjectives()) {
-                if (objective.getType() != Quest.ObjectiveType.SKILL_LEVEL) {
+                if (profile.isObjectiveComplete(quest.getId(), objective.getId())) {
                     continue;
                 }
-                if (objective.getSkill() != null
-                        && objective.getSkill().equalsIgnoreCase(normalizedSkill)
-                        && level >= objective.getTargetLevel()
-                        && !profile.isObjectiveComplete(quest.getId(), objective.getId())) {
-                    profile.completeObjective(quest.getId(), objective.getId());
-                    maybeSetArchetype(profile, quest);
-                    changed = true;
-                    plugin.getMessageUtil().send(player,
-                            "<yellow>Objetivo concluído:</yellow> " + objective.getDescription());
+                if (ObjectiveTypes.EARN_MONEY.equals(objective.getTypeId())) {
+                    Double startBalance = profile.getQuestStartBalance(quest.getId());
+                    if (startBalance == null) {
+                        profile.setQuestStartBalance(quest.getId(), balance);
+                        startBalance = balance;
+                    }
+                    int earned = (int) Math.floor(balance - startBalance);
+                    profile.setObjectiveProgress(quest.getId(), objective.getId(), earned);
+                    if (earned >= objective.getAmount()) {
+                        completeObjective(player, profile, quest, objective);
+                        changed = true;
+                    }
+                } else if (ObjectiveTypes.BALANCE_MIN.equals(objective.getTypeId())) {
+                    if (balance >= objective.getAmount()) {
+                        completeObjective(player, profile, quest, objective);
+                        changed = true;
+                    }
                 }
             }
         }
 
         if (changed) {
-            checkQuestCompletions(player, profile);
-            plugin.getProfileManager().markDirty(player.getUniqueId());
+            finalizeProgress(player, profile);
         }
+    }
+
+    private void processInstantObjectives(Player player, String typeId, Predicate<Quest.Objective> matcher) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        boolean changed = false;
+
+        for (Quest quest : quests.values()) {
+            if (!canWorkOnQuest(player, profile, quest)) {
+                continue;
+            }
+            ensureQuestStarted(player, profile, quest);
+
+            for (Quest.Objective objective : quest.getObjectives()) {
+                if (!typeId.equals(objective.getTypeId())) {
+                    continue;
+                }
+                if (profile.isObjectiveComplete(quest.getId(), objective.getId())) {
+                    continue;
+                }
+                if (matcher.test(objective)) {
+                    completeObjective(player, profile, quest, objective);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            finalizeProgress(player, profile);
+        }
+    }
+
+    private void processCountObjectives(Player player, String typeId, Predicate<Quest.Objective> matcher, int increment) {
+        if (increment <= 0) {
+            return;
+        }
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        boolean changed = false;
+
+        for (Quest quest : quests.values()) {
+            if (!canWorkOnQuest(player, profile, quest)) {
+                continue;
+            }
+            ensureQuestStarted(player, profile, quest);
+
+            for (Quest.Objective objective : quest.getObjectives()) {
+                if (!typeId.equals(objective.getTypeId())) {
+                    continue;
+                }
+                if (!objective.isCountBased()) {
+                    continue;
+                }
+                if (profile.isObjectiveComplete(quest.getId(), objective.getId())) {
+                    continue;
+                }
+                if (!matcher.test(objective)) {
+                    continue;
+                }
+                profile.addObjectiveProgress(quest.getId(), objective.getId(), increment);
+                int progress = profile.getObjectiveProgress(quest.getId(), objective.getId());
+                if (progress >= objective.getAmount()) {
+                    completeObjective(player, profile, quest, objective);
+                }
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            finalizeProgress(player, profile);
+        }
+    }
+
+    private void completeObjective(Player player, PlayerProfile profile, Quest quest, Quest.Objective objective) {
+        if (profile.isObjectiveComplete(quest.getId(), objective.getId())) {
+            return;
+        }
+        profile.completeObjective(quest.getId(), objective.getId());
+        maybeSetArchetype(profile, quest);
+        plugin.getMessageUtil().send(player,
+                "<yellow>Objetivo concluído:</yellow> " + objective.getDescription());
+    }
+
+    private void ensureQuestStarted(Player player, PlayerProfile profile, Quest quest) {
+        if (!profile.markQuestStarted(quest.getId())) {
+            return;
+        }
+        if (quest.getLoreBook() != null && !quest.getLoreBook().isBlank()) {
+            plugin.getInteractiveBooksHook().grantLoreBook(player, quest.getLoreBook());
+        }
+        if (plugin.getVaultHook().isEnabled()) {
+            profile.setQuestStartBalance(quest.getId(), plugin.getVaultHook().getBalance(player));
+        }
+    }
+
+    private void finalizeProgress(Player player, PlayerProfile profile) {
+        checkQuestCompletions(player, profile);
+        plugin.getProfileManager().markDirty(player.getUniqueId());
     }
 
     private void maybeSetArchetype(PlayerProfile profile, Quest quest) {
@@ -179,8 +302,28 @@ public final class QuestManager {
             if (isQuestComplete(profile, quest) && !profile.isQuestComplete(quest.getId())) {
                 profile.markQuestComplete(quest.getId());
                 plugin.getMessageUtil().send(player, "<green>Quest concluída:</green> " + quest.getName());
+                rewardExecutor.grantRewards(player, quest);
             }
         }
+    }
+
+    public boolean canWorkOnQuest(Player player, PlayerProfile profile, Quest quest) {
+        if (profile.isQuestComplete(quest.getId())) {
+            return false;
+        }
+        if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+            return false;
+        }
+        return meetsRequirements(profile, quest);
+    }
+
+    public boolean meetsRequirements(PlayerProfile profile, Quest quest) {
+        for (String requiredId : quest.getRequiredQuestIds()) {
+            if (!profile.isQuestComplete(requiredId)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isQuestComplete(PlayerProfile profile, Quest quest) {
@@ -196,8 +339,12 @@ public final class QuestManager {
         if (profile.isQuestComplete(quest.getId())) {
             return QuestStatus.COMPLETED;
         }
+        if (!meetsRequirements(profile, quest)) {
+            return QuestStatus.LOCKED;
+        }
         boolean anyProgress = quest.getObjectives().stream()
-                .anyMatch(objective -> profile.isObjectiveComplete(quest.getId(), objective.getId()));
+                .anyMatch(objective -> profile.isObjectiveComplete(quest.getId(), objective.getId())
+                        || profile.getObjectiveProgress(quest.getId(), objective.getId()) > 0);
         if (anyProgress || profile.getActiveQuestIds().contains(quest.getId())) {
             return QuestStatus.IN_PROGRESS;
         }
@@ -220,6 +367,7 @@ public final class QuestManager {
     }
 
     public enum QuestStatus {
+        LOCKED("Bloqueada"),
         NOT_STARTED("Não iniciada"),
         IN_PROGRESS("Em progresso"),
         COMPLETED("Concluída");

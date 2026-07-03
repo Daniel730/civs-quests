@@ -3,49 +3,41 @@ package dev.daniel730.rpgserver.quest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public final class Quest {
 
-    public enum ObjectiveType {
-        BUILD_REGION,
-        SKILL_LEVEL;
-
-        public static ObjectiveType fromConfig(String value) {
-            if (value == null) {
-                throw new IllegalArgumentException("Tipo de objetivo ausente");
-            }
-            return switch (value.toLowerCase(Locale.ROOT)) {
-                case "build_region" -> BUILD_REGION;
-                case "skill_level" -> SKILL_LEVEL;
-                default -> throw new IllegalArgumentException("Tipo de objetivo desconhecido: " + value);
-            };
-        }
-    }
-
     public static final class Objective {
         private final String id;
-        private final ObjectiveType type;
+        private final String typeId;
         private final String description;
         private final String region;
         private final String skill;
         private final int targetLevel;
+        private final String mob;
+        private final String block;
+        private final int amount;
+        private final boolean countBased;
 
-        public Objective(String id, ObjectiveType type, String description, String region, String skill, int targetLevel) {
+        public Objective(String id, String typeId, String description, String region, String skill,
+                         int targetLevel, String mob, String block, int amount, boolean countBased) {
             this.id = id;
-            this.type = type;
+            this.typeId = typeId;
             this.description = description;
             this.region = region;
             this.skill = skill;
             this.targetLevel = targetLevel;
+            this.mob = mob;
+            this.block = block;
+            this.amount = amount;
+            this.countBased = countBased;
         }
 
         public String getId() {
             return id;
         }
 
-        public ObjectiveType getType() {
-            return type;
+        public String getTypeId() {
+            return typeId;
         }
 
         public String getDescription() {
@@ -63,20 +55,43 @@ public final class Quest {
         public int getTargetLevel() {
             return targetLevel;
         }
+
+        public String getMob() {
+            return mob;
+        }
+
+        public String getBlock() {
+            return block;
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+
+        public boolean isCountBased() {
+            return countBased;
+        }
     }
 
     private final String id;
     private final String name;
     private final String archetype;
     private final String description;
+    private final String loreBook;
+    private final List<String> requiredQuestIds;
     private final List<Objective> objectives;
+    private final RewardDefinition rewards;
 
-    public Quest(String id, String name, String archetype, String description, List<Objective> objectives) {
+    public Quest(String id, String name, String archetype, String description, String loreBook,
+                 List<String> requiredQuestIds, List<Objective> objectives, RewardDefinition rewards) {
         this.id = id;
         this.name = name;
         this.archetype = archetype;
         this.description = description;
+        this.loreBook = loreBook;
+        this.requiredQuestIds = Collections.unmodifiableList(new ArrayList<>(requiredQuestIds));
         this.objectives = Collections.unmodifiableList(new ArrayList<>(objectives));
+        this.rewards = rewards == null ? RewardDefinition.empty() : rewards;
     }
 
     public String getId() {
@@ -95,7 +110,19 @@ public final class Quest {
         return description;
     }
 
+    public String getLoreBook() {
+        return loreBook;
+    }
+
+    public List<String> getRequiredQuestIds() {
+        return requiredQuestIds;
+    }
+
     public List<Objective> getObjectives() {
         return objectives;
+    }
+
+    public RewardDefinition getRewards() {
+        return rewards;
     }
 }
