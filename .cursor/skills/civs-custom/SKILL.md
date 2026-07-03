@@ -47,11 +47,11 @@ Redeploy: `mvn package` → `target/civs-1.11.6.jar`. Existing duplicate glowsto
 
 | Item | Status |
 |------|--------|
-| `arrow_turret` effect | ✅ existing — shoots arrows at mobs (tick) + intruders (enter); vars `damage.speed.spread` |
-| `damage_turret` effect | ✅ — direct % max-HP damage on interval; used by `basic_turret` |
-| `power_shield` effect | ✅ — reduces incoming player damage by configurable %; region + town |
+| `arrow_turret` effect | ✅ existing — shoots arrows at hostile mobs (tick) + intruders (enter); vars `damage.speed.spread`; skips Civs custom mobs and town members/allies |
+| `damage_turret` effect | ✅ — direct % max-HP damage on interval; used by `basic_turret`; same friendly-fire guard |
+| `power_shield` effect | ✅ — reduces incoming player damage by configurable %; region + town; action-bar/particle/sound feedback when absorbing damage |
 | Region YAML | `defense/basic_turret.yml`, `defense/town_shield.yml` (`power_shield:25`, iron upkeep) |
-| Config | `use-turrets: true`, `use-shields: true`, `default-town-shield-reduction: 15` |
+| Config | `use-turrets: true`, `use-shields: true`, `default-town-shield-reduction: 15`, `shield-feedback-*`, `turret-fire-particles` |
 | Shop | defense group via `ShopMenu` / folder `defense` |
 | Tests | `ArrowTurretTests`, `PowerShieldEffectTests` (`ShieldParams` parsing) |
 | Siege hook | Town shield requires `power > 0` or grace (matches `ProtectionHandler` explosion shield) |
@@ -64,12 +64,12 @@ Redeploy: `mvn package` → `target/civs-1.11.6.jar`. Existing duplicate glowsto
 | Item | Status |
 |------|--------|
 | YAML DSL | ✅ `resources/hybrid/mobs/*.yml` + data folder `plugins/Civs/mobs/` override |
-| Fields | `id`, `display` (locale key), `type`, `health`, `damage`, `drops` (material, amount/min-max, chance) |
+| Fields | `id`, `display` (locale key), `type`, `health`, `damage`, optional `despawn-seconds` (0/off), `drops` (material, amount/min-max, chance) |
 | PDC tag | ✅ `civs:custom_mob_id` on spawn |
 | `CustomMobKillEvent` | ✅ fired on death with `mobId`, `killer`, `location` |
 | Spawn | ✅ `/civs mob spawn <id>` (admin), `/civs mob list` |
-| Region stub | ✅ `custom_mob:bandit_chief` effect on `RegionUpkeepEvent` |
-| Example | `bandit_chief.yml` (Pillager, 80 HP, 8 dmg) |
+| Region stub | ✅ `custom_mob:<mob_id>` effect on `RegionUpkeepEvent`, announces nearby spawn coords |
+| Examples | `bandit_chief.yml` (Pillager, 80 HP, 8 dmg), `bandit_scout.yml`, `wild_boar.yml` |
 | Config | `use-custom-mobs: true` |
 | Tests | `CustomMobDefinitionTests` (YAML parse) |
 | i18n | en + pt_br (`custom-mob-*` keys) |
@@ -81,9 +81,9 @@ Redeploy: `mvn package` → `target/civs-1.11.6.jar`. Existing duplicate glowsto
 |------|-----|
 | Custom mob `/civs mob spawn` invisible | `ProtectionHandler` cancelled Pillager in `deny_mob_spawn` towns; `CustomMobManager` plugin-spawn bypass + safe Y + `setPersistent` |
 | Mob findability | `MobCommand` announces world + block coords; turrets skip `civs:custom_mob_id` |
-| Farm input/output | `RegionChestUtil` — icon chest = inputs; nearest other structure chest = outputs (`farm` group) |
-| Farm tools | `Util.mergeToolRequirements`; durable `reagents` wear as tools; `item-groups` hoe/axe/shears/fishing_rod |
-| NPC Hovel economy | `bank-payout` on `RegionUpkeep`; `npc_hovel.yml` → town bank ($4/hour tick) |
+| Farm input/output | `RegionChestUtil` — icon chest = inputs; nearest other structure chest = outputs (`farm` group); single-chest farms fall back to icon chest |
+| Farm tools | `Util.mergeToolRequirements`; durable `reagents` wear as tools; `item-groups` hoe/axe/shears/fishing_rod`; region-type/recipe GUIs cycle tool/material alternatives cleanly |
+| NPC Hovel economy | `bank-payout` on `RegionUpkeep`; `npc_hovel.yml` → town bank ($4/hour tick ≈ $96/day before gov buffs); throttled online town-member message |
 
 **Town shields:** `PowerShieldEffect` listens `EntityDamageEvent`; stacks best % from `getRegionEffectsAt` + town `power_shield`. Region upkeep gates shield (like turrets). Existing `ProtectionHandler` explosion blocking unchanged.
 
