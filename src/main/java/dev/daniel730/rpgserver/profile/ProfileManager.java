@@ -50,6 +50,7 @@ public final class ProfileManager {
             if (file.exists()) {
                 YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
                 profile.setArchetype(yaml.getString("archetype"));
+                profile.setTrackedQuestId(yaml.getString("tracked-quest"));
                 profile.setActiveQuestIds(new HashSet<>(yaml.getStringList("active-quests")));
                 profile.setCompletedQuestIds(new HashSet<>(yaml.getStringList("completed-quests")));
                 profile.setCompletedObjectiveKeys(new HashSet<>(yaml.getStringList("completed-objectives")));
@@ -69,6 +70,15 @@ public final class ProfileManager {
                         balances.put(key, balanceSection.getDouble(key));
                     }
                     profile.setQuestStartBalances(balances);
+                }
+                profile.setUnlockedPerkIds(new HashSet<>(yaml.getStringList("unlocked-perks")));
+                if (yaml.isConfigurationSection("quest-completion-times")) {
+                    var timesSection = yaml.getConfigurationSection("quest-completion-times");
+                    Map<String, Long> times = new java.util.HashMap<>();
+                    for (String key : timesSection.getKeys(false)) {
+                        times.put(key, timesSection.getLong(key));
+                    }
+                    profile.setQuestCompletionTimes(times);
                 }
             }
             return profile;
@@ -115,12 +125,15 @@ public final class ProfileManager {
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.set("uuid", uuid.toString());
         yaml.set("archetype", profile.getArchetype());
+        yaml.set("tracked-quest", profile.getTrackedQuestId());
         yaml.set("active-quests", profile.getActiveQuestIds().stream().toList());
         yaml.set("completed-quests", profile.getCompletedQuestIds().stream().toList());
         yaml.set("completed-objectives", profile.getCompletedObjectiveKeys().stream().toList());
         yaml.set("started-quests", profile.getStartedQuestIds().stream().toList());
         yaml.set("objective-progress", profile.getObjectiveProgressSnapshot());
         yaml.set("quest-start-balances", profile.getQuestStartBalancesSnapshot());
+        yaml.set("quest-completion-times", profile.getQuestCompletionTimesSnapshot());
+        yaml.set("unlocked-perks", profile.getUnlockedPerkIds().stream().toList());
         try {
             yaml.save(file);
             return true;

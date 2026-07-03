@@ -11,6 +11,13 @@ public final class ObjectiveTypes {
     public static final String SHOP_BUY = "shop_buy";
     public static final String SHOP_SELL = "shop_sell";
     public static final String SHOP_REVENUE = "shop_revenue";
+    public static final String CIVS_SKILL_XP = "civs_skill_xp";
+    public static final String CIVS_SKILL_LEVEL = "civs_skill_level";
+    public static final String AUCTION_LIST = "auction_list";
+    public static final String AUCTION_BUY = "auction_buy";
+    public static final String CAST_SPELL = "cast_spell";
+    public static final String VEIN_MINE = "vein_mine";
+    public static final String CUSTOM_MOB_KILL = "custom_mob_kill";
 
     private ObjectiveTypes() {
     }

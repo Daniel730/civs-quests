@@ -1,9 +1,15 @@
 package dev.daniel730.rpgserver.command;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
+import dev.daniel730.rpgserver.gui.QuestJournalGui;
+import dev.daniel730.rpgserver.perk.PerkDefinition;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
+import dev.daniel730.rpgserver.progression.SkillTreeManager;
 import dev.daniel730.rpgserver.quest.Quest;
+import dev.daniel730.rpgserver.quest.QuestAcceptResult;
 import dev.daniel730.rpgserver.quest.QuestManager;
+import dev.daniel730.rpgserver.quest.QuestProgressSync;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -42,6 +48,10 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleReload(sender);
             case "profile" -> handleProfile(sender);
             case "quest" -> handleQuest(sender, args);
+            case "book" -> handleBook(sender, args, 1);
+            case "journal" -> handleJournal(sender);
+            case "perks" -> handlePerks(sender);
+            case "sync" -> handleSync(sender, args);
             default -> {
                 sendHelp(sender);
                 yield true;
@@ -88,7 +98,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length < 2) {
-            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest <list|status>");
+            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest <list|status|book|accept|track>");
             return true;
         }
         String action = args[1].toLowerCase(Locale.ROOT);
@@ -101,11 +111,112 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                 sendQuestStatus(player);
                 yield true;
             }
+            case "book" -> handleBook(player, args, 2);
+            case "accept" -> {
+                handleQuestAccept(player, args);
+                yield true;
+            }
+            case "track" -> {
+                handleQuestTrack(player, args);
+                yield true;
+            }
             default -> {
-                plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest <list|status>");
+                plugin.getMessageUtil().send(player,
+                        "<yellow>Uso:</yellow> /rpg quest <list|status|book|accept|track>");
                 yield true;
             }
         };
+    }
+
+    private boolean handleBook(CommandSender sender, String[] args, int idIndex) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.quest")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        boolean open = false;
+        String questId = null;
+        if (args.length > idIndex) {
+            if (args[idIndex].equalsIgnoreCase("open")) {
+                open = true;
+                if (args.length > idIndex + 1) {
+                    questId = args[idIndex + 1];
+                }
+            } else {
+                questId = args[idIndex];
+            }
+        }
+        return deliverQuestBook(player, questId, open);
+    }
+
+    private boolean deliverQuestBook(Player player, String questId, boolean open) {
+        Quest quest = plugin.getQuestBookService().resolveQuest(player, questId);
+        if (quest == null) {
+            plugin.getMessageUtil().send(player,
+                    "<red>Nenhuma quest encontrada.</red> Use <white>/rpg quest book &lt;id&gt;</white>");
+            return true;
+        }
+        if (open) {
+            plugin.getQuestBookService().openQuestBook(player, quest);
+            plugin.getMessageUtil().send(player,
+                    "<gray>Abrindo livro:</gray> <white>" + quest.getName() + "</white>");
+        } else {
+            plugin.getQuestBookService().giveQuestBook(player, quest);
+            plugin.getMessageUtil().send(player,
+                    "<green>Livro de quest recebido:</green> <white>" + quest.getName() + "</white>");
+        }
+        return true;
+    }
+
+    private void handleQuestAccept(Player player, String[] args) {
+        if (args.length < 3) {
+            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest accept <id>");
+            return;
+        }
+        String questId = args[2];
+        QuestAcceptResult result = plugin.getQuestManager().acceptQuest(player, questId);
+        Quest quest = plugin.getQuestManager().getQuest(questId);
+        String template = plugin.getPluginConfig().getQuestAcceptMessage(result);
+        if (result == QuestAcceptResult.MAX_ACTIVE) {
+            template = template.replace("{max}", String.valueOf(plugin.getPluginConfig().getMaxActiveQuests()));
+        }
+        String message = plugin.getQuestFeedbackService().formatAcceptMessage(template, quest);
+        plugin.getMessageUtil().send(player, message);
+    }
+
+    private void handleQuestTrack(Player player, String[] args) {
+        if (args.length < 3) {
+            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest track <id>");
+            return;
+        }
+        Quest quest = plugin.getQuestManager().getQuest(args[2]);
+        if (quest == null) {
+            plugin.getMessageUtil().send(player, "<red>Quest não encontrada.</red>");
+            return;
+        }
+        if (plugin.getQuestManager().trackQuest(player, args[2])) {
+            plugin.getMessageUtil().send(player,
+                    plugin.getQuestFeedbackService().formatAcceptMessage(
+                            plugin.getPluginConfig().getQuestTrackSuccess(), quest));
+        } else {
+            plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestTrackFailed());
+        }
+    }
+
+    private boolean handleJournal(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.quest")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        QuestJournalGui.open(plugin, player);
+        return true;
     }
 
     private void sendQuestList(Player player) {
@@ -140,13 +251,87 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private boolean handlePerks(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.perks")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        SkillTreeManager skillTree = plugin.getSkillTreeManager();
+        plugin.getMessageUtil().send(player, "<gold>Perks</gold>");
+        for (PerkDefinition perk : skillTree.getPerksForArchetype(profile.getArchetype())) {
+            SkillTreeManager.PerkStatus status = skillTree.getPerkStatus(profile, perk);
+            String color = switch (status) {
+                case UNLOCKED -> "<green>";
+                case AVAILABLE -> "<yellow>";
+                case LOCKED -> "<gray>";
+            };
+            plugin.getMessageUtil().send(player,
+                    color + perk.getName() + "</color> <dark_gray>[" + status.getDisplay() + "]</dark_gray>");
+        }
+        return true;
+    }
+
+    private boolean handleSync(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("rpg.admin")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        boolean grantRewards = false;
+        int playerArgIndex = 1;
+        if (args.length > 1 && args[1].equalsIgnoreCase("--rewards")) {
+            grantRewards = true;
+            playerArgIndex = 2;
+        }
+        if (args.length <= playerArgIndex) {
+            int totalObjectives = 0;
+            int totalQuests = 0;
+            int players = 0;
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
+                        .sync(online, grantRewards, true);
+                totalObjectives += result.objectivesCompleted();
+                totalQuests += result.questsCompleted();
+                players++;
+            }
+            plugin.getMessageUtil().send(sender,
+                    "<green>Sync concluído</green> para " + players + " jogador(es): "
+                            + totalObjectives + " objetivo(s), " + totalQuests + " quest(s).");
+            return true;
+        }
+        Player target = Bukkit.getPlayer(args[playerArgIndex]);
+        if (target == null) {
+            plugin.getMessageUtil().send(sender, "<red>Jogador não encontrado ou offline.</red>");
+            return true;
+        }
+        QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
+                .sync(target, grantRewards, true);
+        plugin.getMessageUtil().send(sender,
+                "<green>Sync concluído</green> para " + target.getName() + ": "
+                        + result.objectivesCompleted() + " objetivo(s), "
+                        + result.questsCompleted() + " quest(s).");
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         plugin.getMessageUtil().send(sender, "<gold>Comandos RPG</gold>");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest list</gray> — listar quests");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest status</gray> — progresso detalhado");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg quest book [id]</gray> — livro de quest");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg quest accept &lt;id&gt;</gray> — aceitar quest");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg quest track &lt;id&gt;</gray> — rastrear quest");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg book [id|open]</gray> — livro da quest rastreada");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg journal</gray> — diário de quests (GUI)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg perks</gray> — listar perks");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
         if (sender.hasPermission("rpg.admin")) {
             plugin.getMessageUtil().send(sender, "<gray>/rpg reload</gray> — recarregar config");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg sync [jogador]</gray> — sincronizar progresso de quests");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg sync --rewards [jogador]</gray> — sync e conceder recompensas");
         }
     }
 
@@ -154,16 +339,48 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "profile"));
+            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "perks", "profile"));
             if (sender.hasPermission("rpg.admin")) {
                 options.add("reload");
+                options.add("sync");
             }
             return filterPrefix(options, args[0]);
         }
+        if (args.length == 2 && args[0].equalsIgnoreCase("sync") && sender.hasPermission("rpg.admin")) {
+            List<String> syncOptions = new ArrayList<>(List.of("--rewards"));
+            syncOptions.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+            return filterPrefix(syncOptions, args[1]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("sync") && sender.hasPermission("rpg.admin")) {
+            return filterPrefix(
+                    Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(),
+                    args[2]);
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("quest")) {
-            return filterPrefix(List.of("list", "status"), args[1]);
+            return filterPrefix(List.of("list", "status", "book", "accept", "track"), args[1]);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("book")) {
+            List<String> bookOptions = new ArrayList<>(List.of("open"));
+            bookOptions.addAll(questIdCompletions());
+            return filterPrefix(bookOptions, args[1]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("quest")
+                && (args[1].equalsIgnoreCase("book") || args[1].equalsIgnoreCase("accept")
+                || args[1].equalsIgnoreCase("track"))) {
+            if (args[1].equalsIgnoreCase("book") && args[2].equalsIgnoreCase("open")) {
+                return filterPrefix(questIdCompletions(), "");
+            }
+            return filterPrefix(questIdCompletions(), args[2]);
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("quest") && args[1].equalsIgnoreCase("book")
+                && args[2].equalsIgnoreCase("open")) {
+            return filterPrefix(questIdCompletions(), args[3]);
         }
         return List.of();
+    }
+
+    private List<String> questIdCompletions() {
+        return plugin.getQuestManager().getAllQuests().stream().map(Quest::getId).toList();
     }
 
     private List<String> filterPrefix(List<String> options, String prefix) {

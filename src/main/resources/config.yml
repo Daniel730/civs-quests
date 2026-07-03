@@ -29,19 +29,46 @@ integrations:
     warp-rewards: true
   interactivebooks:
     enabled: true
+    quest-book-auto-grant: true
   veinminer:
     enabled: false
 
 progression:
   autosave-minutes: 5
   default-track: main
+  sync-on-join-from-civs: false
 
 quests:
   enabled: true
   max-active: 3
+  allow-abandon: true
   starter-quest-id: welcome
+  reset-timezone: UTC
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "
   no-permission: "<red>Sem permissão.</red>"
   reload-success: "<green>Configuração recarregada.</green>"
+  quest-notifications: true
+  quest-bossbar:
+    enabled: true
+  quest-objective-complete:
+    action-bar: "<yellow>✓</yellow> <white>{objective}</white>"
+    title: "<gold>Objetivo concluído</gold>"
+    subtitle: "<gray>{objective}</gray>"
+  quest-complete:
+    action-bar: "<green>✓</green> <white>{quest}</white>"
+    title: "<green>Quest concluída!</green>"
+    subtitle: "<white>{quest}</white>"
+  quest-bossbar-title: "<gold>{quest}</gold> <gray>({progress})</gray>"
+  quest-accept:
+    success: "<green>Quest aceita:</green> <white>{quest}</white>"
+    not-found: "<red>Quest não encontrada.</red>"
+    already-complete: "<red>Esta quest já foi concluída.</red>"
+    already-started: "<red>Esta quest já está em andamento.</red>"
+    locked: "<red>Pré-requisitos não atendidos.</red>"
+    no-permission: "<red>Você não tem permissão para esta quest.</red>"
+    max-active: "<red>Limite de quests ativas atingido (máx. {max}).</red>"
+  quest-track:
+    success: "<yellow>Rastreando:</yellow> <white>{quest}</white>"
+    failed: "<red>Não foi possível rastrear esta quest.</red>"

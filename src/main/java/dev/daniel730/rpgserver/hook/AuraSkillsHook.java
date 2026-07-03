@@ -3,7 +3,11 @@ package dev.daniel730.rpgserver.hook;
 import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.skill.Skill;
 import dev.aurelium.auraskills.api.skill.Skills;
+import dev.aurelium.auraskills.api.stat.Stat;
+import dev.aurelium.auraskills.api.stat.StatModifier;
+import dev.aurelium.auraskills.api.stat.Stats;
 import dev.aurelium.auraskills.api.user.SkillsUser;
+import dev.aurelium.auraskills.api.util.AuraSkillsModifier;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -74,6 +78,62 @@ public final class AuraSkillsHook {
         }
         SkillsUser user = api.getUser(player.getUniqueId());
         return user == null ? 0 : user.getSkillLevel(skill);
+    }
+
+    public boolean addStatModifier(Player player, String perkId, String statName, double value, String operation) {
+        if (!enabled || player == null || perkId == null || statName == null) {
+            return false;
+        }
+        Stat stat = resolveStat(statName);
+        if (stat == null) {
+            plugin.getLogger().warning("Stat AuraSkills desconhecido: " + statName);
+            return false;
+        }
+        SkillsUser user = api.getUser(player.getUniqueId());
+        if (user == null) {
+            return false;
+        }
+        AuraSkillsModifier.Operation op = resolveOperation(operation);
+        user.addStatModifier(new StatModifier(modifierId(perkId), stat, value, op));
+        return true;
+    }
+
+    public boolean removeStatModifier(Player player, String perkId) {
+        if (!enabled || player == null || perkId == null) {
+            return false;
+        }
+        SkillsUser user = api.getUser(player.getUniqueId());
+        if (user == null) {
+            return false;
+        }
+        user.removeStatModifier(modifierId(perkId));
+        return true;
+    }
+
+    public static String modifierId(String perkId) {
+        if (perkId == null || perkId.isBlank()) {
+            throw new IllegalArgumentException("perk id is required");
+        }
+        return perkId.startsWith("rpg_") ? perkId : "rpg_" + perkId;
+    }
+
+    private Stat resolveStat(String statName) {
+        try {
+            return Stats.valueOf(statName.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private AuraSkillsModifier.Operation resolveOperation(String operation) {
+        if (operation == null || operation.isBlank()) {
+            return AuraSkillsModifier.Operation.ADD;
+        }
+        try {
+            return AuraSkillsModifier.Operation.valueOf(operation.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return AuraSkillsModifier.Operation.ADD;
+        }
     }
 
     private Skill resolveSkill(String skillName) {

@@ -18,7 +18,7 @@ public final class InteractiveBooksHook {
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("InteractiveBooks") == null) {
-            plugin.getLogger().info("InteractiveBooks ausente — lore-book ignorado.");
+            plugin.getLogger().info("InteractiveBooks ausente — lore-book ignorado; livros de quest usam API nativa.");
             return;
         }
         enabled = true;

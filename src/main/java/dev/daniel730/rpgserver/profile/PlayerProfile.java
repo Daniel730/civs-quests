@@ -11,12 +11,15 @@ public final class PlayerProfile {
 
     private final UUID uuid;
     private String archetype;
+    private String trackedQuestId;
     private final Set<String> activeQuestIds = new LinkedHashSet<>();
     private final Set<String> completedQuestIds = new LinkedHashSet<>();
     private final Set<String> completedObjectiveKeys = new LinkedHashSet<>();
     private final Set<String> startedQuestIds = new LinkedHashSet<>();
     private final Map<String, Integer> objectiveProgress = new HashMap<>();
     private final Map<String, Double> questStartBalances = new HashMap<>();
+    private final Map<String, Long> questCompletionEpochMs = new HashMap<>();
+    private final Set<String> unlockedPerkIds = new LinkedHashSet<>();
 
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
@@ -34,12 +37,24 @@ public final class PlayerProfile {
         this.archetype = archetype;
     }
 
+    public String getTrackedQuestId() {
+        return trackedQuestId;
+    }
+
+    public void setTrackedQuestId(String trackedQuestId) {
+        this.trackedQuestId = trackedQuestId;
+    }
+
     public Set<String> getActiveQuestIds() {
         return Collections.unmodifiableSet(activeQuestIds);
     }
 
     public void addActiveQuest(String questId) {
         activeQuestIds.add(questId);
+    }
+
+    public void removeActiveQuest(String questId) {
+        activeQuestIds.remove(questId);
     }
 
     public Set<String> getCompletedQuestIds() {
@@ -84,6 +99,37 @@ public final class PlayerProfile {
 
     public void setQuestStartBalance(String questId, double balance) {
         questStartBalances.put(questId, balance);
+    }
+
+    public Long getQuestCompletedAt(String questId) {
+        return questCompletionEpochMs.get(questId);
+    }
+
+    public void setQuestCompletedAt(String questId, long epochMs) {
+        questCompletionEpochMs.put(questId, epochMs);
+    }
+
+    public Map<String, Long> getQuestCompletionTimesSnapshot() {
+        return Collections.unmodifiableMap(questCompletionEpochMs);
+    }
+
+    public void setQuestCompletionTimes(Map<String, Long> times) {
+        questCompletionEpochMs.clear();
+        questCompletionEpochMs.putAll(times);
+    }
+
+    public void clearQuestState(String questId) {
+        completedQuestIds.remove(questId);
+        activeQuestIds.remove(questId);
+        startedQuestIds.remove(questId);
+        questStartBalances.remove(questId);
+        questCompletionEpochMs.remove(questId);
+        if (questId != null && questId.equals(trackedQuestId)) {
+            trackedQuestId = null;
+        }
+        String prefix = questId + ":";
+        completedObjectiveKeys.removeIf(key -> key.startsWith(prefix));
+        objectiveProgress.keySet().removeIf(key -> key.startsWith(prefix));
     }
 
     public boolean markQuestStarted(String questId) {
@@ -142,5 +188,22 @@ public final class PlayerProfile {
     public void setQuestStartBalances(Map<String, Double> balances) {
         questStartBalances.clear();
         questStartBalances.putAll(balances);
+    }
+
+    public Set<String> getUnlockedPerkIds() {
+        return Collections.unmodifiableSet(unlockedPerkIds);
+    }
+
+    public boolean isPerkUnlocked(String perkId) {
+        return unlockedPerkIds.contains(perkId);
+    }
+
+    public boolean unlockPerk(String perkId) {
+        return unlockedPerkIds.add(perkId);
+    }
+
+    public void setUnlockedPerkIds(Set<String> ids) {
+        unlockedPerkIds.clear();
+        unlockedPerkIds.addAll(ids);
     }
 }

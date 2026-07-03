@@ -22,7 +22,7 @@ softdepend:
 commands:
   rpg:
     description: Comandos principais do RPG Server
-    usage: /rpg [help|reload|profile|quest]
+    usage: /rpg [help|quest <list|status|accept|track|book>|book|journal|perks|profile|sync|reload]
     aliases: [rpgserver]
 
 permissions:
@@ -33,7 +33,10 @@ permissions:
     description: Ver perfil de progressão
     default: true
   rpg.quest:
-    description: Listar e ver status de quests
+    description: Listar, aceitar, rastrear e gerenciar quests
+    default: true
+  rpg.perks:
+    description: Listar perks desbloqueados e disponíveis
     default: true
 
 loadafter:

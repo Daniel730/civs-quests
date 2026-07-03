@@ -78,17 +78,22 @@ public final class Quest {
     private final String archetype;
     private final String description;
     private final String loreBook;
+    private final String unlocksPerk;
+    private final QuestSchedule schedule;
     private final List<String> requiredQuestIds;
     private final List<Objective> objectives;
     private final RewardDefinition rewards;
 
     public Quest(String id, String name, String archetype, String description, String loreBook,
-                 List<String> requiredQuestIds, List<Objective> objectives, RewardDefinition rewards) {
+                 String unlocksPerk, QuestSchedule schedule, List<String> requiredQuestIds,
+                 List<Objective> objectives, RewardDefinition rewards) {
         this.id = id;
         this.name = name;
         this.archetype = archetype;
         this.description = description;
         this.loreBook = loreBook;
+        this.unlocksPerk = unlocksPerk;
+        this.schedule = schedule == null ? QuestSchedule.NONE : schedule;
         this.requiredQuestIds = Collections.unmodifiableList(new ArrayList<>(requiredQuestIds));
         this.objectives = Collections.unmodifiableList(new ArrayList<>(objectives));
         this.rewards = rewards == null ? RewardDefinition.empty() : rewards;
@@ -112,6 +117,18 @@ public final class Quest {
 
     public String getLoreBook() {
         return loreBook;
+    }
+
+    public String getUnlocksPerk() {
+        return unlocksPerk;
+    }
+
+    public QuestSchedule getSchedule() {
+        return schedule;
+    }
+
+    public boolean isScheduled() {
+        return schedule != QuestSchedule.NONE;
     }
 
     public List<String> getRequiredQuestIds() {

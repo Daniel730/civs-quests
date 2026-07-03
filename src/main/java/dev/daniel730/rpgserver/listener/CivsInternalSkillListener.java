@@ -9,12 +9,14 @@ import org.bukkit.event.Listener;
 import org.redcastlemedia.multitallented.civs.events.GainExpEvent;
 
 /**
- * Placeholder for future Civs-internal skill objectives (building/territorial XP).
- * GainExpEvent fires from Civs {@code Civilian.awardSkill()} / {@code addSkillXp()}.
+ * Civs-internal skill objectives via {@link GainExpEvent} (territorial/building XP ledger).
  */
 public final class CivsInternalSkillListener implements Listener {
 
+    private final RpgServerPlugin plugin;
+
     public CivsInternalSkillListener(RpgServerPlugin plugin) {
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -23,6 +25,7 @@ public final class CivsInternalSkillListener implements Listener {
         if (player == null) {
             return;
         }
-        // Future: civs_skill_xp objectives keyed by event.getType()
+        plugin.getQuestManager().handleCivsSkillXp(player, event.getType(), event.getExp());
+        plugin.getQuestManager().checkCivsSkillLevels(player);
     }
 }

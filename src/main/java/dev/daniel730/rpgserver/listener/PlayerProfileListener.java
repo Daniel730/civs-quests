@@ -18,10 +18,22 @@ public final class PlayerProfileListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         plugin.getProfileManager().loadProfile(event.getPlayer().getUniqueId());
+        plugin.getQuestManager().resetExpiredScheduledQuests(event.getPlayer());
+        if (plugin.getCivsHook().isEnabled()) {
+            plugin.getQuestManager().checkCivsSkillLevels(event.getPlayer());
+        }
+        if (plugin.getPluginConfig().isSyncOnJoinFromCivs()) {
+            plugin.getQuestManager().getProgressSync()
+                    .sync(event.getPlayer(), false, false);
+        }
+        plugin.getSkillTreeManager().applyUnlockedPerks(event.getPlayer());
+        plugin.getSkillTreeManager().checkAutoUnlocks(event.getPlayer());
+        plugin.getQuestFeedbackService().refreshBossBar(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
+        plugin.getQuestFeedbackService().hideBossBar(event.getPlayer());
         plugin.getProfileManager().unloadProfile(event.getPlayer().getUniqueId());
     }
 }

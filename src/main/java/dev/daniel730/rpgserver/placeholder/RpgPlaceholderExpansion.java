@@ -44,7 +44,19 @@ public final class RpgPlaceholderExpansion extends PlaceholderExpansion {
             return "";
         }
         PlayerProfile profile = plugin.getProfileManager().loadProfile(player.getUniqueId());
-        return switch (params.toLowerCase(Locale.ROOT)) {
+        String normalized = params.toLowerCase(Locale.ROOT);
+        if (normalized.equals("quest_progress")) {
+            return plugin.getQuestManager().formatPrimaryQuestProgress(profile);
+        }
+        if (normalized.startsWith("quest_progress_")) {
+            String questId = params.substring("quest_progress_".length());
+            Quest quest = plugin.getQuestManager().getQuest(questId);
+            if (quest == null) {
+                return "";
+            }
+            return plugin.getQuestManager().formatQuestProgress(profile, quest);
+        }
+        return switch (normalized) {
             case "archetype" -> formatArchetype(profile.getArchetype());
             case "active_quest" -> formatActiveQuest(profile);
             default -> null;

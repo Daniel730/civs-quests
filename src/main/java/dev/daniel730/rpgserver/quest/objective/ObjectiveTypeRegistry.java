@@ -52,6 +52,13 @@ public final class ObjectiveTypeRegistry {
         register(ObjectiveTypes.SHOP_BUY, ObjectiveTypeRegistry::parseShopBuy);
         register(ObjectiveTypes.SHOP_SELL, ObjectiveTypeRegistry::parseShopSell);
         register(ObjectiveTypes.SHOP_REVENUE, ObjectiveTypeRegistry::parseShopRevenue);
+        register(ObjectiveTypes.CIVS_SKILL_XP, ObjectiveTypeRegistry::parseCivsSkillXp);
+        register(ObjectiveTypes.CIVS_SKILL_LEVEL, ObjectiveTypeRegistry::parseCivsSkillLevel);
+        register(ObjectiveTypes.AUCTION_LIST, ObjectiveTypeRegistry::parseAuctionList);
+        register(ObjectiveTypes.AUCTION_BUY, ObjectiveTypeRegistry::parseAuctionBuy);
+        register(ObjectiveTypes.CAST_SPELL, ObjectiveTypeRegistry::parseCastSpell);
+        register(ObjectiveTypes.VEIN_MINE, ObjectiveTypeRegistry::parseVeinMine);
+        register(ObjectiveTypes.CUSTOM_MOB_KILL, ObjectiveTypeRegistry::parseCustomMobKill);
     }
 
     private static Quest.Objective parseBuildRegion(String id, Map<?, ?> raw) {
@@ -118,6 +125,69 @@ public final class ObjectiveTypeRegistry {
         int amount = intValue(raw, "amount", 1);
         return new Quest.Objective(id, ObjectiveTypes.SHOP_REVENUE, description, null, null, 0,
                 null, null, amount, true);
+    }
+
+    private static Quest.Objective parseCivsSkillXp(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String skill = optionalString(raw, "skill");
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.CIVS_SKILL_XP, description, null, skill, 0,
+                null, null, amount, true);
+    }
+
+    private static Quest.Objective parseCivsSkillLevel(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String skill = requiredString(raw, "skill", id);
+        int level = intValue(raw, "level", 1);
+        return new Quest.Objective(id, ObjectiveTypes.CIVS_SKILL_LEVEL, description, null, skill, level,
+                null, null, level, false);
+    }
+
+    private static Quest.Objective parseAuctionList(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.AUCTION_LIST, description, null, null, 0,
+                null, null, amount, true);
+    }
+
+    private static Quest.Objective parseAuctionBuy(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.AUCTION_BUY, description, null, null, 0,
+                null, null, amount, true);
+    }
+
+    private static Quest.Objective parseCastSpell(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String spell = optionalString(raw, "spell");
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.CAST_SPELL, description, null, null, 0,
+                spell, null, amount, true);
+    }
+
+    private static Quest.Objective parseVeinMine(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String block = optionalString(raw, "block");
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.VEIN_MINE, description, null, null, 0,
+                null, block, amount, true);
+    }
+
+    private static Quest.Objective parseCustomMobKill(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String mob = requiredString(raw, "mob", id);
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.CUSTOM_MOB_KILL, description, null, null, 0,
+                mob, null, amount, true);
+    }
+
+    private static String optionalString(Map<?, ?> raw, String key) {
+        Object value = raw.get(key);
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value);
+        return text.isBlank() ? null : text;
     }
 
     private static String stringOrDefault(Map<?, ?> raw, String key, String defaultValue) {
