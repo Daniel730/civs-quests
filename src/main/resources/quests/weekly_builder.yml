@@ -2,9 +2,10 @@ id: weekly_builder
 name: "Construtor Semanal"
 archetype: builder
 schedule: weekly
-description: "Expanda seu território na semana: extraia recursos e ganhe XP de construção Civs."
+description: "Desafio semanal: extraia pedra, ganhe XP de Mineração Civs e construa um armazém."
 requires:
   - builder_path
+  - sprint2_civs_skills
 objectives:
   - id: mine_stone
     type: mine_block
@@ -22,6 +23,10 @@ objectives:
     description: "Construa um armazém (warehouse)"
 rewards:
   money: 350
+  civs-skill-xp:
+    building: 150
+    mining: 100
   skill-xp:
     foraging: 500
   permission: rpg.quest.weekly_builder
+unlocks-perk: builder_fortress

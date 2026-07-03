@@ -48,6 +48,11 @@ public final class SkillTreeManager {
             perksFolder.mkdirs();
             plugin.saveResource("perks/warrior_berserk.yml", false);
             plugin.saveResource("perks/builder_discount.yml", false);
+            plugin.saveResource("perks/builder_fortress.yml", false);
+            plugin.saveResource("perks/warrior_veteran.yml", false);
+            plugin.saveResource("perks/merchant_bazaar.yml", false);
+            plugin.saveResource("perks/merchant_golden_touch.yml", false);
+            plugin.saveResource("perks/builder_master.yml", false);
         }
 
         File[] files = perksFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -139,6 +144,10 @@ public final class SkillTreeManager {
     }
 
     public boolean tryUnlock(Player player, String perkId) {
+        return tryUnlock(player, perkId, true);
+    }
+
+    public boolean tryUnlock(Player player, String perkId, boolean notify) {
         PerkDefinition perk = perks.get(perkId);
         if (perk == null) {
             plugin.getLogger().warning("Perk desconhecido: " + perkId);
@@ -154,7 +163,9 @@ public final class SkillTreeManager {
         profile.unlockPerk(perkId);
         applyPerk(player, perk);
         plugin.getProfileManager().markDirty(player.getUniqueId());
-        plugin.getMessageUtil().send(player, "<green>Perk desbloqueado:</green> " + perk.getName());
+        if (notify) {
+            plugin.getMessageUtil().send(player, "<green>Perk desbloqueado:</green> " + perk.getName());
+        }
         return true;
     }
 

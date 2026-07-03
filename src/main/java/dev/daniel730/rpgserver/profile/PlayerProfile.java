@@ -20,6 +20,8 @@ public final class PlayerProfile {
     private final Map<String, Double> questStartBalances = new HashMap<>();
     private final Map<String, Long> questCompletionEpochMs = new HashMap<>();
     private final Set<String> unlockedPerkIds = new LinkedHashSet<>();
+    private String dailyCtaShownDay;
+    private boolean welcomeShown;
 
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
@@ -205,5 +207,21 @@ public final class PlayerProfile {
     public void setUnlockedPerkIds(Set<String> ids) {
         unlockedPerkIds.clear();
         unlockedPerkIds.addAll(ids);
+    }
+
+    public String getDailyCtaShownDay() {
+        return dailyCtaShownDay;
+    }
+
+    public void setDailyCtaShownDay(String dailyCtaShownDay) {
+        this.dailyCtaShownDay = dailyCtaShownDay;
+    }
+
+    public boolean isWelcomeShown() {
+        return welcomeShown;
+    }
+
+    public void setWelcomeShown(boolean welcomeShown) {
+        this.welcomeShown = welcomeShown;
     }
 }

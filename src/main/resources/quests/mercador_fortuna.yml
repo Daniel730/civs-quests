@@ -1,7 +1,7 @@
 id: mercador_fortuna
 name: "Fortuna do Mercador"
 archetype: merchant
-description: "Após o primeiro leilão, acumule receita de loja e mantenha um saldo mínimo."
+description: "Após o primeiro leilão: acumule receita na ChestShop e mantenha saldo mínimo."
 requires:
   - sprint2_auction
 objectives:
@@ -18,3 +18,4 @@ rewards:
   skill-xp:
     farming: 200
   permission: rpg.quest.mercador_fortuna
+unlocks-perk: merchant_bazaar

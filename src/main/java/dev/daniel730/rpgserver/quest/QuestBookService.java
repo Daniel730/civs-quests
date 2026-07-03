@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class QuestBookService {
 
@@ -32,7 +33,7 @@ public final class QuestBookService {
         }
         giveQuestBook(player, quest);
         plugin.getMessageUtil().send(player,
-                "<gray>Livro de quest recebido:</gray> <white>" + quest.getName() + "</white>");
+                plugin.getPluginConfig().getQuestBookGrant().replace("{quest}", quest.getName()));
     }
 
     public ItemStack buildQuestBook(Player player, Quest quest) {
@@ -51,6 +52,22 @@ public final class QuestBookService {
 
     public void giveQuestBook(Player player, Quest quest) {
         ItemStack book = buildQuestBook(player, quest);
+        giveBookItem(player, book);
+    }
+
+    public void grantWelcomeBook(Player player) {
+        ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
+        BookMeta meta = (BookMeta) book.getItemMeta();
+        meta.displayName(plugin.getMessageUtil().parse("<gold><italic>Diário do Reino</italic></gold>"));
+        meta.lore(List.of(
+                plugin.getMessageUtil().parse("<gray>Seu companheiro de aventuras.</gray>"),
+                plugin.getMessageUtil().parse("<yellow>/rpg journal</yellow> <gray>para abrir.</gray>")
+        ));
+        book.setItemMeta(meta);
+        giveBookItem(player, book);
+    }
+
+    private void giveBookItem(Player player, ItemStack book) {
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(book);
         if (!leftover.isEmpty()) {
             player.getWorld().dropItemNaturally(player.getLocation(), book);
@@ -81,7 +98,7 @@ public final class QuestBookService {
     private List<Component> buildPages(Player player, PlayerProfile profile, Quest quest,
                                        QuestManager.QuestStatus status, QuestManager questManager) {
         List<Component> pages = new ArrayList<>();
-        pages.add(buildHeaderPage(quest, status, questManager.getQuestProgress(profile, quest)));
+        pages.add(buildHeaderPage(player, profile, quest, status, questManager));
 
         List<Quest.Objective> objectives = quest.getObjectives();
         for (int i = 0; i < objectives.size(); i += OBJECTIVES_PER_PAGE) {
@@ -97,8 +114,9 @@ public final class QuestBookService {
         return pages;
     }
 
-    private Component buildHeaderPage(Quest quest, QuestManager.QuestStatus status,
-                                      QuestManager.QuestProgress progress) {
+    private Component buildHeaderPage(Player player, PlayerProfile profile, Quest quest,
+                                      QuestManager.QuestStatus status, QuestManager questManager) {
+        QuestManager.QuestProgress progress = questManager.getQuestProgress(profile, quest);
         Component page = Component.text(quest.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)
                 .append(Component.newline())
                 .append(Component.text("Status: ", NamedTextColor.GRAY))
@@ -122,7 +140,24 @@ public final class QuestBookService {
         }
         if (quest.getDescription() != null && !quest.getDescription().isBlank()) {
             page = page.append(Component.newline())
-                    .append(Component.text(quest.getDescription(), NamedTextColor.WHITE));
+                    .append(Component.text(quest.getDescription(), NamedTextColor.WHITE))
+                    .append(Component.newline());
+        }
+        if (status == QuestManager.QuestStatus.COMPLETED) {
+            Optional<Quest> next = questManager.findNextQuestInChain(player, profile, quest);
+            if (next.isPresent()) {
+                page = page.append(Component.text("Próximo: ", NamedTextColor.AQUA))
+                        .append(Component.text(next.get().getName(), NamedTextColor.WHITE))
+                        .append(Component.newline());
+            }
+        } else if (status == QuestManager.QuestStatus.LOCKED
+                && !questManager.meetsRequirements(profile, quest)) {
+            List<String> missing = questManager.formatMissingPrerequisiteNames(profile, quest);
+            if (!missing.isEmpty()) {
+                page = page.append(Component.text("Requer: ", NamedTextColor.RED))
+                        .append(Component.text(String.join(", ", missing), NamedTextColor.WHITE))
+                        .append(Component.newline());
+            }
         }
         return page;
     }
@@ -161,6 +196,12 @@ public final class QuestBookService {
         for (Map.Entry<String, Double> entry : rewards.getSkillXp().entrySet()) {
             page = page.append(Component.text("• ", NamedTextColor.GRAY))
                     .append(Component.text("+" + entry.getValue().intValue() + " XP em "
+                            + entry.getKey(), NamedTextColor.WHITE))
+                    .append(Component.newline());
+        }
+        for (Map.Entry<String, Double> entry : rewards.getCivsSkillXp().entrySet()) {
+            page = page.append(Component.text("• ", NamedTextColor.GRAY))
+                    .append(Component.text("+" + entry.getValue().intValue() + " XP Civs em "
                             + entry.getKey(), NamedTextColor.WHITE))
                     .append(Component.newline());
         }
@@ -227,12 +268,21 @@ public final class QuestBookService {
         }
 
         page = page.append(Component.newline())
-                .append(clickableAction("Atualizar", "/rpg quest book " + questId,
-                        "Receber livro atualizado", NamedTextColor.AQUA))
+                .append(clickableAction("Atualizar", "/rpg quest book open " + questId,
+                        "Reabrir livro com progresso atual", NamedTextColor.AQUA))
                 .append(Component.newline())
                 .append(clickableAction("Diário", "/rpg journal",
                         "Abrir diário de quests", NamedTextColor.GRAY));
         return page;
+    }
+
+    /**
+     * Reopens the quest book with live profile state (used after progress changes or reload).
+     */
+    public void refreshQuestBook(Player player, Quest quest) {
+        player.openBook(buildQuestBook(player, quest));
+        plugin.getMessageUtil().send(player,
+                plugin.getPluginConfig().getQuestBookRefreshed().replace("{quest}", quest.getName()));
     }
 
     private Component clickableAction(String label, String command, String hover, NamedTextColor color) {

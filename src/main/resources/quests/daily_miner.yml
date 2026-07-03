@@ -1,0 +1,19 @@
+id: daily_miner
+name: "Minerador Diário"
+archetype: builder
+schedule: daily
+description: "Use VeinMiner para extrair minério de ferro no território Civs hoje."
+requires:
+  - builder_path
+objectives:
+  - id: vein_iron
+    type: vein_mine
+    block: iron_ore
+    amount: 32
+    description: "Vein-mine 32 minérios de ferro"
+rewards:
+  money: 50
+  civs-skill-xp:
+    mining: 100
+  skill-xp:
+    mining: 50

@@ -16,10 +16,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.Comparator;
 
 public final class QuestManager {
+
+    public static final Set<String> PATH_QUEST_IDS = Set.of(
+            "warrior_path", "merchant_path", "builder_path");
 
     private final RpgServerPlugin plugin;
     private final ObjectiveTypeRegistry objectiveTypeRegistry;
@@ -51,7 +57,7 @@ public final class QuestManager {
             plugin.saveResource("quests/warrior_path.yml", false);
             plugin.saveResource("quests/builder_path.yml", false);
             plugin.saveResource("quests/merchant_path.yml", false);
-            plugin.saveResource("quests/sprint2_examples.yml", false);
+            plugin.saveResource("quests/sprint2_civs_skills.yml", false);
             plugin.saveResource("quests/sprint2_auction.yml", false);
             plugin.saveResource("quests/sprint3_daily.yml", false);
             plugin.saveResource("quests/sprint3_boss.yml", false);
@@ -62,7 +68,11 @@ public final class QuestManager {
             plugin.saveResource("quests/weekly_builder.yml", false);
             plugin.saveResource("quests/sprint2_spells.yml", false);
             plugin.saveResource("quests/mercador_fortuna.yml", false);
+            plugin.saveResource("quests/mercador_mestre.yml", false);
+            plugin.saveResource("quests/construtor_mestre.yml", false);
             plugin.saveResource("quests/daily_mercado.yml", false);
+            plugin.saveResource("quests/daily_miner.yml", false);
+            plugin.saveResource("quests/daily_vendas.yml", false);
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -144,6 +154,169 @@ public final class QuestManager {
         return Collections.unmodifiableCollection(quests.values());
     }
 
+    public static boolean isPathQuest(Quest quest) {
+        return quest != null && PATH_QUEST_IDS.contains(quest.getId());
+    }
+
+    public List<Quest> getPathQuests() {
+        List<Quest> pathQuests = new ArrayList<>();
+        for (String id : PATH_QUEST_IDS) {
+            Quest quest = quests.get(id);
+            if (quest != null) {
+                pathQuests.add(quest);
+            }
+        }
+        pathQuests.sort(Comparator.comparing(Quest::getName, String.CASE_INSENSITIVE_ORDER));
+        return pathQuests;
+    }
+
+    public List<Quest> getArchetypeStoryQuests(Player player, PlayerProfile profile, String archetype) {
+        if (archetype == null || archetype.isBlank()) {
+            return List.of();
+        }
+        List<Quest> result = new ArrayList<>();
+        for (Quest quest : quests.values()) {
+            if (quest.getSchedule() != QuestSchedule.NONE) {
+                continue;
+            }
+            if (!archetype.equalsIgnoreCase(quest.getArchetype())) {
+                continue;
+            }
+            result.add(quest);
+        }
+        return sortForJournal(player, profile, result);
+    }
+
+    public List<Quest> getPathQuests(Player player, PlayerProfile profile) {
+        return sortForJournal(player, profile, getPathQuests());
+    }
+
+    public List<Quest> getScheduledQuests(Player player, PlayerProfile profile, QuestSchedule schedule) {
+        List<Quest> result = new ArrayList<>();
+        for (Quest quest : quests.values()) {
+            if (quest.getSchedule() == schedule && matchesPlayerArchetype(profile, quest)) {
+                result.add(quest);
+            }
+        }
+        return sortForJournal(player, profile, result);
+    }
+
+    public List<Quest> getMiscQuests(Player player, PlayerProfile profile, Set<String> excludeIds) {
+        List<Quest> result = new ArrayList<>();
+        for (Quest quest : quests.values()) {
+            if (excludeIds.contains(quest.getId())) {
+                continue;
+            }
+            if (quest.getSchedule() != QuestSchedule.NONE) {
+                continue;
+            }
+            String archetype = quest.getArchetype();
+            if (archetype != null && !archetype.isBlank()) {
+                String playerArchetype = profile.getArchetype();
+                if (playerArchetype != null && !playerArchetype.isBlank()
+                        && archetype.equalsIgnoreCase(playerArchetype)) {
+                    continue;
+                }
+            }
+            if (isPathQuest(quest) && (profile.getArchetype() == null || profile.getArchetype().isBlank())) {
+                continue;
+            }
+            result.add(quest);
+        }
+        result.sort(Comparator
+                .comparingInt((Quest quest) -> statusSortOrder(getQuestStatus(player, profile, quest)))
+                .thenComparing(Quest::getName, String.CASE_INSENSITIVE_ORDER));
+        return result;
+    }
+
+    public List<Quest> sortForJournal(Player player, PlayerProfile profile, List<Quest> questList) {
+        List<Quest> sorted = new ArrayList<>(questList);
+        sorted.sort(Comparator
+                .comparingInt((Quest quest) -> statusSortOrder(getQuestStatus(player, profile, quest)))
+                .thenComparing(Quest::getName, String.CASE_INSENSITIVE_ORDER));
+        return sorted;
+    }
+
+    private static int statusSortOrder(QuestStatus status) {
+        return switch (status) {
+            case IN_PROGRESS -> 0;
+            case NOT_STARTED -> 1;
+            case LOCKED -> 2;
+            case COMPLETED -> 3;
+        };
+    }
+
+    public List<String> formatMissingPrerequisiteNames(PlayerProfile profile, Quest quest) {
+        List<String> names = new ArrayList<>();
+        for (String requiredId : quest.getRequiredQuestIds()) {
+            if (!profile.isQuestComplete(requiredId)) {
+                Quest required = quests.get(requiredId);
+                names.add(required != null ? required.getName() : requiredId);
+            }
+        }
+        return names;
+    }
+
+    public Optional<Quest> findNextQuestInChain(Player player, PlayerProfile profile, Quest quest) {
+        if (!profile.isQuestComplete(quest.getId())) {
+            return Optional.empty();
+        }
+        List<Quest> followUps = new ArrayList<>();
+        for (Quest candidate : quests.values()) {
+            if (profile.isQuestComplete(candidate.getId())) {
+                continue;
+            }
+            if (!candidate.getRequiredQuestIds().contains(quest.getId())) {
+                continue;
+            }
+            if (!meetsRequirements(profile, candidate)) {
+                continue;
+            }
+            if (!plugin.getLuckPermsHook().hasQuestPermission(player, candidate.getId())) {
+                continue;
+            }
+            QuestStatus status = getQuestStatus(player, profile, candidate);
+            if (status == QuestStatus.NOT_STARTED || status == QuestStatus.IN_PROGRESS) {
+                followUps.add(candidate);
+            }
+        }
+        followUps.sort(Comparator.comparing(Quest::getName, String.CASE_INSENSITIVE_ORDER));
+        return followUps.isEmpty() ? Optional.empty() : Optional.of(followUps.getFirst());
+    }
+
+    public boolean hasAvailableDailyQuest(Player player, PlayerProfile profile) {
+        for (Quest quest : quests.values()) {
+            if (quest.getSchedule() != QuestSchedule.DAILY) {
+                continue;
+            }
+            if (!matchesPlayerArchetype(profile, quest)) {
+                continue;
+            }
+            QuestStatus status = getQuestStatus(player, profile, quest);
+            if (status == QuestStatus.COMPLETED || status == QuestStatus.LOCKED) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean matchesPlayerArchetype(PlayerProfile profile, Quest quest) {
+        String questArchetype = quest.getArchetype();
+        if (questArchetype == null || questArchetype.isBlank()) {
+            return true;
+        }
+        String playerArchetype = profile.getArchetype();
+        if (playerArchetype == null || playerArchetype.isBlank()) {
+            return true;
+        }
+        return questArchetype.equalsIgnoreCase(playerArchetype);
+    }
+
+    public String currentPeriodDay(ZoneId zone) {
+        return java.time.LocalDate.now(zone).toString();
+    }
+
     public void handleRegionBuilt(Player player, String regionKey) {
         if (regionKey == null || regionKey.isBlank()) {
             return;
@@ -152,6 +325,20 @@ public final class QuestManager {
         processInstantObjectives(player, ObjectiveTypes.BUILD_REGION, objective ->
                 objective.getRegion() != null
                         && objective.getRegion().equalsIgnoreCase(normalizedRegion));
+    }
+
+    public void handleJoinTown(Player player, String townKey) {
+        if (!plugin.getCivsHook().isEnabled()) {
+            return;
+        }
+        String normalizedTown = townKey == null ? null : townKey.toLowerCase(Locale.ROOT);
+        processInstantObjectives(player, ObjectiveTypes.JOIN_TOWN, objective -> {
+            if (objective.getRegion() == null || objective.getRegion().isBlank()) {
+                return true;
+            }
+            return normalizedTown != null
+                    && objective.getRegion().equalsIgnoreCase(normalizedTown);
+        });
     }
 
     public void handleSkillLevelUp(Player player, String skillKey, int level) {
@@ -375,6 +562,8 @@ public final class QuestManager {
                 int progress = profile.getObjectiveProgress(quest.getId(), objective.getId());
                 if (progress >= objective.getAmount()) {
                     completeObjective(player, profile, quest, objective);
+                } else if (quest.getId().equals(profile.getTrackedQuestId())) {
+                    maybeNotifyPartialProgress(player, quest, objective, progress);
                 }
                 changed = true;
             }
@@ -383,6 +572,18 @@ public final class QuestManager {
         if (changed) {
             finalizeProgress(player, profile);
         }
+    }
+
+    private void maybeNotifyPartialProgress(Player player, Quest quest, Quest.Objective objective, int current) {
+        int interval = plugin.getPluginConfig().getQuestProgressNotifyInterval();
+        if (interval <= 0 || !plugin.getPluginConfig().isQuestNotificationsEnabled()) {
+            return;
+        }
+        if (current % interval != 0) {
+            return;
+        }
+        plugin.getQuestFeedbackService().notifyObjectiveProgress(
+                player, quest, objective, current, objective.getAmount());
     }
 
     private void completeObjective(Player player, PlayerProfile profile, Quest quest, Quest.Objective objective) {
@@ -500,12 +701,19 @@ public final class QuestManager {
         }
         if (grantRewards) {
             rewardExecutor.grantRewards(player, quest);
+            grantQuestCompletionPermission(player, quest.getId());
             unlockFollowUpQuestPermissions(player, quest.getId());
-            if (quest.getUnlocksPerk() != null && !quest.getUnlocksPerk().isBlank()) {
-                plugin.getSkillTreeManager().tryUnlock(player, quest.getUnlocksPerk());
-            }
         }
         return 1;
+    }
+
+    /** Always grants {@code rpg.quest.<id>} so completion is recorded in LuckPerms. */
+    private void grantQuestCompletionPermission(Player player, String questId) {
+        if (!plugin.getLuckPermsHook().isEnabled()) {
+            return;
+        }
+        plugin.getLuckPermsHook().grantPermission(
+                player, plugin.getLuckPermsHook().questPermission(questId));
     }
 
     /**
@@ -615,6 +823,62 @@ public final class QuestManager {
     public String formatPrimaryQuestProgress(PlayerProfile profile) {
         Quest quest = findPrimaryActiveQuest(profile);
         return formatQuestProgress(profile, quest);
+    }
+
+    public Quest findTrackedQuest(PlayerProfile profile) {
+        String trackedId = profile.getTrackedQuestId();
+        if (trackedId == null) {
+            return null;
+        }
+        Quest tracked = quests.get(trackedId);
+        if (tracked == null || profile.isQuestComplete(trackedId)) {
+            return null;
+        }
+        return tracked;
+    }
+
+    public String formatTrackedQuestName(PlayerProfile profile) {
+        Quest quest = findTrackedQuest(profile);
+        return quest == null ? "Nenhuma" : quest.getName();
+    }
+
+    public String formatTrackedQuestProgress(PlayerProfile profile) {
+        Quest quest = findTrackedQuest(profile);
+        if (quest == null) {
+            return "";
+        }
+        Optional<Quest.Objective> current = findCurrentObjective(profile, quest);
+        if (current.isEmpty()) {
+            return formatQuestProgress(profile, quest);
+        }
+        Quest.Objective objective = current.get();
+        if (objective.isCountBased()) {
+            int currentCount = profile.getObjectiveProgress(quest.getId(), objective.getId());
+            return objective.getDescription() + " (" + currentCount + "/" + objective.getAmount() + ")";
+        }
+        return objective.getDescription();
+    }
+
+    public Optional<Quest.Objective> findCurrentObjective(PlayerProfile profile, Quest quest) {
+        for (Quest.Objective objective : quest.getObjectives()) {
+            if (!profile.isObjectiveComplete(quest.getId(), objective.getId())) {
+                return Optional.of(objective);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the display name of the first incomplete prerequisite quest, if any.
+     */
+    public Optional<String> findFirstMissingPrerequisite(PlayerProfile profile, Quest quest) {
+        for (String requiredId : quest.getRequiredQuestIds()) {
+            if (!profile.isQuestComplete(requiredId)) {
+                Quest required = quests.get(requiredId);
+                return Optional.of(required != null ? required.getName() : requiredId);
+            }
+        }
+        return Optional.empty();
     }
 
     public Quest findPrimaryActiveQuest(PlayerProfile profile) {

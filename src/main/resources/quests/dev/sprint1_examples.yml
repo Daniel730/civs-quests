@@ -1,10 +1,10 @@
-# Exemplos Sprint 1 — tipos de objetivo e recompensas
-# Conceda permissão rpg.quest.sprint1_examples para testar in-game.
+# Dev-only — não carregado em produção (pasta quests/dev/ ignorada pelo QuestManager).
+# Conceda permissão rpg.quest.sprint1_examples manualmente para testar.
 
 id: sprint1_examples
-name: "Exemplos Sprint 1"
+name: "[DEV] Exemplos Sprint 1"
 archetype: merchant
-description: "Referência YAML para objetivos kill_mob, mine_block, earn_money, shop_*, balance_min."
+description: "Referência admin: kill_mob, mine_block, earn_money, shop_*, balance_min."
 lore-book: sprint1_guide
 requires:
   - merchant_path

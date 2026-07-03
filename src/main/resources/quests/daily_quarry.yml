@@ -2,7 +2,7 @@ id: daily_quarry
 name: "Pedreira Diária"
 archetype: builder
 schedule: daily
-description: "Extraia pedra hoje para recompensa rápida de construtor."
+description: "Mine pedra no seu território Civs hoje — recompensa diária de construtor."
 objectives:
   - id: mine_stone
     type: mine_block
@@ -11,5 +11,7 @@ objectives:
     description: "Mine 64 pedras"
 rewards:
   money: 40
+  civs-skill-xp:
+    mining: 60
   skill-xp:
-    mining: 80
+    mining: 40

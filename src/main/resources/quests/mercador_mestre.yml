@@ -1,0 +1,26 @@
+id: mercador_mestre
+name: "Mercador Mestre"
+archetype: merchant
+description: "Graduação mercador: domine receita ChestShop, leilão Civs e acumule capital."
+requires:
+  - mercador_fortuna
+objectives:
+  - id: shop_income
+    type: shop_revenue
+    amount: 1500
+    description: "Receba 1500 moedas de vendas na sua loja ChestShop"
+  - id: auction_purchases
+    type: auction_buy
+    amount: 5
+    description: "Compre 5 itens no leilão Civs (/cv menu)"
+  - id: capital
+    type: balance_min
+    amount: 2500
+    description: "Mantenha pelo menos 2500 moedas no saldo"
+rewards:
+  money: 500
+  skill-xp:
+    farming: 600
+  permission: rpg.quest.mercador_mestre
+  lp-group: rpg-merchant
+unlocks-perk: merchant_golden_touch

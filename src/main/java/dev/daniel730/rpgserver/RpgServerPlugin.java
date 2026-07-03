@@ -97,7 +97,7 @@ public final class RpgServerPlugin extends JavaPlugin {
 
         profileManager.loadOnlinePlayers();
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
-            questFeedbackService.refreshBossBar(online);
+            questFeedbackService.refreshTrackedHud(online);
         }
 
         chestShopHook.enable();
@@ -150,7 +150,7 @@ public final class RpgServerPlugin extends JavaPlugin {
         questManager.loadQuests();
         skillTreeManager.loadPerks();
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
-            questFeedbackService.refreshBossBar(online);
+            questFeedbackService.refreshTrackedHud(online);
         }
         reregisterIntegrationListeners();
     }

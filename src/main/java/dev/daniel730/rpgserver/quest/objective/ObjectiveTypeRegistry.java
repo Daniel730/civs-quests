@@ -58,6 +58,7 @@ public final class ObjectiveTypeRegistry {
         register(ObjectiveTypes.AUCTION_BUY, ObjectiveTypeRegistry::parseAuctionBuy);
         register(ObjectiveTypes.CAST_SPELL, ObjectiveTypeRegistry::parseCastSpell);
         register(ObjectiveTypes.VEIN_MINE, ObjectiveTypeRegistry::parseVeinMine);
+        register(ObjectiveTypes.JOIN_TOWN, ObjectiveTypeRegistry::parseJoinTown);
         register(ObjectiveTypes.CUSTOM_MOB_KILL, ObjectiveTypeRegistry::parseCustomMobKill);
     }
 
@@ -171,6 +172,13 @@ public final class ObjectiveTypeRegistry {
         int amount = intValue(raw, "amount", 1);
         return new Quest.Objective(id, ObjectiveTypes.VEIN_MINE, description, null, null, 0,
                 null, block, amount, true);
+    }
+
+    private static Quest.Objective parseJoinTown(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String town = optionalString(raw, "town");
+        return new Quest.Objective(id, ObjectiveTypes.JOIN_TOWN, description, town, null, 0,
+                null, null, 1, false);
     }
 
     private static Quest.Objective parseCustomMobKill(String id, Map<?, ?> raw) {

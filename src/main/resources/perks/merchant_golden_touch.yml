@@ -1,0 +1,9 @@
+id: merchant_golden_touch
+name: "Toque Dourado"
+archetype: merchant
+requires:
+  - mercador_mestre
+type: auraskills-stat
+stat: luck
+value: 2.0
+operation: add

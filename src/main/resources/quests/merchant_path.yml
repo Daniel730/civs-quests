@@ -1,7 +1,7 @@
 id: merchant_path
 name: "Caminho do Mercador"
 archetype: merchant
-description: "Tutorial mercador Civs: lote comercial, cabana, Agricultura e primeira venda ChestShop."
+description: "Marque seu lote, erga sua cabana e faça o ouro do reino fluir pelas suas mãos."
 lore-book: merchant_intro
 objectives:
   - id: build_plot

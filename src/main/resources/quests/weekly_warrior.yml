@@ -2,9 +2,10 @@ id: weekly_warrior
 name: "Caçador Semanal"
 archetype: warrior
 schedule: weekly
-description: "Prove sua força na semana: elimine zumbis, conjure magias e suba em Combate."
+description: "Desafio semanal: elimine 30 zumbis, conjure magias Civs e alcance Combate nível 8."
 requires:
   - warrior_path
+  - sprint2_spells
 objectives:
   - id: kill_hostiles
     type: kill_mob

@@ -2,9 +2,10 @@ id: weekly_merchant
 name: "Comerciante Semanal"
 archetype: merchant
 schedule: weekly
-description: "Movimente a economia da semana: compre, venda e participe do leilão Civs."
+description: "Desafio semanal: movimente a economia com compras, vendas ChestShop e leilão Civs."
 requires:
   - merchant_path
+  - sprint2_auction
 objectives:
   - id: shop_purchases
     type: shop_buy

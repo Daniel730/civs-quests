@@ -1,12 +1,16 @@
 id: builder_path
 name: "Caminho do Construtor"
 archetype: builder
-description: "Tutorial construtor Civs: abrigo, sala do conselho e progresso em Coleta (Foraging)."
+description: "Transforme wilderness em domínio — abrigos, conselho e mestria em Coleta."
+lore-book: builder_intro
 objectives:
   - id: build_shelter
     type: build_region
     region: shelter
     description: "Construa um abrigo (shelter)"
+  - id: join_community
+    type: join_town
+    description: "Aceite um convite e entre em uma cidade"
   - id: build_council_room
     type: build_region
     region: council_room
@@ -17,7 +21,9 @@ objectives:
     level: 5
     description: "Alcance nível 5 em Coleta (Foraging)"
 rewards:
-  money: 10
+  money: 25
+  civs-skill-xp:
+    building: 50
   skill-xp:
     foraging: 75
   permission: rpg.quest.builder_path

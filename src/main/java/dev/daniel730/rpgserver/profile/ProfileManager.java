@@ -72,6 +72,7 @@ public final class ProfileManager {
                     profile.setQuestStartBalances(balances);
                 }
                 profile.setUnlockedPerkIds(new HashSet<>(yaml.getStringList("unlocked-perks")));
+                profile.setWelcomeShown(yaml.getBoolean("welcome-shown", false));
                 if (yaml.isConfigurationSection("quest-completion-times")) {
                     var timesSection = yaml.getConfigurationSection("quest-completion-times");
                     Map<String, Long> times = new java.util.HashMap<>();
@@ -80,6 +81,7 @@ public final class ProfileManager {
                     }
                     profile.setQuestCompletionTimes(times);
                 }
+                profile.setDailyCtaShownDay(yaml.getString("daily-cta-shown-day"));
             }
             return profile;
         });
@@ -134,6 +136,8 @@ public final class ProfileManager {
         yaml.set("quest-start-balances", profile.getQuestStartBalancesSnapshot());
         yaml.set("quest-completion-times", profile.getQuestCompletionTimesSnapshot());
         yaml.set("unlocked-perks", profile.getUnlockedPerkIds().stream().toList());
+        yaml.set("welcome-shown", profile.isWelcomeShown());
+        yaml.set("daily-cta-shown-day", profile.getDailyCtaShownDay());
         try {
             yaml.save(file);
             return true;

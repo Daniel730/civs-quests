@@ -1,6 +1,6 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-03 (evening — quest audit + LP chain fix deploy)  
+**Updated:** 2026-07-03 (night — quest narrative polish + capstones deploy)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
 
@@ -13,14 +13,76 @@
 | P2 Civs | CIVS-010 Custom mob YAML | `CustomMobManager`, `bandit_chief`, `CustomMobKillEvent`, `/cv mob` | ✅ deployed + GitHub closed |
 | P2 RPG | CIVS-010 integration | `custom_mob_kill`, `bandit_chief_slayer`, `CivsCustomMobHook` | ✅ deployed |
 | P2 RPG | Warrior path continuation | `warrior_champion.yml` (post-boss chain) | ✅ deployed |
-| P2 RPG | Builder daily content | `daily_quarry.yml` (`mine_block`) | ✅ deployed |
-| P2 RPG | RPG-016 Weekly quest content | `weekly_warrior`, `weekly_merchant`, `weekly_builder` YAML | ✅ deployed |
+| P2 RPG | Merchant/Builder capstones | `mercador_mestre`, `construtor_mestre` | ✅ this session |
+| P2 RPG | Builder daily content | `daily_quarry`, `daily_miner` | ✅ deployed |
+| P2 RPG | Merchant dailies | `daily_mercado`, `daily_vendas` | ✅ deployed |
+| P2 RPG | RPG-016 Weekly quest content | `weekly_*` + path prerequisites | ✅ deployed |
+| P2 RPG | Lore books | `leilao_intro`, `chefe_bandido` (InteractiveBooks) | ✅ this session |
 | P2 RPG | RPG-009 VeinMiner optional objective | hook stubbed; `integrations.veinminer.enabled: false` | ⏸ deferred |
 | P1 Civs | CIVS-009 Turrets + town shields | KingdomX patterns — large | 🟡 MVP local (turrets only; shields deferred) |
 
 ---
 
-## Session handoff (2026-07-03 evening) — autonomous agent batch
+## Session handoff (2026-07-03 night) — quest narrative polish
+
+### What shipped
+
+- **Capstones:** `mercador_mestre` (requires `mercador_fortuna`: shop_revenue + auction_buy + balance_min), `construtor_mestre` (requires `sprint2_civs_skills`: warehouse + civs_skill_level mining 5).
+- **Dev quests hidden:** `sprint1_examples` moved to `quests/dev/` (not loaded); renamed `sprint2_examples.yml` → `sprint2_civs_skills.yml`.
+- **Lore books:** `leilao_intro` on `sprint2_auction`, `chefe_bandido` on `bandit_chief_slayer` — player instructions via `/cv menu`, no admin commands.
+- **Descriptions:** all production quests PT copy with Civs terms; weekly `requires` aligned (spells/auction/civs_skills).
+- **Builder path:** `join_town` objective (accept town invite).
+- **Dailies split:** `daily_mercado` (buy) + `daily_vendas` (sell) + `daily_miner` (vein_mine).
+- **LP chain:** `unlockFollowUpQuestPermissions` grants `rpg.quest.mercador_mestre` on `mercador_fortuna` complete (no duplicate permission on parent reward).
+
+### Quest inventory (19 production YAML → `saveResource` seeds 19)
+
+`warrior_path`, `builder_path`, `merchant_path`, `sprint2_civs_skills`, `sprint2_auction`, `sprint2_spells`, `daily_hunter`, `daily_quarry`, `daily_mercado`, `daily_miner`, `daily_vendas`, `weekly_warrior`, `weekly_merchant`, `weekly_builder`, `bandit_chief_slayer`, `warrior_champion`, `mercador_fortuna`, `mercador_mestre`, `construtor_mestre`.
+
+**Not loaded:** `quests/dev/sprint1_examples.yml` (admin reference only).
+
+### Path chains
+
+| Archetype | Chain |
+|-----------|-------|
+| Warrior | `warrior_path` → `sprint2_spells` → `bandit_chief_slayer` → `warrior_champion` |
+| Merchant | `merchant_path` → `sprint2_auction` → `mercador_fortuna` → `mercador_mestre` |
+| Builder | `builder_path` → `sprint2_civs_skills` → `construtor_mestre` |
+
+### All quest reward permissions (LP nodes)
+
+```
+rpg.quest.warrior_path
+rpg.quest.builder_path
+rpg.quest.merchant_path
+rpg.quest.sprint2_civs_skills
+rpg.quest.sprint2_auction
+rpg.quest.sprint2_spells
+rpg.quest.weekly_warrior
+rpg.quest.weekly_merchant
+rpg.quest.weekly_builder
+rpg.quest.bandit_chief_slayer
+rpg.quest.warrior_champion
+rpg.quest.mercador_fortuna
+rpg.quest.mercador_mestre
+rpg.quest.construtor_mestre
+```
+
+(`daily_*` quests: money + skill XP only — no permission reward. `sprint1_examples` dev-only → `rpg.quest.sprint1_done`.)
+
+### In-game test checklist
+
+1. `/rpg reload` — log shows **Carregadas 19 quests.**
+2. `/rpg journal` — no `[DEV]` quests; sprint2 names in PT (Expansão Territorial, Primeiro Leilão, Iniciação às Magias).
+3. Complete `mercador_fortuna` → `mercador_mestre` unlocks via LP chain (no manual grant).
+4. Complete `sprint2_civs_skills` → `construtor_mestre` unlocks.
+5. Start `sprint2_auction` / `bandit_chief_slayer` → lore books grant (InteractiveBooks).
+6. Weekly quests require mid-path quests (spells/auction/civs_skills), not just starter path.
+7. Dailies: `daily_mercado` (buy) vs `daily_vendas` (sell) — no awkward duplicate with weekly.
+
+---
+
+## Session handoff (2026-07-03 evening) — quest audit + LP chain fix
 
 ### Deploy (RPG polish — 2026-07-03 17:30 UTC)
 
@@ -278,6 +340,16 @@ Loaded 1 custom mob definition(s)
 ```
 
 > **Note:** 11 = all repo quest YAMLs (paths + sprint examples + `daily_hunter` + 3 weekly + `sprint2_spells`). Original RPG-016 target was **10** (excl. `sprint2_spells`).
+
+---
+
+### Player journey polish (2026-07-03 evening — RPG-017)
+
+- **Journal sections:** Escolha seu caminho / Seu Caminho / Missões Diárias / Semanais / Expansão Territorial
+- **Chain hints:** Próximo / Requer in journal lore + quest book header
+- **InteractiveBooks:** `warrior_intro`, `merchant_intro`, `builder_intro`, `boss_guide` (PT, clickable)
+- **Daily login CTA:** `Missão Diária disponível!` once per day (`daily-cta-shown-day` in profile)
+- **Docs:** journey map + smokeshow path in `FINAL-HANDOFF.md`; architecture note in `QUEST-DESIGN-NOTES.md`
 
 ---
 

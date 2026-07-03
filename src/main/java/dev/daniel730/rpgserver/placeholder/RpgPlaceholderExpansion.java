@@ -48,6 +48,12 @@ public final class RpgPlaceholderExpansion extends PlaceholderExpansion {
         if (normalized.equals("quest_progress")) {
             return plugin.getQuestManager().formatPrimaryQuestProgress(profile);
         }
+        if (normalized.equals("tracked_quest")) {
+            return plugin.getQuestManager().formatTrackedQuestName(profile);
+        }
+        if (normalized.equals("tracked_progress")) {
+            return plugin.getQuestManager().formatTrackedQuestProgress(profile);
+        }
         if (normalized.startsWith("quest_progress_")) {
             String questId = params.substring("quest_progress_".length());
             Quest quest = plugin.getQuestManager().getQuest(questId);
@@ -58,7 +64,10 @@ public final class RpgPlaceholderExpansion extends PlaceholderExpansion {
         }
         return switch (normalized) {
             case "archetype" -> formatArchetype(profile.getArchetype());
+            case "archetype_colored" -> formatArchetypeColored(profile.getArchetype());
             case "active_quest" -> formatActiveQuest(profile);
+            case "perks_unlocked" -> String.valueOf(profile.getUnlockedPerkIds().size());
+            case "active_perk_count" -> String.valueOf(profile.getUnlockedPerkIds().size());
             default -> null;
         };
     }
@@ -72,6 +81,18 @@ public final class RpgPlaceholderExpansion extends PlaceholderExpansion {
             case "builder" -> "Construtor";
             case "merchant" -> "Mercador";
             default -> archetype;
+        };
+    }
+
+    private String formatArchetypeColored(String archetype) {
+        if (archetype == null || archetype.isBlank()) {
+            return "§7Nenhum";
+        }
+        return switch (archetype.toLowerCase(Locale.ROOT)) {
+            case "warrior" -> "§cGuerreiro";
+            case "builder" -> "§aConstrutor";
+            case "merchant" -> "§6Mercador";
+            default -> "§d" + archetype;
         };
     }
 

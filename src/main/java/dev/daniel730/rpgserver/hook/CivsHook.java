@@ -162,6 +162,17 @@ public final class CivsHook {
         return StatManager.getInstance().hasModifier(player.getUniqueId(), territorialModifierId(perkId));
     }
 
+    public boolean addSkillXp(Player player, String skillKey, double amount) {
+        if (!enabled || player == null || skillKey == null || skillKey.isBlank() || amount <= 0) {
+            return false;
+        }
+        Civilian civilian = CivilianManager.getInstance().getCivilian(player.getUniqueId());
+        if (civilian == null) {
+            return false;
+        }
+        return civilian.addSkillXp(player, skillKey, amount) > 0;
+    }
+
     public static String territorialModifierId(String perkId) {
         if (perkId == null || perkId.isBlank()) {
             throw new IllegalArgumentException("perk id is required");

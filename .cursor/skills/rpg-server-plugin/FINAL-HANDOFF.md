@@ -114,7 +114,61 @@ Subagent `161fabed` (2026-07-03 15:35) was tasked to merge missing `messages.*` 
 
 ---
 
-## 8. Next when you return
+## 8. Player journey map (Sprint 3 polish)
+
+```
+                    ┌─────────────────────────────────────┐
+                    │  LOGIN — Civs tutorial (parallel)   │
+                    │  RPG: "Escolha seu caminho" (journal)│
+                    └──────────────┬──────────────────────┘
+                                   │
+          ┌────────────────────────┼────────────────────────┐
+          ▼                        ▼                        ▼
+   warrior_path            merchant_path             builder_path
+   (+ warrior_intro)        (+ merchant_intro)        (+ builder_intro)
+          │                        │                        │
+          ▼                        ▼                        ▼
+   sprint2_spells           sprint2_auction           sprint2_civs_skills
+   Iniciação às Magias      Primeiro Leilão           Expansão Territorial
+          │                        │                        │
+          ▼                        ▼                        ▼
+   bandit_chief_slayer      mercador_fortuna          construtor_mestre
+   (+ boss_guide)            Fortuna do Mercador       Mestre Construtor
+          │
+          ▼
+   warrior_champion
+   Campeão Guerreiro (capstone)
+
+   ════════════ DAILY / WEEKLY (parallel) ════════════
+   daily_hunter · daily_quarry · daily_mercado · daily_vendas · daily_miner
+   weekly_warrior · weekly_merchant · weekly_builder
+```
+
+**Daily CTA on login:** title *"Missão Diária disponível!"* once per day when a daily is pending.
+
+---
+
+## 9. Smokeshow test path — returning user (ideal)
+
+Use profile **smokeshow** (or reset RPG YAML + `/rpg sync`):
+
+| Step | Action | Expected |
+|------|--------|----------|
+| 1 | Join server | Welcome title + daily CTA if dailies pending |
+| 2 | `/rpg journal` | Section **Escolha seu caminho** (no archetype) or **Seu Caminho** |
+| 3 | Accept `warrior_path` | InteractiveBooks `warrior_intro` + quest book granted |
+| 4 | `/rpg sync` (if Civs progress exists) | Objectives backfill, no skill XP grant |
+| 5 | Complete path → accept `sprint2_spells` | Journal shows **Próximo:** chain hint |
+| 6 | Complete spells → `bandit_chief_slayer` | `boss_guide` lore book on accept |
+| 7 | `/cv mob spawn bandit_chief` → kill | Quest completes, `warrior_champion` unlocks |
+| 8 | Next login (new day) | **Missão Diária disponível!** title once |
+| 9 | Complete `daily_hunter` | Diária tag, resets next calendar day |
+
+LP nodes: grant `rpg.quest.warrior_path` after path complete (automatic on reward) or `/lp user <name> permission set rpg.quest.<id> true` for testing locked quests.
+
+---
+
+## 10. Next when you return
 
 - [ ] Playtest boss chain + `daily_quarry` in-game
 - [ ] Grant new LP nodes if testing permissions

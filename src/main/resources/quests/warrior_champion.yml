@@ -1,7 +1,7 @@
 id: warrior_champion
 name: "Campeão Guerreiro"
 archetype: warrior
-description: "Capstone guerreiro: domine magias Civs e alcance nível 10 em Combate."
+description: "Graduação guerreiro: conjure 10 magias Civs e alcance Combate nível 10."
 requires:
   - bandit_chief_slayer
 objectives:
@@ -19,3 +19,5 @@ rewards:
   skill-xp:
     fighting: 500
   permission: rpg.quest.warrior_champion
+  lp-group: rpg-warrior
+unlocks-perk: warrior_veteran

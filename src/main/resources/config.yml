@@ -31,12 +31,16 @@ integrations:
     enabled: true
     quest-book-auto-grant: true
   veinminer:
-    enabled: false
+    enabled: true
 
 progression:
   autosave-minutes: 5
   default-track: main
   sync-on-join-from-civs: false
+  reward-multipliers:
+    money: 1.0
+    skill-xp: 1.0
+    civs-skill-xp: 1.0
 
 quests:
   enabled: true
@@ -44,6 +48,50 @@ quests:
   allow-abandon: true
   starter-quest-id: welcome
   reset-timezone: UTC
+
+# Spectacle & HUD — sounds, particles, boss bar / scoreboard
+feedback:
+  tracked-hud: both          # bossbar | scoreboard | both | none
+  quest-progress:
+    pulse: true
+    sound: BLOCK_NOTE_BLOCK_PLING
+    sound-volume: 0.35
+    sound-pitch: 1.6
+  quest-objective-complete:
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+    sound-volume: 0.8
+    sound-pitch: 1.3
+    particles: true
+    title-fade-in: 5
+    title-stay: 45
+    title-fade-out: 10
+  quest-complete:
+    sound: ENTITY_PLAYER_LEVELUP
+    sound-volume: 1.0
+    sound-pitch: 1.2
+    firework: true
+    particles: true
+    title-fade-in: 10
+    title-stay: 70
+    title-fade-out: 20
+  journal:
+    open-sound: ITEM_BOOK_PAGE_TURN
+    open-sound-pitch: 1.0
+    accept-sound: ENTITY_PLAYER_LEVELUP
+    accept-sound-pitch: 1.4
+    track-sound: BLOCK_NOTE_BLOCK_CHIME
+    track-sound-pitch: 1.2
+    click-sound: UI_BUTTON_CLICK
+    sound-volume: 0.7
+  welcome:
+    enabled: true
+    give-quest-book: true
+    sound: ENTITY_PLAYER_LEVELUP
+    sound-volume: 0.9
+    sound-pitch: 0.9
+    title-fade-in: 15
+    title-stay: 80
+    title-fade-out: 25
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "
@@ -54,13 +102,49 @@ messages:
     enabled: true
   quest-objective-complete:
     action-bar: "<yellow>✓</yellow> <white>{objective}</white>"
-    title: "<gold>Objetivo concluído</gold>"
+    title: "<gradient:gold:yellow><bold>Objetivo concluído!</bold></gradient>"
     subtitle: "<gray>{objective}</gray>"
   quest-complete:
     action-bar: "<green>✓</green> <white>{quest}</white>"
-    title: "<green>Quest concluída!</green>"
-    subtitle: "<white>{quest}</white>"
-  quest-bossbar-title: "<gold>{quest}</gold> <gray>({progress})</gray>"
+    title: "<gradient:#55FF55:#00FFAA:#55FFFF><bold>★ QUEST CONCLUÍDA ★</bold></gradient>"
+    subtitle: "<gradient:gold:yellow><bold>{quest}</bold></gradient>"
+  quest-bossbar-title: "<gold>{quest}</gold> <gray>— {objective} ({current}/{total})</gray>"
+  quest-progress:
+    interval: 5
+    action-bar: "<gold>▶</gold> <gray>{objective}</gray> <white>({current}/{total})</white> <dark_gray>[{percent}%]</dark_gray>"
+  welcome:
+    # pt_BR (default)
+    title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Bem-vindo ao Reino</bold></gradient>"
+    subtitle: "<gray>Abra </gray><yellow>/rpg journal</yellow><gray> para começar</gray>"
+    message: "<gold>★</gold> <white>Sua aventura começa agora!</white> <gray>Use</gray> <yellow>/rpg journal</yellow> <gray>para escolher um caminho.</gray>"
+    # en (alternate — copy keys above and set settings.locale: en)
+    # title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Welcome to the Realm</bold></gradient>"
+    # subtitle: "<gray>Open </gray><yellow>/rpg journal</yellow><gray> to begin</gray>"
+    # message: "<gold>★</gold> <white>Your adventure begins!</white> <gray>Use</gray> <yellow>/rpg journal</yellow> <gray>to choose your path.</gray>"
+  quest-journal:
+    locked-prerequisite: "<red>Falta concluir:</red> <white>{quest}</white>"
+    locked-permission: "<red>Requer desbloqueio (permissão).</red>"
+    locked-generic: "<red>Esta quest está bloqueada.</red> <gray>Cumpra os requisitos acima.</gray>"
+    tracked-badge: "<gold>★ Quest rastreada</gold>"
+    track-hint: "<gold>▶ Clique para rastrear</gold> <gray>(boss bar + notificações)</gray>"
+    already-tracked: "<gray>{quest} já está sendo rastreada.</gray>"
+    accept-hint: "<yellow>▶ Clique para aceitar a quest.</yellow>"
+    abandon-hint: "<red>▶ Shift-clique para abandonar.</red>"
+    completed-hint: "<aqua>✔ Quest concluída.</aqua>"
+    chain-next: "<aqua>Próximo:</aqua> <white>{quest}</white>"
+    chain-requires: "<red>Requer:</red> <white>{quests}</white>"
+    page-indicator: "<dark_gray>Página {page}/{total}</dark_gray>"
+  daily-cta:
+    enabled: true
+    title: "<gold><bold>Missão Diária disponível!</bold></gold>"
+    subtitle: "<gray>Abra o diário com /rpg journal</gray>"
+  quest-sync:
+    success-all: "<green>Sync concluído</green> para <white>{players}</white> jogador(es): <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."
+    success-one: "<green>Sync concluído</green> para <white>{player}</white>: <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."
+  quest-book:
+    refreshed: "<gray>Livro atualizado:</gray> <white>{quest}</white>"
+    grant: "<gray>Livro de quest recebido:</gray> <white>{quest}</white>"
+    opened: "<gray>Abrindo livro:</gray> <white>{quest}</white>"
   quest-accept:
     success: "<green>Quest aceita:</green> <white>{quest}</white>"
     not-found: "<red>Quest não encontrada.</red>"
@@ -72,3 +156,5 @@ messages:
   quest-track:
     success: "<yellow>Rastreando:</yellow> <white>{quest}</white>"
     failed: "<red>Não foi possível rastrear esta quest.</red>"
+  reward-summary:
+    header: "<gold>★ Recompensas recebidas</gold>"

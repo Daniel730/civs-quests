@@ -1,0 +1,9 @@
+id: builder_master
+name: "Mestre Construtor"
+archetype: builder
+requires:
+  - construtor_mestre
+type: civs-territorial
+stat: build_speed
+value: 0.15
+operation: add

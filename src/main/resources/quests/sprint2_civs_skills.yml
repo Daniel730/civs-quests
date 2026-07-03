@@ -1,7 +1,7 @@
 id: sprint2_civs_skills
 name: "Expansão Territorial"
 archetype: builder
-description: "Desenvolva skills territoriais Civs minerando e evoluindo a região da sua cidade."
+description: "Expanda seu território Civs: ganhe XP de Mineração minerando na sua região."
 requires:
   - builder_path
 objectives:
@@ -9,7 +9,7 @@ objectives:
     type: civs_skill_xp
     skill: mining
     amount: 50
-    description: "Ganhe 50 XP de mineração Civs"
+    description: "Ganhe 50 XP de Mineração Civs"
   - id: mining_level_2
     type: civs_skill_level
     skill: mining
@@ -17,4 +17,9 @@ objectives:
     description: "Alcance nível 2 em Mineração Civs"
 rewards:
   money: 25
+  civs-skill-xp:
+    mining: 100
+  skill-xp:
+    foraging: 100
   permission: rpg.quest.sprint2_civs_skills
+unlocks-perk: builder_discount

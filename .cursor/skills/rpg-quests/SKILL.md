@@ -26,6 +26,8 @@ description: >-
 | `earn_money` | Vault balance delta | `amount: 1000` |
 | `balance_min` | Essentials/Vault | `amount: 500` |
 | `shop_buy` / `shop_sell` / `shop_revenue` | ChestShop `TransactionEvent` | `amount`, optional filters |
+| `join_town` | Civs `PlayerAcceptsTownInviteEvent` | optional `town:` filter |
+| `vein_mine` | VeinMiner `PlayerVeinMineEvent` | optional `block:`, `amount` |
 
 Add new types: register in `ObjectiveTypes` + parser in registry + listener method.
 
@@ -92,8 +94,11 @@ field granted on quest start (`ensureQuestStarted`), not part of `rewards:`.
 | Placeholder | Status |
 |-------------|--------|
 | `%rpg_archetype%` | ✅ |
-| `%rpg_active_quest%` | ✅ |
-| `%rpg_quest_progress%` | P1 |
+| `%rpg_active_quest%` | ✅ (primary active quest name) |
+| `%rpg_tracked_quest%` | ✅ (explicitly tracked quest name) |
+| `%rpg_tracked_progress%` | ✅ (current objective + count for tracked quest) |
+| `%rpg_quest_progress%` | ✅ (primary active quest progress) |
+| `%rpg_quest_progress_<id>%` | ✅ (per-quest progress) |
 
 ## Pitfalls
 

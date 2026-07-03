@@ -1,0 +1,33 @@
+name: "Carta do Construtor"
+title: "Caminho do Construtor"
+author: "Conselho Territorial"
+generation: ORIGINAL
+lore:
+  - "Pedra, madeira e a vontade de erguer"
+open_command: ''
+pages:
+  '1':
+    - '<gradient:#4682B4:#C0C0C0:#4682B4><bold>🏛 Caminho do Construtor</bold></gradient>'
+    - ''
+    - '<gray>Antes da espada, veio o alicerce.'
+    - '<gray>Transforme wilderness em cidadelas —'
+    - '<gray>abra abrigos, salas de conselho e'
+    - '<gray>deixe sua marca no mapa do reino.</gray>'
+    - ''
+    - '<yellow><italic>« Toda grande cidade começou com um bloco. »</italic></yellow>'
+  '2':
+    - '<gold><bold>Seu Projeto</bold></gold>'
+    - ''
+    - '<gray>① Construa um <white>abrigo</white> seguro</gray>'
+    - '<gray>② Erga a <white>sala do conselho</white></gray>'
+    - '<gray>③ Colete recursos — <white>Coleta</white> nível 5</gray>'
+    - '<gray>④ Expanda seu domínio bloco a bloco</gray>'
+  '3':
+    - '<aqua><bold>Dicas de Obra</bold></aqua>'
+    - ''
+    - '<gray>• /cv menu — regiões e receitas Civs</gray>'
+    - '<gray>• Quebre madeira e pedra para subir Coleta</gray>'
+    - '<gray>• /rpg journal — acompanhe cada etapa</gray>'
+    - ''
+    - '<click:run_command:/rpg quest accept builder_path><green><underlined>[ Iniciar Obra ]</underlined></green></click>'
+    - '<click:run_command:/rpg journal><gray><underlined>[ Abrir Diário ]</underlined></gray></click>'

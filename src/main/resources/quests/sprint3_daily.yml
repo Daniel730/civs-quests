@@ -1,7 +1,7 @@
 id: daily_hunter
 name: "Caçador Diário"
 schedule: daily
-description: "Mate zumbis hoje para ganhar uma recompensa rápida."
+description: "Elimine zumbis pelo mapa hoje — recompensa diária de combate."
 objectives:
   - id: kill_zombies
     type: kill_mob

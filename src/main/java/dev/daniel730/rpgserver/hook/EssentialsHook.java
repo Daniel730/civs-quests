@@ -29,25 +29,25 @@ public final class EssentialsHook {
         return enabled;
     }
 
-    public void giveKit(Player player, String kitName) {
+    public boolean giveKit(Player player, String kitName) {
         if (!enabled || player == null || kitName == null || kitName.isBlank()) {
-            return;
+            return false;
         }
         if (!plugin.getPluginConfig().isEssentialsKitRewardsEnabled()) {
-            return;
+            return false;
         }
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kit " + kitName + " " + player.getName());
-        plugin.getMessageUtil().send(player, "<green>Recompensa:</green> kit " + kitName);
+        return true;
     }
 
-    public void warpPlayer(Player player, String warpName) {
+    public boolean warpPlayer(Player player, String warpName) {
         if (!enabled || player == null || warpName == null || warpName.isBlank()) {
-            return;
+            return false;
         }
         if (!plugin.getPluginConfig().isEssentialsWarpRewardsEnabled()) {
-            return;
+            return false;
         }
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "warp " + warpName + " " + player.getName());
-        plugin.getMessageUtil().send(player, "<green>Recompensa:</green> teleporte para " + warpName);
+        return true;
     }
 }

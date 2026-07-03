@@ -11,7 +11,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
+
+import java.util.Optional;
 
 public final class QuestJournalListener implements Listener {
 
@@ -38,10 +42,12 @@ public final class QuestJournalListener implements Listener {
 
         int slot = event.getRawSlot();
         if (slot == QuestJournalHolder.NAV_PREV_SLOT && holder.getPage() > 0) {
+            plugin.getQuestFeedbackService().playJournalClick(player);
             QuestJournalGui.render(plugin, player, holder, holder.getPage() - 1);
             return;
         }
         if (slot == QuestJournalHolder.NAV_NEXT_SLOT && holder.getPage() < holder.getTotalPages() - 1) {
+            plugin.getQuestFeedbackService().playJournalClick(player);
             QuestJournalGui.render(plugin, player, holder, holder.getPage() + 1);
             return;
         }
@@ -71,8 +77,20 @@ public final class QuestJournalListener implements Listener {
             case IN_PROGRESS -> handleTrack(player, profile, quest, questManager, holder);
             case COMPLETED -> plugin.getMessageUtil().send(player,
                     "<aqua>" + quest.getName() + "</aqua> <gray>já foi concluída.</gray>");
-            case LOCKED -> plugin.getMessageUtil().send(player,
-                    "<red>Esta quest está bloqueada.</red> <gray>Cumpra os requisitos para desbloquear.</gray>");
+            case LOCKED -> {
+                Optional<String> missing = questManager.findFirstMissingPrerequisite(profile, quest);
+                if (missing.isPresent()) {
+                    plugin.getMessageUtil().send(player,
+                            plugin.getPluginConfig().getQuestJournalLockedPrerequisite()
+                                    .replace("{quest}", missing.get()));
+                } else if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+                    plugin.getMessageUtil().send(player,
+                            plugin.getPluginConfig().getQuestJournalLockedPermission());
+                } else {
+                    plugin.getMessageUtil().send(player,
+                            plugin.getPluginConfig().getQuestJournalLockedGeneric());
+                }
+            }
             default -> {
             }
         }
@@ -83,6 +101,7 @@ public final class QuestJournalListener implements Listener {
         QuestManager.StartResult result = questManager.startQuest(player, profile, quest);
         switch (result) {
             case STARTED -> {
+                plugin.getQuestFeedbackService().playJournalAccept(player);
                 plugin.getMessageUtil().send(player,
                         "<green>Quest aceita:</green> " + quest.getName()
                                 + " <dark_gray>(rastreada)</dark_gray>");
@@ -108,10 +127,12 @@ public final class QuestJournalListener implements Listener {
                              QuestManager questManager, QuestJournalHolder holder) {
         if (quest.getId().equals(profile.getTrackedQuestId())) {
             plugin.getMessageUtil().send(player,
-                    "<gray>" + quest.getName() + " já está sendo rastreada.</gray>");
+                    plugin.getPluginConfig().getQuestJournalAlreadyTracked()
+                            .replace("{quest}", quest.getName()));
             return;
         }
         if (questManager.setTrackedQuest(player, profile, quest)) {
+            plugin.getQuestFeedbackService().playJournalTrack(player);
             plugin.getMessageUtil().send(player,
                     "<gold>Rastreando quest:</gold> " + quest.getName());
             refresh(player, holder);

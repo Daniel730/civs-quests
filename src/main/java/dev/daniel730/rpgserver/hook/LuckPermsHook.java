@@ -5,6 +5,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -71,6 +72,24 @@ public final class LuckPermsHook {
         CompletableFuture<Void> save = luckPerms.getUserManager().saveUser(user);
         save.exceptionally(ex -> {
             plugin.getLogger().warning("Falha ao salvar permissão LuckPerms: " + ex.getMessage());
+            return null;
+        });
+        return true;
+    }
+
+    public boolean grantGroup(Player player, String group) {
+        if (!enabled || group == null || group.isBlank()) {
+            return false;
+        }
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+            return false;
+        }
+        InheritanceNode node = InheritanceNode.builder(group).build();
+        user.data().add(node);
+        CompletableFuture<Void> save = luckPerms.getUserManager().saveUser(user);
+        save.exceptionally(ex -> {
+            plugin.getLogger().warning("Falha ao salvar grupo LuckPerms: " + ex.getMessage());
             return null;
         });
         return true;

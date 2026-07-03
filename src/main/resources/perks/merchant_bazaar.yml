@@ -1,0 +1,9 @@
+id: merchant_bazaar
+name: "Feirante Experiente"
+archetype: merchant
+requires:
+  - mercador_fortuna
+type: civs-territorial
+stat: shop_discount
+value: 0.03
+operation: add

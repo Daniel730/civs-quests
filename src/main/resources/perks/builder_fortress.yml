@@ -1,0 +1,9 @@
+id: builder_fortress
+name: "Fortaleza do Construtor"
+archetype: builder
+requires:
+  - weekly_builder
+type: civs-territorial
+stat: build_speed
+value: 0.10
+operation: add

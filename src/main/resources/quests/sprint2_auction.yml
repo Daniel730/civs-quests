@@ -1,7 +1,8 @@
 id: sprint2_auction
 name: "Primeiro Leilão"
 archetype: merchant
-description: "Participe do leilão Civs: liste um item à venda e compre de outro jogador."
+description: "Abra /cv menu → Casa de Leilões: anuncie um item e compre de outro jogador."
+lore-book: leilao_intro
 requires:
   - merchant_path
 objectives:
@@ -15,4 +16,6 @@ objectives:
     description: "Compre 1 item no leilão Civs"
 rewards:
   money: 50
+  skill-xp:
+    farming: 75
   permission: rpg.quest.sprint2_auction

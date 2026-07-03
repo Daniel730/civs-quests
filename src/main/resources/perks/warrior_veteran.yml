@@ -1,0 +1,9 @@
+id: warrior_veteran
+name: "Veterano de Guerra"
+archetype: warrior
+requires:
+  - warrior_champion
+type: auraskills-stat
+stat: toughness
+value: 3.0
+operation: add

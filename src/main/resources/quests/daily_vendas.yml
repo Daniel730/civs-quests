@@ -1,0 +1,16 @@
+id: daily_vendas
+name: "Vendas Diárias"
+archetype: merchant
+schedule: daily
+description: "Venda itens na sua loja ChestShop hoje — complementa o Mercado Diário."
+requires:
+  - merchant_path
+objectives:
+  - id: shop_sales
+    type: shop_sell
+    amount: 5
+    description: "Venda 5 vezes em lojas ChestShop"
+rewards:
+  money: 35
+  skill-xp:
+    farming: 75

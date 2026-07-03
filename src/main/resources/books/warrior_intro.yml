@@ -1,25 +1,35 @@
-name: "Introdução Guerreiro"
+name: "Crônicas do Guerreiro"
 title: "Caminho do Guerreiro"
-author: "RPG Server"
+author: "Ordem do Reino"
 generation: ORIGINAL
 lore:
-  - "Lore do arquetipo guerreiro"
+  - "O juramento de sangue e território"
 open_command: ''
 pages:
   '1':
-    - '<gold><bold>Caminho do Guerreiro</bold></gold>'
+    - '<gradient:#8B0000:#FFD700:#8B0000><bold>⚔ Caminho do Guerreiro</bold></gradient>'
     - ''
-    - '<gray>Bem-vindo, guerreiro! Este livro apresenta'
-    - '<gray>o caminho territorial do Civs para quem'
-    - '<gray>busca força em combate e defesa.</gray>'
+    - '<gray>O reino não se conquista com palavras.</gray>'
+    - '<gray>Erga abrigos de pedra, erga altares de'
+    - '<gray>fogo e prove que seu aço resiste às'
+    - '<gray>hordas que rondam as fronteiras.</gray>'
     - ''
-    - '<yellow>Construa abrigos, altares e prove seu'
-    - '<yellow>valor derrotando hostis.</yellow>'
+    - '<yellow><italic>« A força sem território é só ruína. »</italic></yellow>'
   '2':
-    - '<aqua>Dicas</aqua>'
+    - '<gold><bold>Seu Juramento</bold></gold>'
     - ''
-    - '<gray>• Use /rpg journal para ver todas as quests'
-    - '<gray>• Use /rpg quest book warrior_path para o livro de progresso'
+    - '<gray>① Construa um <white>abrigo</white> — seu primeiro'
+    - '<gray>   bastião contra a noite</gray>'
+    - '<gray>② Erga um <white>altar</white> — fonte de'
+    - '<gray>   equipamento e magias de combate</gray>'
+    - '<gray>③ Cace os mortos-vivos nas sombras</gray>'
+    - '<gray>④ Domine <white>Combate</white> até o nível 5</gray>'
+  '3':
+    - '<aqua><bold>Dicas de Campo</bold></aqua>'
     - ''
-    - '<click:run_command:/rpg quest accept warrior_path><green><underlined>[Aceitar Quest]</underlined></green></click>'
-    - '<hover:show_text:"<gray>Iniciar Caminho do Guerreiro</gray>">'
+    - '<gray>• /cv menu — construa regiões Civs</gray>'
+    - '<gray>• /rpg journal — seu diário de missões</gray>'
+    - '<gray>• Derrote inimigos para subir em Combate</gray>'
+    - ''
+    - '<click:run_command:/rpg quest accept warrior_path><green><underlined>[ Jurar o Caminho ]</underlined></green></click>'
+    - '<click:run_command:/rpg journal><gray><underlined>[ Abrir Diário ]</underlined></gray></click>'

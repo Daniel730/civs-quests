@@ -162,11 +162,11 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         if (open) {
             plugin.getQuestBookService().openQuestBook(player, quest);
             plugin.getMessageUtil().send(player,
-                    "<gray>Abrindo livro:</gray> <white>" + quest.getName() + "</white>");
+                    plugin.getPluginConfig().getQuestBookOpened().replace("{quest}", quest.getName()));
         } else {
             plugin.getQuestBookService().giveQuestBook(player, quest);
             plugin.getMessageUtil().send(player,
-                    "<green>Livro de quest recebido:</green> <white>" + quest.getName() + "</white>");
+                    plugin.getPluginConfig().getQuestBookGrant().replace("{quest}", quest.getName()));
         }
         return true;
     }
@@ -216,6 +216,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         QuestJournalGui.open(plugin, player);
+        plugin.getQuestFeedbackService().playJournalOpen(player);
         return true;
     }
 
@@ -299,8 +300,10 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                 players++;
             }
             plugin.getMessageUtil().send(sender,
-                    "<green>Sync concluído</green> para " + players + " jogador(es): "
-                            + totalObjectives + " objetivo(s), " + totalQuests + " quest(s).");
+                    plugin.getPluginConfig().getQuestSyncSuccessAll()
+                            .replace("{players}", String.valueOf(players))
+                            .replace("{objectives}", String.valueOf(totalObjectives))
+                            .replace("{quests}", String.valueOf(totalQuests)));
             return true;
         }
         Player target = Bukkit.getPlayer(args[playerArgIndex]);
@@ -311,9 +314,10 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
                 .sync(target, grantRewards, true);
         plugin.getMessageUtil().send(sender,
-                "<green>Sync concluído</green> para " + target.getName() + ": "
-                        + result.objectivesCompleted() + " objetivo(s), "
-                        + result.questsCompleted() + " quest(s).");
+                plugin.getPluginConfig().getQuestSyncSuccessOne()
+                        .replace("{player}", target.getName())
+                        .replace("{objectives}", String.valueOf(result.objectivesCompleted()))
+                        .replace("{quests}", String.valueOf(result.questsCompleted())));
         return true;
     }
 

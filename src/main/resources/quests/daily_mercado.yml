@@ -2,7 +2,7 @@ id: daily_mercado
 name: "Mercado Diário"
 archetype: merchant
 schedule: daily
-description: "Compre itens em lojas ChestShop hoje para movimentar o mercado."
+description: "Compre itens em lojas ChestShop de outros jogadores hoje."
 requires:
   - merchant_path
 objectives:

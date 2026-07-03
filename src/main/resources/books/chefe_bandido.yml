@@ -1,0 +1,35 @@
+name: "Caçada ao Chefe"
+title: "Caçador do Chefe Bandido"
+author: "RPG Server"
+generation: ORIGINAL
+lore:
+  - "Como derrotar o Chefe Bandido"
+open_command: ''
+pages:
+  '1':
+    - '<gold><bold>Caçador do Chefe</bold></gold>'
+    - ''
+    - '<gray>O Chefe Bandido é um inimigo'
+    - '<gray>territorial de alto risco. Prepare-se'
+    - '<gray>antes de entrar em combate.</gray>'
+    - ''
+    - '<yellow>Complete o Caminho do Guerreiro'
+    - '<yellow>e a Iniciação às Magias primeiro.</yellow>'
+  '2':
+    - '<aqua>Preparação</aqua>'
+    - ''
+    - '<gray>• Use seu altar Civs para obter'
+    - '<gray>  equipamento de combate'
+    - '<gray>• Abra /cv menu → Magias e pratique'
+    - '<gray>  feitiços antes da luta</gray>'
+    - ''
+    - '<red>Enfrente o Chefe Bandido em combate'
+    - '<red>quando encontrá-lo no mundo.</red>'
+  '3':
+    - '<green>Dicas</green>'
+    - ''
+    - '<gray>• Conjure magias durante o combate'
+    - '<gray>• Leve poções e armadura reforçada'
+    - '<gray>• /rpg journal mostra o progresso</gray>'
+    - ''
+    - '<click:run_command:/rpg quest accept bandit_chief_slayer><green><underlined>[Aceitar Quest]</underlined></green></click>'

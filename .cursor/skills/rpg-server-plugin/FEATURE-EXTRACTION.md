@@ -88,7 +88,7 @@ RPG **never** stores parallel skill XP. Quest rewards call AuraSkills API; Civs 
 - **RPG-006** ✅ ChestShop `shop_buy` / `shop_sell` / `shop_revenue` via reflection `TransactionEvent`
 - **RPG-007** ✅ `EssentialsHook` — `balance_min` objective, kit/warp rewards (config-gated)
 - **RPG-008** ✅ `InteractiveBooksHook` — grant `lore-book` on quest start
-- **RPG-009** ⏸ (optional) `VeinMinerQuestListener` — deferred to P2
+- **RPG-009** ✅ `VeinMinerHook` — `vein_mine` objective via `PlayerVeinMineEvent`; `daily_miner.yml`; config default `enabled: true`
 
 ## Civs backlog (by priority)
 
