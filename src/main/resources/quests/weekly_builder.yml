@@ -1,0 +1,27 @@
+id: weekly_builder
+name: "Construtor Semanal"
+archetype: builder
+schedule: weekly
+description: "Expanda seu território na semana: extraia recursos e ganhe XP de construção Civs."
+requires:
+  - builder_path
+objectives:
+  - id: mine_stone
+    type: mine_block
+    block: stone
+    amount: 150
+    description: "Mine 150 blocos de pedra"
+  - id: earn_mining_xp
+    type: civs_skill_xp
+    skill: mining
+    amount: 200
+    description: "Ganhe 200 XP de mineração Civs"
+  - id: build_warehouse
+    type: build_region
+    region: warehouse
+    description: "Construa um armazém (warehouse)"
+rewards:
+  money: 350
+  skill-xp:
+    foraging: 500
+  permission: rpg.quest.weekly_builder

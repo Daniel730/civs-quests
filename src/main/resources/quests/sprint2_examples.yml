@@ -1,0 +1,20 @@
+id: sprint2_civs_skills
+name: "Sprint 2 — Skills Civs"
+archetype: builder
+description: "Exemplos de objetivos territoriais via GainExpEvent (skills internas Civs)."
+requires:
+  - builder_path
+objectives:
+  - id: earn_mining_xp
+    type: civs_skill_xp
+    skill: mining
+    amount: 50
+    description: "Ganhe 50 XP de mineração Civs"
+  - id: mining_level_2
+    type: civs_skill_level
+    skill: mining
+    level: 2
+    description: "Alcance nível 2 em Mineração Civs"
+rewards:
+  money: 25
+  permission: rpg.quest.sprint2_civs_skills

@@ -1,0 +1,25 @@
+id: weekly_merchant
+name: "Comerciante Semanal"
+archetype: merchant
+schedule: weekly
+description: "Movimente a economia da semana: compre, venda e participe do leilão Civs."
+requires:
+  - merchant_path
+objectives:
+  - id: shop_purchases
+    type: shop_buy
+    amount: 12
+    description: "Compre 12 vezes em lojas ChestShop"
+  - id: shop_sales
+    type: shop_sell
+    amount: 12
+    description: "Venda 12 vezes em lojas ChestShop"
+  - id: auction_trades
+    type: auction_buy
+    amount: 3
+    description: "Compre 3 itens no leilão Civs"
+rewards:
+  money: 400
+  skill-xp:
+    farming: 500
+  permission: rpg.quest.weekly_merchant

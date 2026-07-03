@@ -1,0 +1,27 @@
+id: weekly_warrior
+name: "Caçador Semanal"
+archetype: warrior
+schedule: weekly
+description: "Prove sua força na semana: elimine zumbis, conjure magias e suba em Combate."
+requires:
+  - warrior_path
+objectives:
+  - id: kill_hostiles
+    type: kill_mob
+    mob: zombie
+    amount: 30
+    description: "Mate 30 zumbis"
+  - id: cast_spells
+    type: cast_spell
+    amount: 15
+    description: "Conjure 15 magias Civs"
+  - id: fighting_level
+    type: skill_level
+    skill: fighting
+    level: 8
+    description: "Alcance nível 8 em Combate (Fighting)"
+rewards:
+  money: 300
+  skill-xp:
+    fighting: 750
+  permission: rpg.quest.weekly_warrior

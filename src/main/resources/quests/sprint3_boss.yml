@@ -1,0 +1,17 @@
+id: bandit_chief_slayer
+name: "Caçador do Chefe"
+archetype: warrior
+description: "Derrote o Chefe Bandido spawnado pelo Civs (/cv mob spawn bandit_chief)."
+requires:
+  - warrior_path
+objectives:
+  - id: slay_bandit_chief
+    type: custom_mob_kill
+    mob: bandit_chief
+    amount: 1
+    description: "Derrote o Chefe Bandido"
+rewards:
+  money: 500
+  skill-xp:
+    fighting: 1000
+  permission: rpg.quest.bandit_chief_slayer

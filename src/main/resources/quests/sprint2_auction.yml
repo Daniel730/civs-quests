@@ -1,0 +1,18 @@
+id: sprint2_auction
+name: "Sprint 2 — Leilão Civs"
+archetype: merchant
+description: "Exemplos de objetivos do leilão nativo Civs (AuctionListEvent / AuctionPurchaseEvent)."
+requires:
+  - merchant_path
+objectives:
+  - id: list_one_item
+    type: auction_list
+    amount: 1
+    description: "Liste 1 item no leilão Civs"
+  - id: buy_one_item
+    type: auction_buy
+    amount: 1
+    description: "Compre 1 item no leilão Civs"
+rewards:
+  money: 50
+  permission: rpg.quest.sprint2_auction

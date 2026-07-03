@@ -1,0 +1,26 @@
+id: warrior_champion
+name: "Campeão Guerreiro"
+archetype: warrior
+description: "Após derrotar o Chefe Bandido, prove domínio em combate."
+requires:
+  - bandit_chief_slayer
+objectives:
+  - id: kill_hostiles
+    type: kill_mob
+    mob: zombie
+    amount: 20
+    description: "Mate 20 zumbis"
+  - id: cast_spells
+    type: cast_spell
+    amount: 10
+    description: "Conjure 10 magias Civs"
+  - id: fighting_level
+    type: skill_level
+    skill: fighting
+    level: 10
+    description: "Alcance nível 10 em Combate (Fighting)"
+rewards:
+  money: 250
+  skill-xp:
+    fighting: 500
+  permission: rpg.quest.warrior_champion

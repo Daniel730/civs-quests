@@ -1,0 +1,21 @@
+id: sprint2_spells
+name: "Sprint 2 — Magias Civs"
+archetype: warrior
+description: "Exemplos de objetivos cast_spell via Civs SpellPreCastEvent (requer Civs Sprint 2+)."
+requires:
+  - warrior_path
+objectives:
+  - id: cast_any_spell
+    type: cast_spell
+    amount: 5
+    description: "Conjure 5 magias Civs (qualquer feitiço)"
+  - id: cast_fireball
+    type: cast_spell
+    spell: fireball
+    amount: 3
+    description: "Conjure 3 vezes o feitiço fireball"
+rewards:
+  money: 40
+  skill-xp:
+    fighting: 150
+  permission: rpg.quest.sprint2_spells

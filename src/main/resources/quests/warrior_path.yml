@@ -2,6 +2,7 @@ id: warrior_path
 name: "Caminho do Guerreiro"
 archetype: warrior
 description: "Siga os primeiros passos do tutorial guerreiro do Civs."
+lore-book: warrior_intro
 objectives:
   - id: build_shelter
     type: build_region
@@ -26,3 +27,4 @@ rewards:
   skill-xp:
     fighting: 75
   permission: rpg.quest.warrior_path
+unlocks-perk: warrior_berserk

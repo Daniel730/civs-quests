@@ -1,0 +1,15 @@
+id: daily_quarry
+name: "Pedreira Diária"
+archetype: builder
+schedule: daily
+description: "Extraia pedra hoje para recompensa rápida de construtor."
+objectives:
+  - id: mine_stone
+    type: mine_block
+    block: stone
+    amount: 64
+    description: "Mine 64 pedras"
+rewards:
+  money: 40
+  skill-xp:
+    mining: 80

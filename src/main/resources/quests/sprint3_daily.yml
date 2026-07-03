@@ -1,0 +1,14 @@
+id: daily_hunter
+name: "Caçador Diário"
+schedule: daily
+description: "Mate zumbis hoje para ganhar uma recompensa rápida."
+objectives:
+  - id: kill_zombies
+    type: kill_mob
+    mob: zombie
+    amount: 5
+    description: "Mate 5 zumbis"
+rewards:
+  money: 50
+  skill-xp:
+    fighting: 100
