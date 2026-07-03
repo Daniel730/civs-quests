@@ -19,7 +19,56 @@
 | P2 RPG | RPG-016 Weekly quest content | `weekly_*` + path prerequisites | ✅ deployed |
 | P2 RPG | Lore books | `leilao_intro`, `chefe_bandido` (InteractiveBooks) | ✅ this session |
 | P2 RPG | RPG-009 VeinMiner optional objective | hook stubbed; `integrations.veinminer.enabled: false` | ⏸ deferred |
-| P1 Civs | CIVS-009 Turrets + town shields | KingdomX patterns — large | 🟡 MVP local (turrets only; shields deferred) |
+| P2 RPG | Rewards & progression polish | Consolidated reward summary, `civs-skill-xp`, LP auto-grant, 4 perks, capstone balance | ✅ deployed |
+
+---
+
+## Rewards & progression (2026-07-03 late evening)
+
+### Engine
+
+- **`RewardExecutor`** — single chat summary after quest fanfare (title/firework unchanged); formatted Vault money, PT skill names, perk line.
+- **`civs-skill-xp`** reward field → `CivsHook.addSkillXp` → Civs `GainExpEvent` (builder path).
+- **`lp-group`** reward field → LuckPerms inheritance node (`rpg-warrior`, `rpg-builder`, `rpg-merchant` on capstones).
+- **Auto LP on complete** — every quest grants `rpg.quest.<id>` even when YAML omits `permission` (dailies trackable).
+- **`progression.reward-multipliers`** in `config.yml` — `money`, `skill-xp`, `civs-skill-xp` (default 1.0).
+- **PAPI:** `%rpg_perks_unlocked%`, `%rpg_active_perk_count%`.
+
+### Perks (7 total)
+
+| Perk | Archetype | Unlock quest | Effect |
+|------|-----------|--------------|--------|
+| `warrior_berserk` | warrior | `warrior_path` | AuraSkills strength +2 |
+| `warrior_veteran` | warrior | `warrior_champion` | AuraSkills toughness +3 |
+| `builder_discount` | builder | `sprint2_civs_skills` | Civs shop_discount +5% |
+| `builder_fortress` | builder | `weekly_builder` | Civs build_speed +10% |
+| `builder_master` | builder | `construtor_mestre` | Civs build_speed +15% |
+| `merchant_bazaar` | merchant | `mercador_fortuna` | Civs shop_discount +3% |
+| `merchant_golden_touch` | merchant | `mercador_mestre` | AuraSkills luck +2 |
+
+### Reward balance table (money / AuraSkills XP / Civs XP)
+
+| Tier | Quest | Money | skill-xp | civs-skill-xp | Perk |
+|------|-------|------:|----------|---------------|------|
+| Path | `warrior_path` | 10 | fighting 75 | — | warrior_berserk |
+| Path | `builder_path` | 25 | foraging 75 | building 50 | — |
+| Path | `merchant_path` | 25 | farming 50 | — | — |
+| Mid | `sprint2_*` | 25–50 | archetype | mining 100 (civs skills) | builder_discount |
+| Mid | `mercador_fortuna` | 100 | farming 200 | — | merchant_bazaar |
+| Weekly | `weekly_*` | 300–400 | 500–750 | building/mining (builder) | builder_fortress |
+| Boss | `bandit_chief_slayer` | 500 | fighting 1000 | — | — |
+| Capstone | `warrior_champion` | 250 | fighting 500 | — | warrior_veteran + lp-group |
+| Capstone | `construtor_mestre` | 400 | foraging 300 | mining 400, building 200 | builder_master + lp-group |
+| Capstone | `mercador_mestre` | 500 | farming 600 | — | merchant_golden_touch + lp-group |
+| Daily | `daily_*` | 30–50 | 40–100 | mining 60–100 (builder) | — |
+
+### Test checklist
+
+1. Complete any quest → title/firework (if enabled) **then** `★ Recompensas recebidas` bullet list in chat.
+2. Builder quest with `civs-skill-xp` → Civs mining/building XP notification in-game.
+3. Capstone complete → LP node `rpg.quest.<id>`, optional `lp-group`, perk auto-unlock once in summary.
+4. `/papi parse me %rpg_perks_unlocked%` after perk unlock.
+5. `/rpg reload` → 7 perks loaded, 18+ quests.
 
 ---
 
