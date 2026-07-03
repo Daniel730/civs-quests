@@ -87,6 +87,16 @@ Redeploy: `mvn package` → `target/civs-1.11.6.jar`. Existing duplicate glowsto
 
 **Town shields:** `PowerShieldEffect` listens `EntityDamageEvent`; stacks best % from `getRegionEffectsAt` + town `power_shield`. Region upkeep gates shield (like turrets). Existing `ProtectionHandler` explosion blocking unchanged.
 
+## Sprint 3 polish batch (local)
+
+| Item | Status |
+|------|--------|
+| Auction BIN UX | ✅ empty browse/my-listings titles, shift-click confirm, seller notify (`AuctionFeedback`), menu refresh after buy |
+| Farm polish | ✅ `RegionChestUtilTest` single-chest I/O; region menu shows `farm-tool-durability`; pt_br/en `farm-tool-tip` on tool slots |
+| Custom mobs | ✅ `bandit_camp.yml` example (`custom_mob:bandit_scout`); per-region spawn cooldown (`custom-mob-region-spawn-cooldown-seconds`); `/civs mob list` shows type/HP/dmg |
+| Town shields | ✅ YAML `shield-percent:` on region type (town_shield 25%, default town 15% config) |
+| Turret upkeep | ✅ `basic_turret` arrow/iron upkeep; region menu `turret-repair-warning` lists missing chest materials when defense offline |
+
 ## Events RPG consumes
 
 | Event | Status | Use |
