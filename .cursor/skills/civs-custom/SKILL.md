@@ -75,6 +75,16 @@ Redeploy: `mvn package` → `target/civs-1.11.6.jar`. Existing duplicate glowsto
 | i18n | en + pt_br (`custom-mob-*` keys) |
 | Not in scope | boss phases, skills, MythicMobs import |
 
+## Sprint 3 — farm I/O, hovel economy, mob spawn fix (local)
+
+| Item | Fix |
+|------|-----|
+| Custom mob `/civs mob spawn` invisible | `ProtectionHandler` cancelled Pillager in `deny_mob_spawn` towns; `CustomMobManager` plugin-spawn bypass + safe Y + `setPersistent` |
+| Mob findability | `MobCommand` announces world + block coords; turrets skip `civs:custom_mob_id` |
+| Farm input/output | `RegionChestUtil` — icon chest = inputs; nearest other structure chest = outputs (`farm` group) |
+| Farm tools | `Util.mergeToolRequirements`; durable `reagents` wear as tools; `item-groups` hoe/axe/shears/fishing_rod |
+| NPC Hovel economy | `bank-payout` on `RegionUpkeep`; `npc_hovel.yml` → town bank ($4/hour tick) |
+
 **Town shields:** `PowerShieldEffect` listens `EntityDamageEvent`; stacks best % from `getRegionEffectsAt` + town `power_shield`. Region upkeep gates shield (like turrets). Existing `ProtectionHandler` explosion blocking unchanged.
 
 ## Events RPG consumes

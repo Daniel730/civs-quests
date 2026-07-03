@@ -1,6 +1,6 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-03 (evening — CIVS-010 + boss chain deploy)  
+**Updated:** 2026-07-03 (evening — quest audit + LP chain fix deploy)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
 
@@ -88,11 +88,19 @@ RPG plugin unchanged by these; Civs JAR rebuild + redeploy required for them to 
 - Journal shows Diária / Semanal tags.
 - Content files: `sprint3_daily.yml` (`daily_hunter`), `weekly_warrior.yml`, `weekly_merchant.yml`, `weekly_builder.yml` — **deployed** to server quests folder.
 
-### Quest inventory (14 YAML → 14 loaded on server)
+### Quest audit fixes (2026-07-03 evening)
 
-`warrior_path`, `builder_path`, `merchant_path`, `sprint1_examples`, `sprint2_civs_skills` (`sprint2_examples.yml`), `sprint2_auction`, `sprint2_spells`, `daily_hunter` (`sprint3_daily.yml`), `daily_quarry`, `weekly_warrior`, `weekly_merchant`, `weekly_builder`, `bandit_chief_slayer` (`sprint3_boss.yml`), `warrior_champion`.
+- **LP chain unlock:** `QuestManager.unlockFollowUpQuestPermissions` — on quest complete, auto-grants `rpg.quest.<id>` for quests listing the completed quest in `requires` (fixes blocked follow-ups e.g. `bandit_chief_slayer` → `warrior_champion`).
+- **YAML polish (PT):** path quests, `sprint2_spells` → "Iniciação às Magias", `sprint2_auction` → "Primeiro Leilão", `sprint2_civs_skills` → "Expansão Territorial"; boss/champion copy player-facing (no admin commands).
+- **`bandit_chief_slayer`** now requires `warrior_path` + `sprint2_spells`; **`warrior_champion`** capstone = `cast_spell` + Fighting 10 (zombie grind removed).
+- **New quests:** `mercador_fortuna` (`shop_revenue` + `balance_min`, requires `sprint2_auction`), `daily_mercado` (daily `shop_buy`, merchant archetype).
+- **`sprint1_examples`** omitted from `saveResource` (admin/dev reference only; not seeded on fresh install).
 
-`QuestManager.saveResource` seeds all 14 on first install.
+### Quest inventory (16 YAML in repo → 15+ loaded on server)
+
+`warrior_path`, `builder_path`, `merchant_path`, `sprint2_civs_skills` (`sprint2_examples.yml`), `sprint2_auction`, `sprint2_spells`, `daily_hunter` (`sprint3_daily.yml`), `daily_quarry`, `daily_mercado`, `weekly_warrior`, `weekly_merchant`, `weekly_builder`, `bandit_chief_slayer` (`sprint3_boss.yml`), `warrior_champion`, `mercador_fortuna`. (`sprint1_examples` not auto-seeded.)
+
+`QuestManager.saveResource` seeds 15 on first install (excludes `sprint1_examples`).
 
 ### Git state (no commits made this session)
 | Repo | Branch | State |
@@ -175,9 +183,10 @@ rpg.quest.weekly_merchant
 rpg.quest.weekly_builder
 rpg.quest.bandit_chief_slayer
 rpg.quest.warrior_champion
+rpg.quest.mercador_fortuna
 ```
 
-(`daily_hunter` and `daily_quarry` have no permission reward — money + skill XP only.)
+(`daily_hunter`, `daily_quarry`, and `daily_mercado` have no permission reward — money + skill XP only.)
 
 Grant path completion permissions first or use `/rpg sync` after Civs tutorial progress before weekly quests unlock in journal.
 
