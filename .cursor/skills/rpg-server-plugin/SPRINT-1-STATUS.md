@@ -6,7 +6,7 @@
 
 **Build:** both `mvn compile` OK. **Deploy:** Civs JAR then RPG JAR → Linux `plugins/`.
 
-**Next:** Sprint 2 — Civs StatManager + auction BIN; RPG SkillTreeManager + journal GUI.
+**Next:** See **`SPRINT-2-STATUS.md`** (Sprint 2 complete locally, pending deploy/PR).
 
 ---
 
@@ -123,7 +123,7 @@ Civs-internal objectives.
   Civs is enabled) — ready to consume `GainExpEvent` once `civs_skill_*` objective types
   are added to the RPG objective registry (P2 backlog).
 
-**Civs Sprint 2:** StatManager, auction BIN, SpellPreCastEvent wire.
+**Civs Sprint 2:** ✅ done locally — see `SPRINT-2-STATUS.md`.
 
 ---
 

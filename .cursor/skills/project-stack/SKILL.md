@@ -54,14 +54,18 @@ Skip: MiniMOTD, ChestSort, ChunkLoader, Chunky, GSit, EssentialsChat, NBTAPI, pr
 
 ## Sprint status (2026-07-03)
 
-**Sprint 1 DONE** — see [SPRINT-1-STATUS.md](../rpg-server-plugin/SPRINT-1-STATUS.md).
+**Sprint 1 & 2 DONE, Sprint 3 in progress (all local/uncommitted).** See [SPRINT-1-STATUS.md](../rpg-server-plugin/SPRINT-1-STATUS.md), [SPRINT-2-STATUS.md](../rpg-server-plugin/SPRINT-2-STATUS.md), [SPRINT-3-STATUS.md](../rpg-server-plugin/SPRINT-3-STATUS.md). Live-server deploy + return checklist: [FINAL-HANDOFF.md](../rpg-server-plugin/FINAL-HANDOFF.md).
 
-| Area | Done |
-|------|------|
-| Civs CIVS-001–004 | GainExpEvent, SkillListener, PAPI skills, addSkillXp |
-| RPG RPG-001–008 | ObjectiveTypeRegistry, 7+ objective types, rewards, ChestShop/Essentials/IB hooks |
+| Sprint | Area | Done |
+|--------|------|------|
+| 1 | Civs CIVS-001–004 | GainExpEvent, SkillListener, PAPI skills, addSkillXp |
+| 1 | RPG RPG-001–008 | ObjectiveTypeRegistry, 7+ objective types, rewards, ChestShop/Essentials/IB hooks |
+| 2 | Civs CIVS-006–008 | StatManager, auction BIN, SpellPreCastEvent + smokeshow bug fixes |
+| 2 | RPG RPG-010–015 | Civs territorial objectives, SkillTreeManager+perks, journal GUI, PAPI progress, reload re-register, auction/spell objectives |
+| 3 | RPG-016 | Daily/weekly quest scaffold + content (`sprint3_daily`, `weekly_*`); `/rpg sync` profile backfill |
 
-**Sprint 2 next:** Civs StatManager + auction BIN; RPG SkillTreeManager + journal GUI + Civs territorial objectives.
+**Live server:** pre-Sprint-3 JAR (7 quests, 2 perks). Sprint 2/3 changes need deploy + commit.
+**Sprint 3 remaining:** [CIVS-009](https://github.com/Daniel730/Civs/issues/9) turret MVP local (shields open, not deployed), [RPG-009](https://github.com/Daniel730/civs-quests/issues/9) VeinMiner (deferred). CIVS-010 closed + deployed. GitHub sync: [GITHUB-SYNC.md](../rpg-server-plugin/GITHUB-SYNC.md).
 
 ## Backlog quick ref
 
@@ -79,10 +83,11 @@ Full matrix: [FEATURE-EXTRACTION.md](../rpg-server-plugin/FEATURE-EXTRACTION.md)
 ## Workflow for agents
 
 1. Read this skill + the repo-specific skill (`civs-custom` or `rpg-server-plugin` / `rpg-quests`).
-2. Check `SPRINT-1-STATUS.md` for what's done.
+2. Check `SPRINT-*-STATUS.md` for what's done.
 3. Minimal diff; match existing code style.
 4. `mvn compile` in the repo you changed.
-5. Update `SPRINT-1-STATUS.md` or backlog if completing a ticket.
+5. Update sprint status or `FEATURE-EXTRACTION.md` if completing a ticket.
+6. **Sync GitHub issues (both repos)** — create/close/comment via `gh`; see [GITHUB-SYNC.md](../rpg-server-plugin/GITHUB-SYNC.md). Run after sprint work, deploy, and before handoff.
 
 ## Anti-patterns
 

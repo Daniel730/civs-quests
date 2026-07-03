@@ -64,4 +64,4 @@ Two custom plugins for one territorial RPG server (Paper 26.1.2, Java 25):
 | `rpg-quests` | Quest YAML, objectives, rewards |
 | `reference-plugins` | Borrowing patterns from cloned repos |
 
-Details: `.cursor/skills/*/SKILL.md`, `FEATURE-EXTRACTION.md`, `SPRINT-1-STATUS.md`.
+Details: `.cursor/skills/*/SKILL.md`, `FEATURE-EXTRACTION.md`, `SPRINT-*-STATUS.md`. GitHub backlog sync (both repos): `rpg-server-plugin/GITHUB-SYNC.md`.

@@ -38,4 +38,7 @@ Both repos may be edited. Deploy **both** JARs to Linux server `plugins/`.
 
 ## Agent brain
 
-Scope and skills: `.cursor/rules/project-scope.mdc`, `.cursor/skills/project-stack/SKILL.md`.
+Scope and skills: `.cursor/rules/project-scope.mdc`, `.cursor/skills/project-stack/SKILL.md`. After sprint work: sync issues on **both** repos — `.cursor/skills/rpg-server-plugin/GITHUB-SYNC.md`.
+## Deploy (production)
+
+Use **WSL** (`wsl ssh` / `wsl scp`) — SSH keys are in WSL, not Windows OpenSSH. Build Civs then RPG (`mvn package`), deploy both JARs to `daniel@bot-server` `/home/daniel/mineserver/plugins/`. See `.cursor/skills/rpg-server-plugin/DEPLOY.md`.

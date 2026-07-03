@@ -8,7 +8,7 @@ description: >-
 
 # RPG Server Plugin
 
-> **Related skills:** [project-stack](../project-stack/SKILL.md) · [rpg-quests](../rpg-quests/SKILL.md) · [civs-custom](../civs-custom/SKILL.md) · [SPRINT-1-STATUS.md](SPRINT-1-STATUS.md) · [FEATURE-EXTRACTION.md](FEATURE-EXTRACTION.md)
+> **Related skills:** [project-stack](../project-stack/SKILL.md) · [rpg-quests](../rpg-quests/SKILL.md) · [civs-custom](../civs-custom/SKILL.md) · [GITHUB-SYNC.md](GITHUB-SYNC.md) · [SPRINT-1-STATUS.md](SPRINT-1-STATUS.md) · [FEATURE-EXTRACTION.md](FEATURE-EXTRACTION.md)
 
 ## Target
 
@@ -19,13 +19,17 @@ description: >-
 | Version | `0.1.0-SNAPSHOT` |
 | Civs sibling | `../Civs-1.11.6/` → JAR `target/civs-1.11.6.jar` |
 
-## Build & deploy
+## Build
 
 ```powershell
 & "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" compile
 ```
 
-Output: `target/rpg-server-0.1.0-SNAPSHOT.jar`. Deploy with Civs JAR to Linux `plugins/`.
+Output: `target/rpg-server-0.1.0-SNAPSHOT.jar` (use `mvn package` before deploy).
+
+## Deploy
+
+Production deploy is **WSL SSH** to `daniel@bot-server`, instance `/home/daniel/mineserver`. Full stop/backup/scp/start/verify procedure: **[DEPLOY.md](DEPLOY.md)**.
 
 ## Role
 

@@ -101,3 +101,30 @@ field granted on quest start (`ensureQuestStarted`), not part of `rewards:`.
 - ChestShop: use reflection so missing JAR doesn't break load.
 - `quests.max-active` — enforce when implementing quest start flow.
 - `/rpg reload` — re-register ChestShop listener (known gap).
+
+## Quest progress sync (`/rpg sync`)
+
+Backfills RPG **step state only** from Civs/AuraSkills/Vault — never grants AuraSkills XP.
+
+| Command | Permission | Behavior |
+|---------|------------|----------|
+| `/rpg sync` | `rpg.admin` | Sync all online players (no rewards) |
+| `/rpg sync <player>` | `rpg.admin` | Sync one online player |
+| `/rpg sync --rewards [player]` | `rpg.admin` | Sync and run `RewardExecutor` for newly completed quests |
+
+Config: `progression.sync-on-join-from-civs: true` — silent sync on join (no rewards, no chat).
+
+### Objective sync sources
+
+| type | Source |
+|------|--------|
+| `build_region` | Civs `building` accomplishments, `items` stash, or owned `RegionManager` regions |
+| `skill_level` | AuraSkills `getSkillLevel` |
+| `civs_skill_level` | Civs `Civilian` internal skill level |
+| `civs_skill_xp` | Civs skill `getTotalExp()` (floor) |
+| `balance_min` | Vault balance |
+| `earn_money` | Vault balance delta since quest start |
+| `kill_mob` | Civs `sword`/`axe` accomplishment counts |
+| `shop_*`, `auction_*`, `cast_spell`, `mine_block` | RPG progress only (no external backfill) |
+
+Offline bulk migrate: `scripts/bulk-sync-quest-profiles.py` (Civs + AuraSkills YAML → RPG profiles).
