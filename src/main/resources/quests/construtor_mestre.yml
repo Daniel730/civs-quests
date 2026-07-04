@@ -1,26 +1,32 @@
 id: construtor_mestre
 name: "Construtor Mestre"
 archetype: builder
-description: "Graduação construtor: erga um armazém territorial e domine Mineração Civs nível 5."
+description: "Graduação construtor: erga a prefeitura, domine Mineração Civs e acumule XP de Construção."
 requires:
   - construtor_armazem
 objectives:
-  - id: build_warehouse
+  - id: build_town_hall
     type: build_region
-    region: warehouse
-    description: "Construa um armazém (warehouse) no seu território"
+    region: town_hall
+    description: "Construa uma prefeitura (town_hall)"
   - id: mining_master
     type: civs_skill_level
     skill: mining
     level: 5
     description: "Alcance nível 5 em Mineração Civs"
+  - id: earn_building_xp
+    type: civs_skill_xp
+    skill: building
+    amount: 150
+    description: "Ganhe 150 XP de Construção Civs"
 rewards:
   money: 400
   civs-skill-xp:
     mining: 400
-    building: 200
+    building: 250
   skill-xp:
     foraging: 300
+    mining: 200
   permission: rpg.quest.construtor_mestre
   lp-group: rpg-builder
 unlocks-perk: builder_master

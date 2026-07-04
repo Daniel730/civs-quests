@@ -16,7 +16,7 @@ objectives:
     amount: 3
     description: "Conjure 3 vezes o feitiço fireball"
 rewards:
-  money: 40
+  money: 50
   skill-xp:
-    fighting: 250
+    fighting: 300
   permission: rpg.quest.sprint2_spells

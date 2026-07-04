@@ -15,7 +15,7 @@ objectives:
     amount: 1
     description: "Compre 1 item no leilão Civs"
 rewards:
-  money: 50
+  money: 75
   skill-xp:
-    farming: 75
+    farming: 150
   permission: rpg.quest.sprint2_auction

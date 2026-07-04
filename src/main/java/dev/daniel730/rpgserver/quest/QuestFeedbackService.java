@@ -46,7 +46,8 @@ public final class QuestFeedbackService {
     public void notifyObjectiveProgress(Player player, Quest quest, Quest.Objective objective,
                                         int current, int total) {
         PluginConfig config = plugin.getPluginConfig();
-        if (!config.isQuestNotificationsEnabled()) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        if (!isNotificationsEnabled(profile)) {
             return;
         }
         String template = config.getQuestProgressActionBar();
@@ -65,7 +66,8 @@ public final class QuestFeedbackService {
 
     public void notifyObjectiveComplete(Player player, Quest quest, Quest.Objective objective) {
         PluginConfig config = plugin.getPluginConfig();
-        if (!config.isQuestNotificationsEnabled()) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        if (!isNotificationsEnabled(profile)) {
             return;
         }
         String questName = quest.getName();
@@ -91,7 +93,8 @@ public final class QuestFeedbackService {
 
     public void notifyQuestComplete(Player player, Quest quest) {
         PluginConfig config = plugin.getPluginConfig();
-        if (!config.isQuestNotificationsEnabled()) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        if (!isNotificationsEnabled(profile)) {
             return;
         }
         String questName = quest.getName();
@@ -161,6 +164,48 @@ public final class QuestFeedbackService {
         if (config.isWelcomeGiveQuestBook()) {
             plugin.getQuestBookService().grantWelcomeBook(player);
         }
+        if (config.isWelcomeGiveGuideBook()) {
+            plugin.getPlayerGuideBookService().giveGuideBook(player);
+        }
+    }
+
+    public boolean isNotificationsEnabled(PlayerProfile profile) {
+        if (profile.getNotificationsEnabled() != null) {
+            return profile.getNotificationsEnabled();
+        }
+        return plugin.getPluginConfig().isQuestNotificationsEnabled();
+    }
+
+    public boolean isBossBarEnabled(PlayerProfile profile) {
+        if (profile.getBossBarEnabled() != null) {
+            return profile.getBossBarEnabled();
+        }
+        return plugin.getPluginConfig().isQuestBossBarEnabled();
+    }
+
+    public void toggleNotifications(Player player) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        boolean next = !isNotificationsEnabled(profile);
+        profile.setNotificationsEnabled(next);
+        plugin.getProfileManager().markDirty(player.getUniqueId());
+        plugin.getMessageUtil().send(player, next
+                ? plugin.getPluginConfig().getSettingsNotificationsOn()
+                : plugin.getPluginConfig().getSettingsNotificationsOff());
+        if (!next) {
+            hideBossBar(player);
+        }
+        refreshTrackedHud(player);
+    }
+
+    public void toggleBossBar(Player player) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        boolean next = !isBossBarEnabled(profile);
+        profile.setBossBarEnabled(next);
+        plugin.getProfileManager().markDirty(player.getUniqueId());
+        plugin.getMessageUtil().send(player, next
+                ? plugin.getPluginConfig().getSettingsBossBarOn()
+                : plugin.getPluginConfig().getSettingsBossBarOff());
+        refreshTrackedHud(player);
     }
 
     public void notifyDailyCtaIfNeeded(Player player) {
@@ -198,14 +243,14 @@ public final class QuestFeedbackService {
     public void refreshTrackedHud(Player player) {
         PluginConfig config = plugin.getPluginConfig();
         TrackedHudMode mode = config.getTrackedHudMode();
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
 
-        if (!config.isQuestNotificationsEnabled() || mode == TrackedHudMode.NONE) {
+        if (!isNotificationsEnabled(profile) || mode == TrackedHudMode.NONE) {
             hideBossBar(player);
             hideScoreboard(player);
             return;
         }
 
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
         Quest quest = plugin.getQuestManager().findTrackedQuest(profile);
         if (quest == null) {
             hideBossBar(player);
@@ -230,7 +275,7 @@ public final class QuestFeedbackService {
         QuestManager.QuestProgress questProgress = plugin.getQuestManager().getQuestProgress(profile, quest);
         int percent = ProgressBarUtil.percent(questProgress.completed(), questProgress.total());
 
-        if (mode.showBossBar() && config.isQuestBossBarEnabled()) {
+        if (mode.showBossBar() && isBossBarEnabled(profile)) {
             updateBossBar(player, quest, objective, current, total, ratio, questProgress);
         } else {
             hideBossBar(player);

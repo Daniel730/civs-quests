@@ -1,0 +1,20 @@
+id: merchant_shop_front
+name: "Fachada do Mercado"
+archetype: merchant
+description: "Decore seu território com uma floricultura e abasteça-se nas lojas do reino."
+requires:
+  - sprint2_auction
+objectives:
+  - id: build_flower_shop
+    type: build_region
+    region: flower_shop
+    description: "Construa uma floricultura (flower_shop)"
+  - id: shop_purchases
+    type: shop_buy
+    amount: 3
+    description: "Compre 3 vezes em lojas ChestShop"
+rewards:
+  money: 80
+  skill-xp:
+    farming: 200
+  permission: rpg.quest.merchant_shop_front

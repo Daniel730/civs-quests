@@ -1,20 +1,18 @@
 id: builder_path
 name: "Caminho do Construtor"
 archetype: builder
-description: "Transforme wilderness em domínio — abrigos, conselho e mestria em Coleta."
+description: "Transforme wilderness em domínio — abrigo, pedreira e mestria em Coleta."
 lore-book: builder_intro
 objectives:
   - id: build_shelter
     type: build_region
     region: shelter
     description: "Construa um abrigo (shelter)"
-  - id: join_community
-    type: join_town
-    description: "Aceite um convite e entre em uma cidade"
-  - id: build_council_room
-    type: build_region
-    region: council_room
-    description: "Construa uma sala do conselho (council_room)"
+  - id: quarry_stone
+    type: mine_block
+    block: stone
+    amount: 32
+    description: "Mine 32 pedras para fundações"
   - id: foraging_level
     type: skill_level
     skill: foraging
@@ -23,7 +21,7 @@ objectives:
 rewards:
   money: 25
   civs-skill-xp:
-    building: 50
+    building: 75
   skill-xp:
-    foraging: 75
+    foraging: 100
   permission: rpg.quest.builder_path

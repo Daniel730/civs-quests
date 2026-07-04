@@ -15,9 +15,9 @@ objectives:
     level: 10
     description: "Alcance nível 10 em Combate (Fighting)"
 rewards:
-  money: 250
+  money: 300
   skill-xp:
-    fighting: 500
+    fighting: 750
   permission: rpg.quest.warrior_champion
   lp-group: rpg-warrior
 unlocks-perk: warrior_veteran

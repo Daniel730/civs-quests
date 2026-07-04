@@ -22,7 +22,7 @@ objectives:
     amount: 1
     description: "Faça sua primeira venda em loja ChestShop"
 rewards:
-  money: 25
+  money: 50
   skill-xp:
-    farming: 50
+    farming: 100
   permission: rpg.quest.merchant_path

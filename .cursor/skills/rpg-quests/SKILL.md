@@ -49,7 +49,7 @@ id: warrior_path
 name: "Caminho do Guerreiro"
 archetype: warrior
 description: "..."
-lore-book: warrior_intro        # optional, root-level (InteractiveBooks)
+lore-book: warrior_intro        # optional, deprecated — use Guia do Reino (/rpg guide); IB only if grant-on-quest-start: true
 requires:                       # RPG-004 chain — list of prior quest ids
   - merchant_path
 objectives:
@@ -72,8 +72,15 @@ Rules: `.cursor/rules/rpg-quests.mdc`. Examples: `src/main/resources/quests/`, `
 ## Rewards (`RewardExecutor` / `RewardDefinition`)
 
 Fields: `money`, `skill-xp.<skill>`, `permission` (one node), `essentials-kit`, `warp`.
-Each gated by `integrations.*.enabled` and hook presence. `lore-book` is a **quest-root**
-field granted on quest start (`ensureQuestStarted`), not part of `rewards:`.
+Each gated by `integrations.*.enabled` and hook presence. `lore-book` is deprecated — use **`PlayerGuideBookService`** (`/rpg guide`) for player help; IB grant only when `integrations.interactivebooks.grant-on-quest-start: true`.
+
+## Player guide book (Sprint 3 redesign)
+
+- **One item:** `PlayerGuideBookService` — WRITTEN_BOOK with lore marker `rpg-guide-book`.
+- **Commands:** `/rpg guide` (open/give), `/rpg guide refresh`, `/rpg settings notifications|bossbar`.
+- **Tabs (clickable pages):** Início, Civs (/cv), RPG, Configurações (per-player toggles in profile YAML).
+- **Join:** `guide-book.on-join: true` — replaces per-quest book spam.
+- **Archetype lock:** starting one path blocks other paths (`ARCHETYPE_LOCKED`).
 
 ## Requirements
 

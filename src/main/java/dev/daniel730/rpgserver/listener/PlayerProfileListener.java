@@ -35,7 +35,22 @@ public final class PlayerProfileListener implements Listener {
         plugin.getSkillTreeManager().applyUnlockedPerks(player);
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
         maybeShowWelcome(player, newProfile);
+        maybeGiveGuideBook(player);
         plugin.getQuestFeedbackService().refreshTrackedHud(player);
+    }
+
+    private void maybeGiveGuideBook(Player player) {
+        if (!plugin.getPluginConfig().isGuideBookOnJoin()) {
+            return;
+        }
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            if (!plugin.getPlayerGuideBookService().hasGuideBookInInventory(player)) {
+                plugin.getPlayerGuideBookService().giveGuideBook(player);
+            }
+        }, 60L);
     }
 
     private void maybeShowWelcome(Player player, boolean newProfile) {

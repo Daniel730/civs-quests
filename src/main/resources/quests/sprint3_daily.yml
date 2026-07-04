@@ -1,7 +1,10 @@
 id: daily_hunter
 name: "Caçador Diário"
+archetype: warrior
 schedule: daily
-description: "Elimine zumbis pelo mapa hoje — recompensa diária de combate."
+description: "Elimine zumbis pelo mapa hoje — recompensa diária de combate para guerreiros."
+requires:
+  - warrior_path
 objectives:
   - id: kill_zombies
     type: kill_mob
@@ -11,4 +14,4 @@ objectives:
 rewards:
   money: 50
   skill-xp:
-    fighting: 100
+    fighting: 150

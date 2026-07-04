@@ -50,6 +50,8 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "quest" -> handleQuest(sender, args);
             case "book" -> handleBook(sender, args, 1);
             case "journal" -> handleJournal(sender);
+            case "guide" -> handleGuide(sender, args);
+            case "settings" -> handleSettings(sender, args);
             case "perks" -> handlePerks(sender);
             case "sync" -> handleSync(sender, args);
             default -> {
@@ -220,6 +222,94 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleGuide(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.quest")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (args.length >= 2 && args[1].equalsIgnoreCase("refresh")) {
+            plugin.getPlayerGuideBookService().refreshGuide(player);
+            return true;
+        }
+        if (args.length >= 2 && args[1].equalsIgnoreCase("give")) {
+            plugin.getPlayerGuideBookService().giveGuideBook(player);
+            return true;
+        }
+        if (plugin.getPlayerGuideBookService().hasGuideBookInInventory(player)) {
+            plugin.getPlayerGuideBookService().openGuide(player);
+        } else {
+            plugin.getPlayerGuideBookService().openOrGiveGuide(player);
+        }
+        return true;
+    }
+
+    private boolean handleSettings(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.profile")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (args.length < 2) {
+            plugin.getMessageUtil().send(player,
+                    "<yellow>Uso:</yellow> /rpg settings <notifications|bossbar> [on|off|toggle]");
+            return true;
+        }
+        String setting = args[1].toLowerCase(Locale.ROOT);
+        boolean toggle = args.length < 3 || args[2].equalsIgnoreCase("toggle");
+        boolean enable = args.length >= 3 && (args[2].equalsIgnoreCase("on")
+                || args[2].equalsIgnoreCase("ligar") || args[2].equalsIgnoreCase("true"));
+        return switch (setting) {
+            case "notifications", "notificacoes", "notify" -> {
+                if (toggle) {
+                    plugin.getQuestFeedbackService().toggleNotifications(player);
+                } else {
+                    setNotifications(player, enable);
+                }
+                yield true;
+            }
+            case "bossbar", "boss-bar", "hud" -> {
+                if (toggle) {
+                    plugin.getQuestFeedbackService().toggleBossBar(player);
+                } else {
+                    setBossBar(player, enable);
+                }
+                yield true;
+            }
+            default -> {
+                plugin.getMessageUtil().send(player,
+                        "<yellow>Uso:</yellow> /rpg settings <notifications|bossbar> [on|off|toggle]");
+                yield true;
+            }
+        };
+    }
+
+    private void setNotifications(Player player, boolean enable) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        profile.setNotificationsEnabled(enable);
+        plugin.getProfileManager().markDirty(player.getUniqueId());
+        plugin.getMessageUtil().send(player, enable
+                ? plugin.getPluginConfig().getSettingsNotificationsOn()
+                : plugin.getPluginConfig().getSettingsNotificationsOff());
+        plugin.getQuestFeedbackService().refreshTrackedHud(player);
+    }
+
+    private void setBossBar(Player player, boolean enable) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        profile.setBossBarEnabled(enable);
+        plugin.getProfileManager().markDirty(player.getUniqueId());
+        plugin.getMessageUtil().send(player, enable
+                ? plugin.getPluginConfig().getSettingsBossBarOn()
+                : plugin.getPluginConfig().getSettingsBossBarOff());
+        plugin.getQuestFeedbackService().refreshTrackedHud(player);
+    }
+
     private void sendQuestList(Player player) {
         PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
         QuestManager questManager = plugin.getQuestManager();
@@ -330,6 +420,8 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest track &lt;id&gt;</gray> — rastrear quest");
         plugin.getMessageUtil().send(sender, "<gray>/rpg book [id|open]</gray> — livro da quest rastreada");
         plugin.getMessageUtil().send(sender, "<gray>/rpg journal</gray> — diário de quests (GUI)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg guide [give|refresh]</gray> — guia do reino (livro único)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg settings notifications|bossbar</gray> — preferências pessoais");
         plugin.getMessageUtil().send(sender, "<gray>/rpg perks</gray> — listar perks");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
         if (sender.hasPermission("rpg.admin")) {
@@ -343,7 +435,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "perks", "profile"));
+            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "guide", "settings", "perks", "profile"));
             if (sender.hasPermission("rpg.admin")) {
                 options.add("reload");
                 options.add("sync");
@@ -359,6 +451,15 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return filterPrefix(
                     Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(),
                     args[2]);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("guide")) {
+            return filterPrefix(List.of("give", "refresh"), args[1]);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("settings")) {
+            return filterPrefix(List.of("notifications", "bossbar", "toggle"), args[1]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("settings")) {
+            return filterPrefix(List.of("on", "off", "toggle", "ligar", "desligar"), args[2]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("quest")) {
             return filterPrefix(List.of("list", "status", "book", "accept", "track"), args[1]);

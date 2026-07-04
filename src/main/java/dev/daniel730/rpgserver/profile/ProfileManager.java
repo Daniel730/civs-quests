@@ -82,6 +82,12 @@ public final class ProfileManager {
                     profile.setQuestCompletionTimes(times);
                 }
                 profile.setDailyCtaShownDay(yaml.getString("daily-cta-shown-day"));
+                if (yaml.contains("settings.notifications")) {
+                    profile.setNotificationsEnabled(yaml.getBoolean("settings.notifications"));
+                }
+                if (yaml.contains("settings.bossbar")) {
+                    profile.setBossBarEnabled(yaml.getBoolean("settings.bossbar"));
+                }
             }
             return profile;
         });
@@ -138,6 +144,12 @@ public final class ProfileManager {
         yaml.set("unlocked-perks", profile.getUnlockedPerkIds().stream().toList());
         yaml.set("welcome-shown", profile.isWelcomeShown());
         yaml.set("daily-cta-shown-day", profile.getDailyCtaShownDay());
+        if (profile.getNotificationsEnabled() != null) {
+            yaml.set("settings.notifications", profile.getNotificationsEnabled());
+        }
+        if (profile.getBossBarEnabled() != null) {
+            yaml.set("settings.bossbar", profile.getBossBarEnabled());
+        }
         try {
             yaml.save(file);
             return true;

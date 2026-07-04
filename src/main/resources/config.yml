@@ -29,9 +29,13 @@ integrations:
     warp-rewards: true
   interactivebooks:
     enabled: true
-    quest-book-auto-grant: true
+    quest-book-auto-grant: false
+    grant-on-quest-start: false
   veinminer:
     enabled: true
+
+guide-book:
+  on-join: true
 
 progression:
   autosave-minutes: 5
@@ -85,7 +89,8 @@ feedback:
     sound-volume: 0.7
   welcome:
     enabled: true
-    give-quest-book: true
+    give-quest-book: false
+    give-guide-book: true
     sound: ENTITY_PLAYER_LEVELUP
     sound-volume: 0.9
     sound-pitch: 0.9
@@ -115,8 +120,8 @@ messages:
   welcome:
     # pt_BR (default)
     title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Bem-vindo ao Reino</bold></gradient>"
-    subtitle: "<gray>Abra </gray><yellow>/rpg journal</yellow><gray> para começar</gray>"
-    message: "<gold>★</gold> <white>Sua aventura começa agora!</white> <gray>Use</gray> <yellow>/rpg journal</yellow> <gray>para escolher um caminho.</gray>"
+    subtitle: "<gray>Abra </gray><yellow>/rpg guide</yellow><gray> ou </gray><yellow>/rpg journal</yellow>"
+    message: "<gold>★</gold> <white>Sua aventura começa agora!</white> <gray>Use o</gray> <yellow>Guia do Reino</yellow> <gray>ou</gray> <yellow>/rpg journal</yellow> <gray>para escolher um caminho.</gray>"
     # en (alternate — copy keys above and set settings.locale: en)
     # title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Welcome to the Realm</bold></gradient>"
     # subtitle: "<gray>Open </gray><yellow>/rpg journal</yellow><gray> to begin</gray>"
@@ -145,6 +150,16 @@ messages:
     refreshed: "<gray>Livro atualizado:</gray> <white>{quest}</white>"
     grant: "<gray>Livro de quest recebido:</gray> <white>{quest}</white>"
     opened: "<gray>Abrindo livro:</gray> <white>{quest}</white>"
+  guide-book:
+    grant: "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg guide</yellow>"
+    refreshed: "<gray>Guia atualizado com seu progresso atual.</gray>"
+    inventory-full: "<yellow>Inventário cheio — guia dropado no chão.</yellow>"
+    already-have: "<gray>Você já possui o Guia do Reino.</gray> <yellow>/rpg guide</yellow> <gray>para abrir.</gray>"
+  settings:
+    notifications-on: "<green>Notificações de quest ligadas.</green>"
+    notifications-off: "<gray>Notificações de quest desligadas.</gray>"
+    bossbar-on: "<green>Boss bar de quest ligada.</green>"
+    bossbar-off: "<gray>Boss bar de quest desligada.</gray>"
   quest-accept:
     success: "<green>Quest aceita:</green> <white>{quest}</white>"
     not-found: "<red>Quest não encontrada.</red>"
@@ -153,6 +168,8 @@ messages:
     locked: "<red>Pré-requisitos não atendidos.</red>"
     no-permission: "<red>Você não tem permissão para esta quest.</red>"
     max-active: "<red>Limite de quests ativas atingido (máx. {max}).</red>"
+    archetype-locked: "<red>Você já escolheu outro caminho. Cada arquétipo tem quests únicas.</red>"
+    archetype-locked: "<red>Você já escolheu outro caminho. Cada arquétipo tem quests e recompensas únicas.</red>"
   quest-track:
     success: "<yellow>Rastreando:</yellow> <white>{quest}</white>"
     failed: "<red>Não foi possível rastrear esta quest.</red>"

@@ -3,6 +3,8 @@ name: "Pedreira Diária"
 archetype: builder
 schedule: daily
 description: "Mine pedra no seu território Civs hoje — recompensa diária de construtor."
+requires:
+  - builder_path
 objectives:
   - id: mine_stone
     type: mine_block
@@ -12,6 +14,6 @@ objectives:
 rewards:
   money: 40
   civs-skill-xp:
-    mining: 60
+    mining: 80
   skill-xp:
-    mining: 40
+    mining: 50

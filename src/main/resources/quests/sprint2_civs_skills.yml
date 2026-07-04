@@ -16,10 +16,10 @@ objectives:
     level: 2
     description: "Alcance nível 2 em Mineração Civs"
 rewards:
-  money: 25
+  money: 35
   civs-skill-xp:
-    mining: 100
+    mining: 125
   skill-xp:
-    foraging: 100
+    foraging: 125
   permission: rpg.quest.sprint2_civs_skills
 unlocks-perk: builder_discount

@@ -18,6 +18,8 @@ public final class PluginConfig {
     private final boolean essentialsWarpRewardsEnabled;
     private final boolean interactiveBooksEnabled;
     private final boolean questBookAutoGrant;
+    private final boolean guideBookOnJoin;
+    private final boolean grantLoreBooksOnQuestStart;
     private final boolean veinMinerEnabled;
     private final String questPermissionPrefix;
     private final int autosaveMinutes;
@@ -44,6 +46,7 @@ public final class PluginConfig {
     private final String questAcceptLocked;
     private final String questAcceptNoPermission;
     private final String questAcceptMaxActive;
+    private final String questAcceptArchetypeLocked;
     private final String questTrackSuccess;
     private final String questTrackFailed;
     private final int questProgressNotifyInterval;
@@ -63,6 +66,14 @@ public final class PluginConfig {
     private final String questBookRefreshed;
     private final String questBookGrant;
     private final String questBookOpened;
+    private final String guideBookGranted;
+    private final String guideBookRefreshed;
+    private final String guideBookInventoryFull;
+    private final String guideBookAlreadyHave;
+    private final String settingsNotificationsOn;
+    private final String settingsNotificationsOff;
+    private final String settingsBossBarOn;
+    private final String settingsBossBarOff;
     private final double rewardMoneyMultiplier;
     private final double rewardSkillXpMultiplier;
     private final double rewardCivsSkillXpMultiplier;
@@ -108,6 +119,7 @@ public final class PluginConfig {
     private final float welcomeSoundVolume;
     private final float welcomeSoundPitch;
     private final boolean welcomeGiveQuestBook;
+    private final boolean welcomeGiveGuideBook;
     private final int welcomeTitleFadeIn;
     private final int welcomeTitleStay;
     private final int welcomeTitleFadeOut;
@@ -125,7 +137,9 @@ public final class PluginConfig {
         this.essentialsKitRewardsEnabled = config.getBoolean("integrations.essentials.kit-rewards", true);
         this.essentialsWarpRewardsEnabled = config.getBoolean("integrations.essentials.warp-rewards", true);
         this.interactiveBooksEnabled = config.getBoolean("integrations.interactivebooks.enabled", true);
-        this.questBookAutoGrant = config.getBoolean("integrations.interactivebooks.quest-book-auto-grant", true);
+        this.questBookAutoGrant = config.getBoolean("integrations.interactivebooks.quest-book-auto-grant", false);
+        this.grantLoreBooksOnQuestStart = config.getBoolean("integrations.interactivebooks.grant-on-quest-start", false);
+        this.guideBookOnJoin = config.getBoolean("guide-book.on-join", true);
         this.veinMinerEnabled = config.getBoolean("integrations.veinminer.enabled", false);
         this.questPermissionPrefix = config.getString("integrations.luckperms.quest-permission-prefix", "rpg.quest.");
         this.autosaveMinutes = config.getInt("progression.autosave-minutes", 5);
@@ -168,6 +182,8 @@ public final class PluginConfig {
                 "<red>Você não tem permissão para esta quest.</red>");
         this.questAcceptMaxActive = config.getString("messages.quest-accept.max-active",
                 "<red>Limite de quests ativas atingido.</red>");
+        this.questAcceptArchetypeLocked = config.getString("messages.quest-accept.archetype-locked",
+                "<red>Você já escolheu outro caminho. Cada arquétipo tem quests únicas.</red>");
         this.questTrackSuccess = config.getString("messages.quest-track.success",
                 "<yellow>Rastreando:</yellow> <white>{quest}</white>");
         this.questTrackFailed = config.getString("messages.quest-track.failed",
@@ -207,6 +223,22 @@ public final class PluginConfig {
                 "<gray>Livro de quest recebido:</gray> <white>{quest}</white>");
         this.questBookOpened = config.getString("messages.quest-book.opened",
                 "<gray>Abrindo livro:</gray> <white>{quest}</white>");
+        this.guideBookGranted = config.getString("messages.guide-book.grant",
+                "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg guide</yellow>");
+        this.guideBookRefreshed = config.getString("messages.guide-book.refreshed",
+                "<gray>Guia atualizado com seu progresso atual.</gray>");
+        this.guideBookInventoryFull = config.getString("messages.guide-book.inventory-full",
+                "<yellow>Inventário cheio — guia dropado no chão.</yellow>");
+        this.guideBookAlreadyHave = config.getString("messages.guide-book.already-have",
+                "<gray>Você já possui o Guia do Reino.</gray> <yellow>/rpg guide</yellow> <gray>para abrir.</gray>");
+        this.settingsNotificationsOn = config.getString("messages.settings.notifications-on",
+                "<green>Notificações de quest ligadas.</green>");
+        this.settingsNotificationsOff = config.getString("messages.settings.notifications-off",
+                "<gray>Notificações de quest desligadas.</gray>");
+        this.settingsBossBarOn = config.getString("messages.settings.bossbar-on",
+                "<green>Boss bar de quest ligada.</green>");
+        this.settingsBossBarOff = config.getString("messages.settings.bossbar-off",
+                "<gray>Boss bar de quest desligada.</gray>");
         this.questJournalChainNext = config.getString("messages.quest-journal.chain-next",
                 "<aqua>Próximo:</aqua> <white>{quest}</white>");
         this.questJournalChainRequires = config.getString("messages.quest-journal.chain-requires",
@@ -258,7 +290,9 @@ public final class PluginConfig {
         this.welcomeSound = config.getString("feedback.welcome.sound", "ENTITY_PLAYER_LEVELUP");
         this.welcomeSoundVolume = (float) config.getDouble("feedback.welcome.sound-volume", 0.9);
         this.welcomeSoundPitch = (float) config.getDouble("feedback.welcome.sound-pitch", 0.9);
-        this.welcomeGiveQuestBook = config.getBoolean("feedback.welcome.give-quest-book", true);
+        this.welcomeGiveQuestBook = config.getBoolean("feedback.welcome.give-quest-book", false);
+        this.welcomeGiveGuideBook = config.getBoolean("feedback.welcome.give-guide-book",
+                config.getBoolean("guide-book.on-join", true));
         this.welcomeTitleFadeIn = config.getInt("feedback.welcome.title-fade-in", 15);
         this.welcomeTitleStay = config.getInt("feedback.welcome.title-stay", 80);
         this.welcomeTitleFadeOut = config.getInt("feedback.welcome.title-fade-out", 25);
@@ -319,6 +353,14 @@ public final class PluginConfig {
 
     public boolean isQuestBookAutoGrant() {
         return questBookAutoGrant;
+    }
+
+    public boolean isGrantLoreBooksOnQuestStart() {
+        return grantLoreBooksOnQuestStart;
+    }
+
+    public boolean isGuideBookOnJoin() {
+        return guideBookOnJoin;
     }
 
     public boolean isVeinMinerEnabled() {
@@ -425,6 +467,10 @@ public final class PluginConfig {
         return questAcceptMaxActive;
     }
 
+    public String getQuestAcceptArchetypeLocked() {
+        return questAcceptArchetypeLocked;
+    }
+
     public String getQuestTrackSuccess() {
         return questTrackSuccess;
     }
@@ -501,6 +547,38 @@ public final class PluginConfig {
         return questBookOpened;
     }
 
+    public String getGuideBookGranted() {
+        return guideBookGranted;
+    }
+
+    public String getGuideBookRefreshed() {
+        return guideBookRefreshed;
+    }
+
+    public String getGuideBookInventoryFull() {
+        return guideBookInventoryFull;
+    }
+
+    public String getGuideBookAlreadyHave() {
+        return guideBookAlreadyHave;
+    }
+
+    public String getSettingsNotificationsOn() {
+        return settingsNotificationsOn;
+    }
+
+    public String getSettingsNotificationsOff() {
+        return settingsNotificationsOff;
+    }
+
+    public String getSettingsBossBarOn() {
+        return settingsBossBarOn;
+    }
+
+    public String getSettingsBossBarOff() {
+        return settingsBossBarOff;
+    }
+
     public double getRewardMoneyMultiplier() {
         return rewardMoneyMultiplier;
     }
@@ -546,6 +624,7 @@ public final class PluginConfig {
             case LOCKED -> questAcceptLocked;
             case NO_PERMISSION -> questAcceptNoPermission;
             case MAX_ACTIVE -> questAcceptMaxActive;
+            case ARCHETYPE_LOCKED -> questAcceptArchetypeLocked;
         };
     }
 
@@ -691,6 +770,10 @@ public final class PluginConfig {
 
     public boolean isWelcomeGiveQuestBook() {
         return welcomeGiveQuestBook;
+    }
+
+    public boolean isWelcomeGiveGuideBook() {
+        return welcomeGiveGuideBook;
     }
 
     public int getWelcomeTitleFadeIn() {

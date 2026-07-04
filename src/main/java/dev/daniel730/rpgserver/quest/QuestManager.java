@@ -76,6 +76,9 @@ public final class QuestManager {
             plugin.saveResource("quests/daily_vendas.yml", false);
             plugin.saveResource("quests/daily_farm.yml", false);
             plugin.saveResource("quests/weekly_boss_hunter.yml", false);
+            plugin.saveResource("quests/warrior_siege_prep.yml", false);
+            plugin.saveResource("quests/merchant_shop_front.yml", false);
+            plugin.saveResource("quests/builder_town_hall.yml", false);
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -191,7 +194,13 @@ public final class QuestManager {
     }
 
     public List<Quest> getPathQuests(Player player, PlayerProfile profile) {
-        return sortForJournal(player, profile, getPathQuests());
+        List<Quest> available = new ArrayList<>();
+        for (Quest path : getPathQuests()) {
+            if (!isConflictingPath(profile, path)) {
+                available.add(path);
+            }
+        }
+        return sortForJournal(player, profile, available);
     }
 
     public List<Quest> getScheduledQuests(Player player, PlayerProfile profile, QuestSchedule schedule) {
@@ -213,13 +222,8 @@ public final class QuestManager {
             if (quest.getSchedule() != QuestSchedule.NONE) {
                 continue;
             }
-            String archetype = quest.getArchetype();
-            if (archetype != null && !archetype.isBlank()) {
-                String playerArchetype = profile.getArchetype();
-                if (playerArchetype != null && !playerArchetype.isBlank()
-                        && archetype.equalsIgnoreCase(playerArchetype)) {
-                    continue;
-                }
+            if (!matchesPlayerArchetype(profile, quest)) {
+                continue;
             }
             if (isPathQuest(quest) && (profile.getArchetype() == null || profile.getArchetype().isBlank())) {
                 continue;
@@ -324,16 +328,52 @@ public final class QuestManager {
         return false;
     }
 
+    public static boolean isNeutralArchetype(String archetype) {
+        return archetype != null && "neutral".equalsIgnoreCase(archetype);
+    }
+
     public boolean matchesPlayerArchetype(PlayerProfile profile, Quest quest) {
         String questArchetype = quest.getArchetype();
+        String playerArchetype = profile.getArchetype();
+
         if (questArchetype == null || questArchetype.isBlank()) {
+            return playerArchetype == null || playerArchetype.isBlank();
+        }
+        if (isNeutralArchetype(questArchetype)) {
             return true;
         }
-        String playerArchetype = profile.getArchetype();
         if (playerArchetype == null || playerArchetype.isBlank()) {
-            return true;
+            return isPathQuest(quest);
         }
         return questArchetype.equalsIgnoreCase(playerArchetype);
+    }
+
+    public boolean isConflictingPath(PlayerProfile profile, Quest quest) {
+        if (!isPathQuest(quest)) {
+            if (profile.getArchetype() == null || profile.getArchetype().isBlank()) {
+                return false;
+            }
+            String questArchetype = quest.getArchetype();
+            if (questArchetype == null || questArchetype.isBlank() || isNeutralArchetype(questArchetype)) {
+                return false;
+            }
+            return !questArchetype.equalsIgnoreCase(profile.getArchetype());
+        }
+        for (String pathId : PATH_QUEST_IDS) {
+            if (pathId.equals(quest.getId())) {
+                continue;
+            }
+            if (profile.hasQuestStarted(pathId) || profile.isQuestComplete(pathId)) {
+                return true;
+            }
+        }
+        String playerArchetype = profile.getArchetype();
+        if (playerArchetype != null && !playerArchetype.isBlank()
+                && quest.getArchetype() != null
+                && !quest.getArchetype().equalsIgnoreCase(playerArchetype)) {
+            return true;
+        }
+        return false;
     }
 
     public String currentPeriodDay(ZoneId zone) {
@@ -651,10 +691,10 @@ public final class QuestManager {
     }
 
     private void onQuestStarted(Player player, PlayerProfile profile, Quest quest) {
-        if (quest.getLoreBook() != null && !quest.getLoreBook().isBlank()) {
+        if (plugin.getPluginConfig().isGrantLoreBooksOnQuestStart()
+                && quest.getLoreBook() != null && !quest.getLoreBook().isBlank()) {
             plugin.getInteractiveBooksHook().grantLoreBook(player, quest.getLoreBook());
         }
-        plugin.getQuestBookService().grantOnQuestStart(player, quest);
         profile.addActiveQuest(quest.getId());
         if (profile.getTrackedQuestId() == null) {
             profile.setTrackedQuestId(quest.getId());
@@ -678,6 +718,7 @@ public final class QuestManager {
             case NO_PERMISSION -> QuestAcceptResult.NO_PERMISSION;
             case REQUIREMENTS -> QuestAcceptResult.LOCKED;
             case LIMIT_REACHED -> QuestAcceptResult.MAX_ACTIVE;
+            case ARCHETYPE_LOCKED -> QuestAcceptResult.ARCHETYPE_LOCKED;
         };
     }
 
@@ -756,8 +797,11 @@ public final class QuestManager {
     }
 
     private void maybeSetArchetype(PlayerProfile profile, Quest quest) {
-        if (quest.getArchetype() != null && !quest.getArchetype().isBlank()) {
-            if (profile.getArchetype() == null || profile.getArchetype().isBlank()) {
+        if (quest.getArchetype() != null && !quest.getArchetype().isBlank()
+                && !isNeutralArchetype(quest.getArchetype())) {
+            if (isPathQuest(quest)) {
+                profile.setArchetype(quest.getArchetype());
+            } else if (profile.getArchetype() == null || profile.getArchetype().isBlank()) {
                 profile.setArchetype(quest.getArchetype());
             }
         }
@@ -766,6 +810,12 @@ public final class QuestManager {
 
     public boolean canWorkOnQuest(Player player, PlayerProfile profile, Quest quest) {
         if (profile.isQuestComplete(quest.getId())) {
+            return false;
+        }
+        if (isConflictingPath(profile, quest)) {
+            return false;
+        }
+        if (!matchesPlayerArchetype(profile, quest)) {
             return false;
         }
         if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
@@ -811,6 +861,9 @@ public final class QuestManager {
     public QuestStatus getQuestStatus(Player player, PlayerProfile profile, Quest quest) {
         if (profile.isQuestComplete(quest.getId())) {
             return QuestStatus.COMPLETED;
+        }
+        if (isConflictingPath(profile, quest)) {
+            return QuestStatus.LOCKED;
         }
         if (!meetsRequirements(profile, quest)) {
             return QuestStatus.LOCKED;
@@ -946,6 +999,9 @@ public final class QuestManager {
         if (profile.isQuestComplete(quest.getId())) {
             return StartResult.ALREADY_COMPLETE;
         }
+        if (isConflictingPath(profile, quest)) {
+            return StartResult.ARCHETYPE_LOCKED;
+        }
         if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
             return StartResult.NO_PERMISSION;
         }
@@ -998,7 +1054,8 @@ public final class QuestManager {
         ALREADY_COMPLETE,
         NO_PERMISSION,
         REQUIREMENTS,
-        LIMIT_REACHED
+        LIMIT_REACHED,
+        ARCHETYPE_LOCKED
     }
 
     public record QuestProgress(int completed, int total) {

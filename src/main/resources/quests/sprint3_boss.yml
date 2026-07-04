@@ -4,8 +4,7 @@ archetype: warrior
 description: "Equipe-se no altar, invoque o Chefe Bandido em combate e reclame a glória da vitória."
 lore-book: boss_guide
 requires:
-  - warrior_path
-  - sprint2_spells
+  - warrior_siege_prep
 objectives:
   - id: slay_bandit_chief
     type: custom_mob_kill

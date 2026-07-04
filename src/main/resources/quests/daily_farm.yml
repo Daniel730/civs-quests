@@ -1,7 +1,10 @@
 id: daily_farm
 name: "Fazenda Diária"
+archetype: builder
 schedule: daily
-description: "Colha trigo maduro nos campos hoje — recompensa diária de Agricultura."
+description: "Colha trigo maduro nos campos hoje — recompensa diária de coleta para construtores."
+requires:
+  - builder_path
 objectives:
   - id: harvest_wheat
     type: mine_block
@@ -10,5 +13,7 @@ objectives:
     description: "Colha 32 trigos maduros"
 rewards:
   money: 40
+  civs-skill-xp:
+    building: 40
   skill-xp:
-    farming: 100
+    foraging: 120

@@ -22,7 +22,7 @@ softdepend:
 commands:
   rpg:
     description: Comandos principais do RPG Server
-    usage: /rpg [help|quest <list|status|accept|track|book>|book|journal|perks|profile|sync|reload]
+    usage: /rpg [help|guide|journal|settings|quest|book|perks|profile|sync|reload]
     aliases: [rpgserver]
 
 permissions:

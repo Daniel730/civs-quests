@@ -2,7 +2,7 @@ id: weekly_builder
 name: "Construtor Semanal"
 archetype: builder
 schedule: weekly
-description: "O desafio dos pedreiros: extraia pedra em massa, acumule XP de Mineração Civs e erga um armazém digno do seu território via /cv menu."
+description: "O desafio dos pedreiros: extraia pedra em massa, acumule XP de Construção Civs e erga uma padaria."
 requires:
   - builder_path
   - sprint2_civs_skills
@@ -12,19 +12,19 @@ objectives:
     block: stone
     amount: 150
     description: "Mine 150 blocos de pedra"
-  - id: earn_mining_xp
+  - id: earn_building_xp
     type: civs_skill_xp
-    skill: mining
+    skill: building
     amount: 200
-    description: "Ganhe 200 XP de mineração Civs"
-  - id: build_warehouse
+    description: "Ganhe 200 XP de Construção Civs"
+  - id: build_bakery
     type: build_region
-    region: warehouse
-    description: "Construa um armazém (warehouse)"
+    region: bakery
+    description: "Construa uma padaria (bakery)"
 rewards:
   money: 350
   civs-skill-xp:
-    building: 150
+    building: 200
     mining: 100
   skill-xp:
     foraging: 500

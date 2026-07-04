@@ -19,10 +19,12 @@ import dev.daniel730.rpgserver.listener.CivsInternalSkillListener;
 import dev.daniel730.rpgserver.listener.CivsQuestListener;
 import dev.daniel730.rpgserver.listener.CivsSpellQuestListener;
 import dev.daniel730.rpgserver.listener.EconomyQuestListener;
+import dev.daniel730.rpgserver.listener.PlayerGuideBookListener;
 import dev.daniel730.rpgserver.listener.PlayerProfileListener;
 import dev.daniel730.rpgserver.listener.QuestJournalListener;
 import dev.daniel730.rpgserver.profile.ProfileManager;
 import dev.daniel730.rpgserver.progression.SkillTreeManager;
+import dev.daniel730.rpgserver.quest.PlayerGuideBookService;
 import dev.daniel730.rpgserver.quest.QuestBookService;
 import dev.daniel730.rpgserver.quest.QuestFeedbackService;
 import dev.daniel730.rpgserver.quest.QuestManager;
@@ -50,6 +52,7 @@ public final class RpgServerPlugin extends JavaPlugin {
     private ProfileManager profileManager;
     private QuestManager questManager;
     private QuestBookService questBookService;
+    private PlayerGuideBookService playerGuideBookService;
     private QuestFeedbackService questFeedbackService;
     private SkillTreeManager skillTreeManager;
     private MessageUtil messageUtil;
@@ -90,6 +93,7 @@ public final class RpgServerPlugin extends JavaPlugin {
         profileManager = new ProfileManager(this);
         questManager = new QuestManager(this);
         questBookService = new QuestBookService(this);
+        playerGuideBookService = new PlayerGuideBookService(this);
         questFeedbackService = new QuestFeedbackService(this);
         skillTreeManager = new SkillTreeManager(this);
         questManager.loadQuests();
@@ -109,6 +113,7 @@ public final class RpgServerPlugin extends JavaPlugin {
         getCommand("rpg").setTabCompleter(rpgCommand);
 
         getServer().getPluginManager().registerEvents(new PlayerProfileListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerGuideBookListener(this), this);
         getServer().getPluginManager().registerEvents(new QuestJournalListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitQuestListener(this), this);
         registerIntegrationListeners();
@@ -268,6 +273,10 @@ public final class RpgServerPlugin extends JavaPlugin {
 
     public QuestBookService getQuestBookService() {
         return questBookService;
+    }
+
+    public PlayerGuideBookService getPlayerGuideBookService() {
+        return playerGuideBookService;
     }
 
     public QuestFeedbackService getQuestFeedbackService() {

@@ -1,0 +1,21 @@
+id: warrior_siege_prep
+name: "Preparação de Cerco"
+archetype: warrior
+description: "Erga um posto de comando e elimine saqueadores antes de enfrentar o Chefe Bandido."
+requires:
+  - sprint2_spells
+objectives:
+  - id: build_command_tent
+    type: build_region
+    region: command_tent
+    description: "Construa um posto de comando (command_tent)"
+  - id: cull_pillagers
+    type: kill_mob
+    mob: pillager
+    amount: 10
+    description: "Mate 10 saqueadores (pillagers)"
+rewards:
+  money: 120
+  skill-xp:
+    fighting: 400
+  permission: rpg.quest.warrior_siege_prep

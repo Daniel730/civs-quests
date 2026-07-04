@@ -18,9 +18,9 @@ objectives:
     amount: 2500
     description: "Mantenha pelo menos 2500 moedas no saldo"
 rewards:
-  money: 500
+  money: 600
   skill-xp:
-    farming: 600
+    farming: 750
   permission: rpg.quest.mercador_mestre
   lp-group: rpg-merchant
 unlocks-perk: merchant_golden_touch

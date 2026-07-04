@@ -22,6 +22,8 @@ public final class PlayerProfile {
     private final Set<String> unlockedPerkIds = new LinkedHashSet<>();
     private String dailyCtaShownDay;
     private boolean welcomeShown;
+    private Boolean notificationsEnabled;
+    private Boolean bossBarEnabled;
 
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
@@ -223,5 +225,21 @@ public final class PlayerProfile {
 
     public void setWelcomeShown(boolean welcomeShown) {
         this.welcomeShown = welcomeShown;
+    }
+
+    public Boolean getNotificationsEnabled() {
+        return notificationsEnabled;
+    }
+
+    public void setNotificationsEnabled(Boolean notificationsEnabled) {
+        this.notificationsEnabled = notificationsEnabled;
+    }
+
+    public Boolean getBossBarEnabled() {
+        return bossBarEnabled;
+    }
+
+    public void setBossBarEnabled(Boolean bossBarEnabled) {
+        this.bossBarEnabled = bossBarEnabled;
     }
 }

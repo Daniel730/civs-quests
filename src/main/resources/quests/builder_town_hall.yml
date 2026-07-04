@@ -1,0 +1,21 @@
+id: builder_town_hall
+name: "Salão da Comunidade"
+archetype: builder
+description: "Junte-se a uma cidade e erga a sala do conselho — alicerce do poder territorial."
+requires:
+  - sprint2_civs_skills
+objectives:
+  - id: join_community
+    type: join_town
+    description: "Aceite um convite e entre em uma cidade"
+  - id: build_council_room
+    type: build_region
+    region: council_room
+    description: "Construa uma sala do conselho (council_room)"
+rewards:
+  money: 75
+  civs-skill-xp:
+    building: 125
+  skill-xp:
+    foraging: 175
+  permission: rpg.quest.builder_town_hall

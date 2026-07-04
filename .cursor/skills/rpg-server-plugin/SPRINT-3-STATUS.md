@@ -1,8 +1,30 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-03 (night batch — builder mid-chain, daily farm, spells lore)  
+**Updated:** 2026-07-04 (unified guide book, quest tree lock, overlap dedup)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
+**Branch:** `sprint-3/rpg-features`  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
+
+---
+
+## Session 2026-07-04 — Guide book + quest tree
+
+### Shipped
+
+| Item | Detail |
+|------|--------|
+| **Guia do Reino** | `PlayerGuideBookService` — one WRITTEN_BOOK, tabs Início / Civs / RPG / Config |
+| **Commands** | `/rpg guide`, `/rpg guide refresh`, `/rpg settings notifications\|bossbar` |
+| **Join** | `guide-book.on-join: true`; disabled per-quest book + IB auto-grant |
+| **Archetype lock** | One path only; `ARCHETYPE_LOCKED` on conflict |
+| **Overlap fix** | `daily_hunter` → warrior, `daily_farm` → merchant; neutral dailies removed |
+| **Docs** | `QUEST-DESIGN-NOTES.md`, updated `rpg-quests` skill |
+
+### Quest dedup summary
+
+- Removed `lore-book` grants on accept from path + chain YAML (7 files).
+- Scheduled quests without archetype fixed (`daily_hunter`, `daily_farm`).
+- Journal + `matchesPlayerArchetype()` hide wrong-path content after choice.
 
 ---
 

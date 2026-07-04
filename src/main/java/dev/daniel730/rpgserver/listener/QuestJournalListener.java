@@ -118,6 +118,8 @@ public final class QuestJournalListener implements Listener {
             case ALREADY_ACTIVE -> handleTrack(player, profile, quest, questManager, holder);
             case ALREADY_COMPLETE -> plugin.getMessageUtil().send(player,
                     "<aqua>Esta quest já foi concluída.</aqua>");
+            case ARCHETYPE_LOCKED -> plugin.getMessageUtil().send(player,
+                    plugin.getPluginConfig().getQuestAcceptArchetypeLocked());
             default -> {
             }
         }
