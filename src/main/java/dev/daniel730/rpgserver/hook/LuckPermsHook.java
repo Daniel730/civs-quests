@@ -23,7 +23,12 @@ public final class LuckPermsHook {
     }
 
     public void enable() {
-        if (enabled || !plugin.getPluginConfig().isLuckPermsEnabled()) {
+        if (!plugin.getPluginConfig().isLuckPermsEnabled()) {
+            enabled = false;
+            luckPerms = null;
+            return;
+        }
+        if (enabled) {
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("LuckPerms") == null) {
@@ -45,6 +50,12 @@ public final class LuckPermsHook {
         }
         enabled = true;
         plugin.getLogger().info("LuckPerms API conectada.");
+    }
+
+    public void refresh() {
+        enabled = false;
+        luckPerms = null;
+        enable();
     }
 
     public boolean isEnabled() {

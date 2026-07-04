@@ -26,6 +26,8 @@ public final class AuraSkillsHook {
 
     public void enable() {
         if (!plugin.getPluginConfig().isAuraSkillsEnabled()) {
+            enabled = false;
+            api = null;
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("AuraSkills") == null) {
@@ -41,6 +43,12 @@ public final class AuraSkillsHook {
         } catch (IllegalStateException ex) {
             plugin.getLogger().warning("AuraSkills API indisponível: " + ex.getMessage());
         }
+    }
+
+    public void refresh() {
+        enabled = false;
+        api = null;
+        enable();
     }
 
     public boolean isEnabled() {

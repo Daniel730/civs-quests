@@ -17,6 +17,8 @@ public final class VaultHook {
 
     public void enable() {
         if (!plugin.getPluginConfig().isVaultEnabled()) {
+            enabled = false;
+            economy = null;
             return;
         }
         RegisteredServiceProvider<Economy> registration =
@@ -32,6 +34,12 @@ public final class VaultHook {
         if (enabled) {
             plugin.getLogger().info("Vault Economy conectada.");
         }
+    }
+
+    public void refresh() {
+        enabled = false;
+        economy = null;
+        enable();
     }
 
     public boolean isEnabled() {

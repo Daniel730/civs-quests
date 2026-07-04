@@ -3,7 +3,10 @@ package dev.daniel730.rpgserver.hook;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.perk.TerritorialPerk;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.redcastlemedia.multitallented.civs.mobs.CustomMobManager;
 import org.bukkit.inventory.Inventory;
 import org.redcastlemedia.multitallented.civs.Civs;
 import org.redcastlemedia.multitallented.civs.civilians.Civilian;
@@ -19,11 +22,15 @@ import org.redcastlemedia.multitallented.civs.stats.StatManager;
 import org.redcastlemedia.multitallented.civs.stats.StatModifier;
 import org.redcastlemedia.multitallented.civs.stats.StatOperation;
 import org.redcastlemedia.multitallented.civs.stats.TerritorialStat;
+import org.redcastlemedia.multitallented.civs.towns.Town;
+import org.redcastlemedia.multitallented.civs.towns.TownManager;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public final class CivsHook {
 
@@ -38,6 +45,7 @@ public final class CivsHook {
 
     public void enable() {
         if (!plugin.getPluginConfig().isCivsEnabled()) {
+            enabled = false;
             return;
         }
         enabled = Bukkit.getPluginManager().getPlugin("Civs") != null;
@@ -46,6 +54,10 @@ public final class CivsHook {
         } else {
             plugin.getLogger().warning("Civs não encontrado — objetivos Civs e perks territoriais ficarão inativos.");
         }
+    }
+
+    public void refresh() {
+        enable();
     }
 
     public boolean isEnabled() {
@@ -165,12 +177,71 @@ public final class CivsHook {
             }
             for (Map.Entry<String, Integer> entry : skill.getAccomplishments().entrySet()) {
                 String key = entry.getKey().toLowerCase(Locale.ROOT);
-                if (key.equals(normalizedMob) || key.contains(normalizedMob)) {
+                if (key.equals(normalizedMob)) {
                     total += entry.getValue();
                 }
             }
         }
         return total;
+    }
+
+    /**
+     * Returns true when the player belongs to a town (owner, member, or guest role in raw roster).
+     * When {@code townName} is set, only that town matches.
+     */
+    public boolean isTownMember(Player player, String townName) {
+        if (!enabled || player == null) {
+            return false;
+        }
+        Set<Town> towns = TownManager.getInstance().getTownsForPlayer(player.getUniqueId());
+        if (towns.isEmpty()) {
+            return false;
+        }
+        if (townName == null || townName.isBlank()) {
+            return true;
+        }
+        String filter = townName.toLowerCase(Locale.ROOT);
+        for (Town town : towns) {
+            if (town.getName().equalsIgnoreCase(filter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Towns where the player is listed as owner in Civs raw roster. */
+    public boolean isTownOwner(Player player, String townName) {
+        if (!enabled || player == null) {
+            return false;
+        }
+        for (Town town : TownManager.getInstance().getTownsForPlayer(player.getUniqueId())) {
+            if (townName != null && !townName.isBlank()
+                    && !town.getName().equalsIgnoreCase(townName)) {
+                continue;
+            }
+            String role = town.getRawPeople().get(player.getUniqueId());
+            if (role != null && role.toLowerCase(Locale.ROOT).contains(Constants.OWNER)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Number of other players (non-owner) in any town the player belongs to. */
+    public int countTownCoMembers(Player player) {
+        if (!enabled || player == null) {
+            return 0;
+        }
+        int count = 0;
+        UUID self = player.getUniqueId();
+        for (Town town : TownManager.getInstance().getTownsForPlayer(self)) {
+            for (UUID member : town.getRawPeople().keySet()) {
+                if (!member.equals(self)) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     public double getSkillTotalExp(Player player, String skillKey) {
@@ -221,6 +292,7 @@ public final class CivsHook {
                 stat,
                 perk.getValue(),
                 operation);
+        StatManager.getInstance().removeModifier(player.getUniqueId(), territorialModifierId(perk.getId()));
         StatManager.getInstance().addModifier(player.getUniqueId(), modifier);
         return true;
     }
@@ -248,6 +320,23 @@ public final class CivsHook {
             return false;
         }
         return civilian.addSkillXp(player, skillKey, amount) > 0;
+    }
+
+    public boolean spawnQuestMob(Player player, String mobId, double partyRadius) {
+        if (!enabled || player == null || mobId == null || mobId.isBlank()) {
+            return false;
+        }
+        try {
+            CustomMobManager manager = CustomMobManager.getInstance();
+            if (!manager.isEnabled() || manager.getMob(mobId) == null) {
+                plugin.getLogger().warning("Mob customizado desconhecido ou desabilitado: " + mobId);
+                return false;
+            }
+            return manager.spawnForQuest(mobId, player.getLocation(), player.getUniqueId(), partyRadius) != null;
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Falha ao invocar mob de caçada " + mobId + ": " + ex.getMessage());
+            return false;
+        }
     }
 
     public static String territorialModifierId(String perkId) {

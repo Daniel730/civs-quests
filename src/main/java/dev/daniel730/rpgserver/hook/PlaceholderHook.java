@@ -32,7 +32,14 @@ public final class PlaceholderHook {
     public void disable() {
         if (expansion != null) {
             expansion.unregister();
+            expansion = null;
         }
+        enabled = false;
+    }
+
+    public void refresh() {
+        disable();
+        enable();
     }
 
     public boolean isEnabled() {

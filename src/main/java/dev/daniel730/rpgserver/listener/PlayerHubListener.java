@@ -8,21 +8,31 @@ import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestManager;
 import dev.daniel730.rpgserver.quest.QuestProgressSync;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import org.redcastlemedia.multitallented.civs.civilians.Civilian;
+import org.redcastlemedia.multitallented.civs.civilians.CivilianManager;
+import org.redcastlemedia.multitallented.civs.menus.MenuManager;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlayerHubListener implements Listener {
 
     private final RpgServerPlugin plugin;
+    private final Set<UUID> civsReturnToHub = ConcurrentHashMap.newKeySet();
 
     public PlayerHubListener(RpgServerPlugin plugin) {
         this.plugin = plugin;
@@ -42,10 +52,41 @@ public final class PlayerHubListener implements Listener {
         event.setCancelled(true);
         Player player = event.getPlayer();
         if (player.isSneaking() && plugin.getCivsHook().openLocationsMenu(player)) {
+            civsReturnToHub.add(player.getUniqueId());
             plugin.getQuestFeedbackService().playJournalOpen(player);
             return;
         }
         plugin.getPlayerHubService().openHub(player);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCivsTopLevelBackClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        UUID uuid = player.getUniqueId();
+        if (!civsReturnToHub.contains(uuid) || !plugin.getCivsHook().isEnabled()) {
+            return;
+        }
+        if (!MenuManager.getInstance().hasMenuOpen(uuid) || MenuManager.getHistorySize(uuid) > 1) {
+            return;
+        }
+        if (event.getClickedInventory() == null
+                || !event.getClickedInventory().equals(event.getView().getTopInventory())
+                || event.getCurrentItem() == null) {
+            return;
+        }
+        Civilian civilian = CivilianManager.getInstance().getCivilian(uuid);
+        if (civilian == null || !MenuManager.getInstance().getBackButton()
+                .createCVItem(civilian.getLocale(), 0)
+                .equivalentItem(event.getCurrentItem(), true, true)) {
+            return;
+        }
+        event.setCancelled(true);
+        civsReturnToHub.remove(uuid);
+        player.closeInventory();
+        Bukkit.getScheduler().runTask(plugin,
+                () -> plugin.getPlayerHubService().openHub(player, PlayerHubHolder.HubTab.CIVS));
     }
 
     @EventHandler
@@ -111,6 +152,14 @@ public final class PlayerHubListener implements Listener {
                 QuestJournalGui.open(plugin, player);
                 plugin.getQuestFeedbackService().playJournalOpen(player);
             }
+            case OPEN_SKILL_TREE -> {
+                player.closeInventory();
+                player.performCommand("rpg tree");
+            }
+            case OPEN_CODEX -> {
+                player.closeInventory();
+                player.performCommand("rpg codex");
+            }
             case TRACK_NEXT, TRACK_QUEST -> trackQuest(player, holder, click.payload());
             case SYNC -> syncQuests(player, holder);
             case CLOSE -> player.closeInventory();
@@ -133,11 +182,34 @@ public final class PlayerHubListener implements Listener {
             opened = plugin.getCivsHook().openMenu(player, menuRef);
         }
         if (opened) {
+            civsReturnToHub.add(player.getUniqueId());
             plugin.getQuestFeedbackService().playJournalOpen(player);
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onCivsInventoryClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
+        UUID uuid = player.getUniqueId();
+        if (!civsReturnToHub.contains(uuid)) {
+            return;
+        }
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!MenuManager.getInstance().hasMenuOpen(uuid) && !plugin.getPlayerHubService().isHubOpen(player)) {
+                civsReturnToHub.remove(uuid);
+            }
+        });
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        civsReturnToHub.remove(event.getPlayer().getUniqueId());
+    }
+
     private void syncQuests(Player player, PlayerHubHolder holder) {
+        plugin.getQuestManager().ensureProfileSanitized(player);
         QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
                 .sync(player, true, true);
         plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestSyncSuccessOne()

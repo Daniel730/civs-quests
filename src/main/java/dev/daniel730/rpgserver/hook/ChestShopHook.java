@@ -2,6 +2,7 @@ package dev.daniel730.rpgserver.hook;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.listener.ChestShopQuestListener;
+import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.EventPriority;
@@ -11,6 +12,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -41,6 +43,7 @@ public final class ChestShopHook {
             Method getOwnerAccount = eventClass.getMethod("getOwnerAccount");
             Method getExactPrice = eventClass.getMethod("getExactPrice");
             Method getTransactionType = eventClass.getMethod("getTransactionType");
+            Method getStock = eventClass.getMethod("getStock");
 
             Class<?> accountClass = Class.forName("com.Acrobot.ChestShop.Database.Account");
             Method getOwnerUuid = accountClass.getMethod("getUuid");
@@ -54,28 +57,43 @@ public final class ChestShopHook {
                     return;
                 }
                 try {
+                    if (event instanceof org.bukkit.event.Cancellable cancellable && cancellable.isCancelled()) {
+                        return;
+                    }
                     Object transactionType = getTransactionType.invoke(event);
                     BigDecimal price = (BigDecimal) getExactPrice.invoke(event);
-                    int amount = Math.max(1, price == null ? 1 : (int) Math.round(price.doubleValue()));
+                    int itemCount = resolveItemCount(getStock.invoke(event));
+                    int revenueAmount = price == null ? 0 : (int) Math.floor(price.doubleValue());
+                    // #region agent log
+                    AgentDebugLog.log(plugin, "H4", "ChestShopHook.TransactionEvent",
+                            "chestshop transaction processed",
+                            Map.of("transactionType", String.valueOf(transactionType),
+                                    "itemCount", itemCount,
+                                    "price", String.valueOf(price),
+                                    "revenueAmount", revenueAmount));
+                    // #endregion
 
                     if (buyType.equals(transactionType)) {
                         Object client = getClient.invoke(event);
                         if (client instanceof org.bukkit.entity.Player player) {
-                            plugin.getQuestManager().handleShopBuy(player, 1);
+                            plugin.getQuestManager().handleShopBuy(player, itemCount);
                         }
                     } else if (sellType.equals(transactionType)) {
                         Object client = getClient.invoke(event);
                         if (client instanceof org.bukkit.entity.Player player) {
-                            plugin.getQuestManager().handleShopSell(player, 1);
+                            plugin.getQuestManager().handleShopSell(player, itemCount);
                         }
                     }
 
-                    if (buyType.equals(transactionType)) {
+                    if (buyType.equals(transactionType) && revenueAmount > 0) {
                         Object ownerAccount = getOwnerAccount.invoke(event);
+                        if (ownerAccount == null) {
+                            return;
+                        }
                         UUID ownerUuid = (UUID) getOwnerUuid.invoke(ownerAccount);
                         org.bukkit.entity.Player owner = Bukkit.getPlayer(ownerUuid);
                         if (owner != null) {
-                            plugin.getQuestManager().handleShopRevenue(owner, amount);
+                            plugin.getQuestManager().handleShopRevenue(owner, revenueAmount);
                         }
                     }
                 } catch (ReflectiveOperationException ex) {
@@ -89,7 +107,7 @@ public final class ChestShopHook {
                     EventPriority.MONITOR,
                     executor,
                     plugin,
-                    false
+                    true
             );
             enabled = true;
             plugin.getLogger().info("ChestShop hook ativo (TransactionEvent via reflexão).");
@@ -108,5 +126,18 @@ public final class ChestShopHook {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    private static int resolveItemCount(Object stock) {
+        if (!(stock instanceof org.bukkit.inventory.ItemStack[] stacks)) {
+            return 1;
+        }
+        int total = 0;
+        for (org.bukkit.inventory.ItemStack stack : stacks) {
+            if (stack != null) {
+                total += stack.getAmount();
+            }
+        }
+        return Math.max(1, total);
     }
 }

@@ -15,14 +15,21 @@ public final class EssentialsHook {
 
     public void enable() {
         if (!plugin.getPluginConfig().isEssentialsEnabled()) {
+            enabled = false;
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("Essentials") == null) {
             plugin.getLogger().info("Essentials ausente — recompensas kit/warp e balance_min via Vault apenas.");
+            enabled = false;
             return;
         }
         enabled = true;
         plugin.getLogger().info("Essentials hook ativo.");
+    }
+
+    public void refresh() {
+        enabled = false;
+        enable();
     }
 
     public boolean isEnabled() {
@@ -36,7 +43,7 @@ public final class EssentialsHook {
         if (!plugin.getPluginConfig().isEssentialsKitRewardsEnabled()) {
             return false;
         }
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kit " + kitName + " " + player.getName());
+        dispatchConsoleCommand("kit " + kitName + " " + player.getName());
         return true;
     }
 
@@ -47,7 +54,16 @@ public final class EssentialsHook {
         if (!plugin.getPluginConfig().isEssentialsWarpRewardsEnabled()) {
             return false;
         }
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "warp " + warpName + " " + player.getName());
+        dispatchConsoleCommand("warp " + warpName + " " + player.getName());
         return true;
+    }
+
+    private void dispatchConsoleCommand(String command) {
+        if (Bukkit.isPrimaryThread()) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        } else {
+            Bukkit.getScheduler().runTask(plugin, () ->
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        }
     }
 }
