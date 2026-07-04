@@ -7,6 +7,41 @@
 
 ---
 
+## Session 2026-07-04 (hub navigation fix + Civs locais)
+
+### Fixed
+
+| Issue | Fix |
+|-------|-----|
+| **Broken Civs tab** | All buttons ran `/cv menu`; now open correct Civs menus via `CivsHook.openMenu()` (`main`, `port`, `region-list`, `auction-browse`, `spell-list`, `blueprints`, `class-list`, `select-town`) |
+| **No back navigation** | Footer **← Voltar** with `Deque` screen stack (`PATH_PICKER`, `QUEST_TREE` sub-views) |
+| **Tab refresh** | Tab clicks call `resetNavigation(tab)` + `render()` in-place (inventory stays open) |
+| **Refresh reopened hub** | `refreshIfOpen()` re-renders current holder; quest progress triggers auto-refresh |
+
+### Shipped (RPG integration)
+
+| Item | Detail |
+|------|--------|
+| **Path picker sub-GUI** | Início → Escolher Caminho — 3 heads (Guerreiro/Mercador/Construtor), accept without journal |
+| **Quest tree sub-GUI** | RPG tab → Árvore de Quests — vertical chain with locked/available/complete panes |
+| **Quests tab** | Shows next 5 chain quests with progress bars; click accept/track |
+| **Footer quick actions** | ↻ Atualizar \| ← Voltar \| ★ Rastrear \| ↺ Sync \| ✕ Fechar |
+| **Civs locais** | Civs tab **Locais / Teleportes** → `MenuManager` `port` menu; Início shortcut; compass **shift+right-click** |
+
+### Civs integration
+
+- `CivsHook.openMenu()`, `openLocationsMenu()`, `openMainMenu()`, `openMenuFromString()` — direct `MenuManager` API (no Civs JAR change required).
+- Same destinations as Civs starter book → main menu **ports** icon → `port` menu.
+
+### Test steps
+
+1. `/rpg hub` → **Civs** tab → **Locais / Teleportes** → Civs port list opens (hub closes).
+2. Re-open hub → **Início** → **Escolher Caminho** → pick head → **← Voltar** returns to Início.
+3. **RPG** → **Árvore de Quests** → click node accept/track → **← Voltar** → footer **★ Rastrear** / **↺ Sync**.
+4. Shift+right-click hub compass → Civs locais directly.
+
+---
+
 ## Session 2026-07-04 (late) — Player Hub GUI
 
 ### Shipped
@@ -17,7 +52,7 @@
 | **Tabs** | Início \| Civs \| RPG \| Config \| Quests — archetype glass borders like journal |
 | **Item** | `RECOVERY_COMPASS` hub item (`rpg-hub-compass`); legacy book marker still works |
 | **Commands** | `/rpg hub`, `/rpg menu`, `/rpg guide` (alias), `give\|refresh` |
-| **Civs tab** | Click icons → run `/cv menu`, `/cv town`, `/cv auction` as player |
+| **Civs tab** | Click icons → `CivsHook.openMenu()` (`main`, `port`, `region-list`, …) — same as Civs book menus |
 | **Config tab** | Green/red wool toggles for notifications + boss bar (profile YAML) |
 | **Removed** | `PlayerGuideBookService` WRITTEN_BOOK pages; `PlayerGuideBookListener` |
 

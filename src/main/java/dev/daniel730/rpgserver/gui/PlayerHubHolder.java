@@ -4,19 +4,25 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class PlayerHubHolder implements InventoryHolder {
 
     public static final int FOOTER_REFRESH_SLOT = 45;
-    public static final int FOOTER_CLOSE_SLOT = 49;
-    public static final int FOOTER_JOURNAL_SLOT = 53;
+    public static final int FOOTER_BACK_SLOT = 47;
+    public static final int FOOTER_TRACK_SLOT = 49;
+    public static final int FOOTER_SYNC_SLOT = 51;
+    public static final int FOOTER_CLOSE_SLOT = 53;
 
     public static final int[] TAB_SLOTS = {0, 2, 4, 6, 8};
 
     private Inventory inventory;
     private HubTab activeTab = HubTab.INICIO;
+    private HubScreen screen = HubScreen.TAB;
+    private final Deque<HubScreen> screenStack = new ArrayDeque<>();
     private final Map<Integer, HubClick> slotActions = new HashMap<>();
 
     public void setInventory(Inventory inventory) {
@@ -29,6 +35,33 @@ public final class PlayerHubHolder implements InventoryHolder {
 
     public void setActiveTab(HubTab activeTab) {
         this.activeTab = activeTab;
+    }
+
+    public HubScreen getScreen() {
+        return screen;
+    }
+
+    public void resetNavigation(HubTab tab) {
+        screenStack.clear();
+        screen = HubScreen.TAB;
+        activeTab = tab;
+    }
+
+    public void pushScreen(HubScreen next) {
+        screenStack.push(screen);
+        screen = next;
+    }
+
+    public boolean popScreen() {
+        if (screenStack.isEmpty()) {
+            return false;
+        }
+        screen = screenStack.pop();
+        return true;
+    }
+
+    public boolean canGoBack() {
+        return !screenStack.isEmpty();
     }
 
     public void mapAction(int slot, HubClick action) {
@@ -46,6 +79,12 @@ public final class PlayerHubHolder implements InventoryHolder {
     @Override
     public @NotNull Inventory getInventory() {
         return inventory;
+    }
+
+    public enum HubScreen {
+        TAB,
+        PATH_PICKER,
+        QUEST_TREE
     }
 
     public enum HubTab {
@@ -87,8 +126,12 @@ public final class PlayerHubHolder implements InventoryHolder {
         TOGGLE_NOTIFICATIONS,
         TOGGLE_BOSSBAR,
         OPEN_JOURNAL,
+        OPEN_SUBVIEW,
+        OPEN_CIVS_MENU,
         TRACK_NEXT,
         TRACK_QUEST,
+        SYNC,
+        BACK,
         CLOSE,
         REFRESH
     }
@@ -100,6 +143,14 @@ public final class PlayerHubHolder implements InventoryHolder {
 
         public static HubClick command(String command) {
             return new HubClick(HubAction.COMMAND, command);
+        }
+
+        public static HubClick subview(HubScreen screen) {
+            return new HubClick(HubAction.OPEN_SUBVIEW, screen.name());
+        }
+
+        public static HubClick civsMenu(String menuName) {
+            return new HubClick(HubAction.OPEN_CIVS_MENU, menuName);
         }
 
         public static HubClick of(HubAction action) {

@@ -4,8 +4,14 @@ import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.perk.TerritorialPerk;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.redcastlemedia.multitallented.civs.Civs;
 import org.redcastlemedia.multitallented.civs.civilians.Civilian;
 import org.redcastlemedia.multitallented.civs.civilians.CivilianManager;
+import org.redcastlemedia.multitallented.civs.localization.LocaleConstants;
+import org.redcastlemedia.multitallented.civs.localization.LocaleManager;
+import org.redcastlemedia.multitallented.civs.menus.MenuManager;
+import org.redcastlemedia.multitallented.civs.util.Constants;
 import org.redcastlemedia.multitallented.civs.regions.Region;
 import org.redcastlemedia.multitallented.civs.regions.RegionManager;
 import org.redcastlemedia.multitallented.civs.skills.Skill;
@@ -14,6 +20,7 @@ import org.redcastlemedia.multitallented.civs.stats.StatModifier;
 import org.redcastlemedia.multitallented.civs.stats.StatOperation;
 import org.redcastlemedia.multitallented.civs.stats.TerritorialStat;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +50,76 @@ public final class CivsHook {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * Opens a Civs {@link MenuManager} screen (same as {@code /cv menu <name>}).
+     * Closes any RPG inventory the player has open first.
+     */
+    public boolean openMenu(Player player, String menuName) {
+        return openMenu(player, menuName, Map.of());
+    }
+
+    public boolean openMenu(Player player, String menuName, Map<String, String> params) {
+        if (!enabled || player == null || menuName == null || menuName.isBlank()) {
+            return false;
+        }
+        if (!hasMenuPermission(player)) {
+            return false;
+        }
+        try {
+            player.closeInventory();
+            MenuManager.clearHistory(player.getUniqueId());
+            Inventory inventory = MenuManager.getInstance().openMenu(player, menuName, new HashMap<>(params));
+            return inventory != null;
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Falha ao abrir menu Civs '" + menuName + "': " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /** Opens the Civs port / locations list ({@code menu:port} from the starter book). */
+    public boolean openLocationsMenu(Player player) {
+        return openMenu(player, "port");
+    }
+
+    /** Opens the Civs main menu ({@code /cv menu}). */
+    public boolean openMainMenu(Player player) {
+        return openMenu(player, "main");
+    }
+
+    /**
+     * Opens a Civs menu from a menu string (e.g. {@code select-town?prevMenu=town&uuid=...}).
+     */
+    public boolean openMenuFromString(Player player, String menuString) {
+        if (!enabled || player == null || menuString == null || menuString.isBlank()) {
+            return false;
+        }
+        if (!hasMenuPermission(player)) {
+            return false;
+        }
+        Civilian civilian = CivilianManager.getInstance().getCivilian(player.getUniqueId());
+        if (civilian == null) {
+            return false;
+        }
+        try {
+            player.closeInventory();
+            MenuManager.clearHistory(player.getUniqueId());
+            Inventory inventory = MenuManager.openMenuFromString(civilian, menuString);
+            return inventory != null;
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Falha ao abrir menu Civs '" + menuString + "': " + ex.getMessage());
+            return false;
+        }
+    }
+
+    private boolean hasMenuPermission(Player player) {
+        if (Civs.perm != null && !Civs.perm.has(player, Constants.MENU_PERMISSION)) {
+            player.sendMessage(Civs.getPrefix() + LocaleManager.getInstance().getTranslation(player,
+                    LocaleConstants.PERMISSION_DENIED));
+            return false;
+        }
+        return true;
     }
 
     public boolean hasBuiltRegion(Player player, String regionKey) {

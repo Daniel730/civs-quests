@@ -2,6 +2,7 @@ package dev.daniel730.rpgserver.quest;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.gui.PlayerHubGui;
+import dev.daniel730.rpgserver.gui.PlayerHubHolder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -33,18 +34,36 @@ public final class PlayerHubService {
     }
 
     public void openHub(Player player) {
-        PlayerHubGui.open(plugin, player);
-        plugin.getQuestFeedbackService().playJournalOpen(player);
+        openHub(player, PlayerHubHolder.HubTab.INICIO);
     }
 
-    public void openHub(Player player, dev.daniel730.rpgserver.gui.PlayerHubHolder.HubTab tab) {
-        PlayerHubGui.open(plugin, player, tab);
+    public void openHub(Player player, PlayerHubHolder.HubTab tab) {
+        PlayerHubHolder holder = new PlayerHubHolder();
+        holder.resetNavigation(tab);
+        PlayerHubGui.open(plugin, player, holder);
         plugin.getQuestFeedbackService().playJournalOpen(player);
     }
 
     public void refreshHub(Player player) {
-        openHub(player);
-        plugin.getMessageUtil().send(player, plugin.getPluginConfig().getHubRefreshed());
+        if (refreshIfOpen(player)) {
+            plugin.getMessageUtil().send(player, plugin.getPluginConfig().getHubRefreshed());
+        } else {
+            openHub(player);
+            plugin.getMessageUtil().send(player, plugin.getPluginConfig().getHubRefreshed());
+        }
+    }
+
+    /** Re-renders the hub when already open; no-op if the player is in another inventory. */
+    public boolean refreshIfOpen(Player player) {
+        if (!(player.getOpenInventory().getTopInventory().getHolder() instanceof PlayerHubHolder holder)) {
+            return false;
+        }
+        PlayerHubGui.render(plugin, player, holder);
+        return true;
+    }
+
+    public boolean isHubOpen(Player player) {
+        return player.getOpenInventory().getTopInventory().getHolder() instanceof PlayerHubHolder;
     }
 
     public void giveHubItem(Player player) {

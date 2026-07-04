@@ -38,7 +38,7 @@ Production deploy is **WSL SSH** to `daniel@bot-server`, instance `/home/daniel/
 | Owner | RPG hook |
 |-------|----------|
 | AuraSkills | `AuraSkillsHook` — objectives, rewards, StatModifier perks |
-| Civs | `CivsHook` + listeners — regions, towns, `GainExpEvent` (optional) |
+| Civs | `CivsHook` + listeners — regions, towns, `GainExpEvent`, **`openMenu`/`openLocationsMenu` for hub** |
 | ChestShop | `ChestShopHook` — merchant objectives |
 | Essentials | `EssentialsHook` — balance, kits, warps |
 | InteractiveBooks | `InteractiveBooksHook` — lore books |

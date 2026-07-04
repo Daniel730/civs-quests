@@ -7,6 +7,7 @@ import dev.daniel730.rpgserver.gui.QuestJournalGui;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestManager;
+import dev.daniel730.rpgserver.quest.QuestProgressSync;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,6 +17,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+
+import java.util.Map;
 
 public final class PlayerHubListener implements Listener {
 
@@ -37,7 +40,12 @@ public final class PlayerHubListener implements Listener {
             return;
         }
         event.setCancelled(true);
-        plugin.getPlayerHubService().openHub(event.getPlayer());
+        Player player = event.getPlayer();
+        if (player.isSneaking() && plugin.getCivsHook().openLocationsMenu(player)) {
+            plugin.getQuestFeedbackService().playJournalOpen(player);
+            return;
+        }
+        plugin.getPlayerHubService().openHub(player);
     }
 
     @EventHandler
@@ -59,9 +67,9 @@ public final class PlayerHubListener implements Listener {
         PlayerHubHolder.HubClick click = holder.getAction(slot);
         if (click == null) {
             PlayerHubHolder.HubTab tab = PlayerHubHolder.HubTab.fromTabSlot(slot);
-            if (tab != null && tab != holder.getActiveTab()) {
+            if (tab != null && (tab != holder.getActiveTab() || holder.getScreen() != PlayerHubHolder.HubScreen.TAB)) {
                 plugin.getQuestFeedbackService().playJournalClick(player);
-                holder.setActiveTab(tab);
+                holder.resetNavigation(tab);
                 PlayerHubGui.render(plugin, player, holder);
             }
             return;
@@ -75,9 +83,20 @@ public final class PlayerHubListener implements Listener {
         switch (click.action()) {
             case TAB -> {
                 PlayerHubHolder.HubTab tab = PlayerHubHolder.HubTab.valueOf(click.payload());
-                holder.setActiveTab(tab);
+                holder.resetNavigation(tab);
                 PlayerHubGui.render(plugin, player, holder);
             }
+            case OPEN_SUBVIEW -> {
+                PlayerHubHolder.HubScreen screen = PlayerHubHolder.HubScreen.valueOf(click.payload());
+                holder.pushScreen(screen);
+                PlayerHubGui.render(plugin, player, holder);
+            }
+            case BACK -> {
+                if (holder.popScreen()) {
+                    PlayerHubGui.render(plugin, player, holder);
+                }
+            }
+            case OPEN_CIVS_MENU -> openCivsMenu(player, click.payload());
             case COMMAND -> player.performCommand(stripSlash(click.payload()));
             case TOGGLE_NOTIFICATIONS -> {
                 plugin.getQuestFeedbackService().toggleNotifications(player);
@@ -93,9 +112,39 @@ public final class PlayerHubListener implements Listener {
                 plugin.getQuestFeedbackService().playJournalOpen(player);
             }
             case TRACK_NEXT, TRACK_QUEST -> trackQuest(player, holder, click.payload());
+            case SYNC -> syncQuests(player, holder);
             case CLOSE -> player.closeInventory();
             case REFRESH -> PlayerHubGui.render(plugin, player, holder);
         }
+    }
+
+    private void openCivsMenu(Player player, String menuRef) {
+        if (menuRef == null || menuRef.isBlank()) {
+            return;
+        }
+        boolean opened;
+        if ("select-town".equals(menuRef)) {
+            opened = plugin.getCivsHook().openMenu(player, menuRef, Map.of(
+                    "prevMenu", "town",
+                    "uuid", player.getUniqueId().toString()));
+        } else if (menuRef.contains("?") || menuRef.contains("$")) {
+            opened = plugin.getCivsHook().openMenuFromString(player, menuRef);
+        } else {
+            opened = plugin.getCivsHook().openMenu(player, menuRef);
+        }
+        if (opened) {
+            plugin.getQuestFeedbackService().playJournalOpen(player);
+        }
+    }
+
+    private void syncQuests(Player player, PlayerHubHolder holder) {
+        QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
+                .sync(player, true, true);
+        plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestSyncSuccessOne()
+                .replace("{player}", player.getName())
+                .replace("{objectives}", String.valueOf(result.objectivesCompleted()))
+                .replace("{quests}", String.valueOf(result.questsCompleted())));
+        PlayerHubGui.render(plugin, player, holder);
     }
 
     private void trackQuest(Player player, PlayerHubHolder holder, String questId) {
@@ -125,11 +174,16 @@ public final class PlayerHubListener implements Listener {
                         plugin.getPluginConfig().getQuestAcceptSuccess().replace("{quest}", quest.getName()));
             } else if (result == QuestManager.StartResult.ALREADY_ACTIVE) {
                 doTrack(player, profile, quest, questManager);
+            } else if (result == QuestManager.StartResult.ARCHETYPE_LOCKED) {
+                plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestAcceptArchetypeLocked());
             } else {
                 plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestAcceptLocked());
             }
         } else if (status == QuestManager.QuestStatus.IN_PROGRESS) {
             doTrack(player, profile, quest, questManager);
+        } else if (status == QuestManager.QuestStatus.LOCKED) {
+            plugin.getMessageUtil().send(player, plugin.getPluginConfig().getQuestAcceptLocked());
+            return;
         } else {
             player.closeInventory();
             QuestJournalGui.open(plugin, player);

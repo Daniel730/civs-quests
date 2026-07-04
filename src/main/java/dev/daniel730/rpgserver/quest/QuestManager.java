@@ -731,6 +731,7 @@ public final class QuestManager {
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
+        plugin.getPlayerHubService().refreshIfOpen(player);
     }
 
     private void checkQuestCompletions(Player player, PlayerProfile profile) {
@@ -1017,6 +1018,7 @@ public final class QuestManager {
         profile.setTrackedQuestId(quest.getId());
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
+        plugin.getPlayerHubService().refreshIfOpen(player);
         return StartResult.STARTED;
     }
 
@@ -1028,6 +1030,7 @@ public final class QuestManager {
         profile.setTrackedQuestId(quest.getId());
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
+        plugin.getPlayerHubService().refreshIfOpen(player);
         return true;
     }
 

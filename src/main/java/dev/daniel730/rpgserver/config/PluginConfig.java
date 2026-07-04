@@ -73,6 +73,9 @@ public final class PluginConfig {
     private final String hubTabConfig;
     private final String hubTabQuests;
     private final String hubFooterRefresh;
+    private final String hubFooterBack;
+    private final String hubFooterTrack;
+    private final String hubFooterSync;
     private final String hubFooterClose;
     private final String hubFooterJournal;
     private final String hubInicioProfileTitle;
@@ -83,6 +86,8 @@ public final class PluginConfig {
     private final String hubInicioNoQuest;
     private final String hubCivsTownTitle;
     private final String hubCivsTownLore;
+    private final String hubCivsLocationsTitle;
+    private final String hubCivsLocationsLore;
     private final String hubCivsTownInfoTitle;
     private final String hubCivsTownInfoLore;
     private final String hubCivsRegionsTitle;
@@ -99,6 +104,8 @@ public final class PluginConfig {
     private final String hubCivsChestShopLore;
     private final String hubRpgJournalTitle;
     private final String hubRpgJournalLore;
+    private final String hubRpgQuestTreeTitle;
+    private final String hubRpgQuestTreeLore;
     private final String hubRpgPerksTitle;
     private final String hubRpgPerksLore;
     private final String hubRpgPerkSummaryTitle;
@@ -285,6 +292,12 @@ public final class PluginConfig {
         this.hubTabQuests = config.getString("messages.player-hub.tabs.quests", "Quests");
         this.hubFooterRefresh = config.getString("messages.player-hub.footer.refresh",
                 "<aqua>↻ Atualizar</aqua>");
+        this.hubFooterBack = config.getString("messages.player-hub.footer.back",
+                "<yellow>← Voltar</yellow>");
+        this.hubFooterTrack = config.getString("messages.player-hub.footer.track",
+                "<gold>★ Rastrear</gold>");
+        this.hubFooterSync = config.getString("messages.player-hub.footer.sync",
+                "<green>↺ Sync</green>");
         this.hubFooterClose = config.getString("messages.player-hub.footer.close",
                 "<red>✕ Fechar</red>");
         this.hubFooterJournal = config.getString("messages.player-hub.footer.journal",
@@ -294,7 +307,7 @@ public final class PluginConfig {
         this.hubInicioChoosePath = config.getString("messages.player-hub.inicio.choose-path",
                 "<yellow><bold>Escolher Caminho</bold></yellow>");
         this.hubInicioChoosePathLore = config.getString("messages.player-hub.inicio.choose-path-lore",
-                "<gray>Abrir diário para escolher Guerreiro, Mercador ou Construtor.</gray>");
+                "<gray>Guerreiro, Mercador ou Construtor — aceite direto da Central.</gray>");
         this.hubInicioNextQuest = config.getString("messages.player-hub.inicio.next-quest",
                 "<green><bold>Próxima Missão</bold></green>");
         this.hubInicioNextQuestLore = config.getString("messages.player-hub.inicio.next-quest-lore",
@@ -304,7 +317,11 @@ public final class PluginConfig {
         this.hubCivsTownTitle = config.getString("messages.player-hub.civs.town-title",
                 "<gold><bold>Menu Civs</bold></gold>");
         this.hubCivsTownLore = config.getString("messages.player-hub.civs.town-lore",
-                "<gray>Painel territorial: cidades, magias, farms.</gray>");
+                "<gray>Menu principal Civs — cidades, magias, farms.</gray>");
+        this.hubCivsLocationsTitle = config.getString("messages.player-hub.civs.locations-title",
+                "<aqua><bold>Locais / Teleportes</bold></aqua>");
+        this.hubCivsLocationsLore = config.getString("messages.player-hub.civs.locations-lore",
+                "<gray>Portais e destinos como no menu Civs.</gray>");
         this.hubCivsTownInfoTitle = config.getString("messages.player-hub.civs.town-info-title",
                 "<yellow><bold>Minha Cidade</bold></yellow>");
         this.hubCivsTownInfoLore = config.getString("messages.player-hub.civs.town-info-lore",
@@ -337,6 +354,10 @@ public final class PluginConfig {
                 "<gold><bold>Diário de Quests</bold></gold>");
         this.hubRpgJournalLore = config.getString("messages.player-hub.rpg.journal-lore",
                 "<gray>Ver, aceitar e rastrear missões.</gray>");
+        this.hubRpgQuestTreeTitle = config.getString("messages.player-hub.rpg.quest-tree-title",
+                "<green><bold>Árvore de Quests</bold></green>");
+        this.hubRpgQuestTreeLore = config.getString("messages.player-hub.rpg.quest-tree-lore",
+                "<gray>Cadeia vertical do seu caminho — clique para aceitar/rastrear.</gray>");
         this.hubRpgPerksTitle = config.getString("messages.player-hub.rpg.perks-title",
                 "<light_purple><bold>Perks</bold></light_purple>");
         this.hubRpgPerksLore = config.getString("messages.player-hub.rpg.perks-lore",
@@ -723,6 +744,18 @@ public final class PluginConfig {
         return hubFooterRefresh;
     }
 
+    public String getHubFooterBack() {
+        return hubFooterBack;
+    }
+
+    public String getHubFooterTrack() {
+        return hubFooterTrack;
+    }
+
+    public String getHubFooterSync() {
+        return hubFooterSync;
+    }
+
     public String getHubFooterClose() {
         return hubFooterClose;
     }
@@ -761,6 +794,14 @@ public final class PluginConfig {
 
     public String getHubCivsTownLore() {
         return hubCivsTownLore;
+    }
+
+    public String getHubCivsLocationsTitle() {
+        return hubCivsLocationsTitle;
+    }
+
+    public String getHubCivsLocationsLore() {
+        return hubCivsLocationsLore;
     }
 
     public String getHubCivsTownInfoTitle() {
@@ -825,6 +866,14 @@ public final class PluginConfig {
 
     public String getHubRpgJournalLore() {
         return hubRpgJournalLore;
+    }
+
+    public String getHubRpgQuestTreeTitle() {
+        return hubRpgQuestTreeTitle;
+    }
+
+    public String getHubRpgQuestTreeLore() {
+        return hubRpgQuestTreeLore;
     }
 
     public String getHubRpgPerksTitle() {
