@@ -70,6 +70,66 @@ public final class PluginConfig {
     private final String guideBookRefreshed;
     private final String guideBookInventoryFull;
     private final String guideBookAlreadyHave;
+    private final String hubTitle;
+    private final String hubItemName;
+    private final String hubItemLore;
+    private final String hubGranted;
+    private final String hubRefreshed;
+    private final String hubInventoryFull;
+    private final String hubAlreadyHave;
+    private final String hubTabInicio;
+    private final String hubTabCivs;
+    private final String hubTabRpg;
+    private final String hubTabConfig;
+    private final String hubTabQuests;
+    private final String hubFooterRefresh;
+    private final String hubFooterClose;
+    private final String hubFooterJournal;
+    private final String hubInicioProfileTitle;
+    private final String hubInicioChoosePath;
+    private final String hubInicioChoosePathLore;
+    private final String hubInicioNextQuest;
+    private final String hubInicioNextQuestLore;
+    private final String hubInicioNoQuest;
+    private final String hubCivsTownTitle;
+    private final String hubCivsTownLore;
+    private final String hubCivsTownInfoTitle;
+    private final String hubCivsTownInfoLore;
+    private final String hubCivsRegionsTitle;
+    private final String hubCivsRegionsLore;
+    private final String hubCivsAuctionTitle;
+    private final String hubCivsAuctionLore;
+    private final String hubCivsSpellsTitle;
+    private final String hubCivsSpellsLore;
+    private final String hubCivsFarmsTitle;
+    private final String hubCivsFarmsLore;
+    private final String hubCivsCombatTitle;
+    private final String hubCivsCombatLore;
+    private final String hubCivsChestShopTitle;
+    private final String hubCivsChestShopLore;
+    private final String hubRpgJournalTitle;
+    private final String hubRpgJournalLore;
+    private final String hubRpgPerksTitle;
+    private final String hubRpgPerksLore;
+    private final String hubRpgPerkSummaryTitle;
+    private final String hubRpgPerkSummaryLore;
+    private final String hubRpgDailyTitle;
+    private final String hubRpgWeeklyTitle;
+    private final String hubRpgScheduleAvailable;
+    private final String hubRpgScheduleDone;
+    private final String hubRpgScheduleLocked;
+    private final String hubRpgScheduleNone;
+    private final String hubRpgScheduleHint;
+    private final String hubRpgProfileTitle;
+    private final String hubRpgProfileLore;
+    private final String hubConfigNotificationsTitle;
+    private final String hubConfigNotificationsLore;
+    private final String hubConfigBossBarTitle;
+    private final String hubConfigBossBarLore;
+    private final String hubConfigHintTitle;
+    private final String hubConfigHintLore;
+    private final String hubQuestsOpenJournalTitle;
+    private final String hubQuestsOpenJournalLore;
     private final String settingsNotificationsOn;
     private final String settingsNotificationsOff;
     private final String settingsBossBarOn;
@@ -139,7 +199,8 @@ public final class PluginConfig {
         this.interactiveBooksEnabled = config.getBoolean("integrations.interactivebooks.enabled", true);
         this.questBookAutoGrant = config.getBoolean("integrations.interactivebooks.quest-book-auto-grant", false);
         this.grantLoreBooksOnQuestStart = config.getBoolean("integrations.interactivebooks.grant-on-quest-start", false);
-        this.guideBookOnJoin = config.getBoolean("guide-book.on-join", true);
+        this.guideBookOnJoin = config.getBoolean("player-hub.on-join",
+                config.getBoolean("guide-book.on-join", true));
         this.veinMinerEnabled = config.getBoolean("integrations.veinminer.enabled", false);
         this.questPermissionPrefix = config.getString("integrations.luckperms.quest-permission-prefix", "rpg.quest.");
         this.autosaveMinutes = config.getInt("progression.autosave-minutes", 5);
@@ -231,6 +292,121 @@ public final class PluginConfig {
                 "<yellow>Inventário cheio — guia dropado no chão.</yellow>");
         this.guideBookAlreadyHave = config.getString("messages.guide-book.already-have",
                 "<gray>Você já possui o Guia do Reino.</gray> <yellow>/rpg guide</yellow> <gray>para abrir.</gray>");
+        this.hubTitle = config.getString("messages.player-hub.title",
+                "<gold><bold>Central do Reino</bold></gold>");
+        this.hubItemName = config.getString("messages.player-hub.item-name",
+                "<gold><italic>Central do Reino</italic></gold>");
+        this.hubItemLore = config.getString("messages.player-hub.item-lore",
+                "<gray>Clique direito ou </gray><yellow>/rpg hub</yellow>");
+        this.hubGranted = config.getString("messages.player-hub.grant",
+                "<gray>Central do Reino recebida.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg hub</yellow>");
+        this.hubRefreshed = config.getString("messages.player-hub.refreshed",
+                "<gray>Central atualizada com seu progresso.</gray>");
+        this.hubInventoryFull = config.getString("messages.player-hub.inventory-full",
+                "<yellow>Inventário cheio — item dropado no chão.</yellow>");
+        this.hubAlreadyHave = config.getString("messages.player-hub.already-have",
+                "<gray>Você já possui a Central do Reino.</gray> <yellow>/rpg hub</yellow> <gray>para abrir.</gray>");
+        this.hubTabInicio = config.getString("messages.player-hub.tabs.inicio", "Início");
+        this.hubTabCivs = config.getString("messages.player-hub.tabs.civs", "Civs");
+        this.hubTabRpg = config.getString("messages.player-hub.tabs.rpg", "RPG");
+        this.hubTabConfig = config.getString("messages.player-hub.tabs.config", "Config");
+        this.hubTabQuests = config.getString("messages.player-hub.tabs.quests", "Quests");
+        this.hubFooterRefresh = config.getString("messages.player-hub.footer.refresh",
+                "<aqua>↻ Atualizar</aqua>");
+        this.hubFooterClose = config.getString("messages.player-hub.footer.close",
+                "<red>✕ Fechar</red>");
+        this.hubFooterJournal = config.getString("messages.player-hub.footer.journal",
+                "<yellow>Diário de Quests</yellow>");
+        this.hubInicioProfileTitle = config.getString("messages.player-hub.inicio.profile-title",
+                "<gold>{player}</gold>");
+        this.hubInicioChoosePath = config.getString("messages.player-hub.inicio.choose-path",
+                "<yellow><bold>Escolher Caminho</bold></yellow>");
+        this.hubInicioChoosePathLore = config.getString("messages.player-hub.inicio.choose-path-lore",
+                "<gray>Abrir diário para escolher Guerreiro, Mercador ou Construtor.</gray>");
+        this.hubInicioNextQuest = config.getString("messages.player-hub.inicio.next-quest",
+                "<green><bold>Próxima Missão</bold></green>");
+        this.hubInicioNextQuestLore = config.getString("messages.player-hub.inicio.next-quest-lore",
+                "<aqua>{quest}</aqua> <dark_gray>— clique para rastrear</dark_gray>");
+        this.hubInicioNoQuest = config.getString("messages.player-hub.inicio.no-quest",
+                "<gray>Sem missões pendentes</gray>");
+        this.hubCivsTownTitle = config.getString("messages.player-hub.civs.town-title",
+                "<gold><bold>Menu Civs</bold></gold>");
+        this.hubCivsTownLore = config.getString("messages.player-hub.civs.town-lore",
+                "<gray>Painel territorial: cidades, magias, farms.</gray>");
+        this.hubCivsTownInfoTitle = config.getString("messages.player-hub.civs.town-info-title",
+                "<yellow><bold>Minha Cidade</bold></yellow>");
+        this.hubCivsTownInfoLore = config.getString("messages.player-hub.civs.town-info-lore",
+                "<gray>Ver cidade, membros e convites.</gray>");
+        this.hubCivsRegionsTitle = config.getString("messages.player-hub.civs.regions-title",
+                "<green><bold>Regiões</bold></green>");
+        this.hubCivsRegionsLore = config.getString("messages.player-hub.civs.regions-lore",
+                "<gray>Farms, armazéns, altares e bônus.</gray>");
+        this.hubCivsAuctionTitle = config.getString("messages.player-hub.civs.auction-title",
+                "<gold><bold>Leilão</bold></gold>");
+        this.hubCivsAuctionLore = config.getString("messages.player-hub.civs.auction-lore",
+                "<gray>Casa de leilões Civs.</gray>");
+        this.hubCivsSpellsTitle = config.getString("messages.player-hub.civs.spells-title",
+                "<light_purple><bold>Magias</bold></light_purple>");
+        this.hubCivsSpellsLore = config.getString("messages.player-hub.civs.spells-lore",
+                "<gray>Altar e grimório no menu Civs.</gray>");
+        this.hubCivsFarmsTitle = config.getString("messages.player-hub.civs.farms-title",
+                "<yellow><bold>Farms</bold></yellow>");
+        this.hubCivsFarmsLore = config.getString("messages.player-hub.civs.farms-lore",
+                "<gray>Regiões agrícolas e produção.</gray>");
+        this.hubCivsCombatTitle = config.getString("messages.player-hub.civs.combat-title",
+                "<red><bold>Combate</bold></red>");
+        this.hubCivsCombatLore = config.getString("messages.player-hub.civs.combat-lore",
+                "<gray>Mobs customizados e eventos.</gray>");
+        this.hubCivsChestShopTitle = config.getString("messages.player-hub.civs.chestshop-title",
+                "<aqua><bold>Lojas de Jogadores</bold></aqua>");
+        this.hubCivsChestShopLore = config.getString("messages.player-hub.civs.chestshop-lore",
+                "<gray>Use placas ChestShop para comprar e vender.</gray>");
+        this.hubRpgJournalTitle = config.getString("messages.player-hub.rpg.journal-title",
+                "<gold><bold>Diário de Quests</bold></gold>");
+        this.hubRpgJournalLore = config.getString("messages.player-hub.rpg.journal-lore",
+                "<gray>Ver, aceitar e rastrear missões.</gray>");
+        this.hubRpgPerksTitle = config.getString("messages.player-hub.rpg.perks-title",
+                "<light_purple><bold>Perks</bold></light_purple>");
+        this.hubRpgPerksLore = config.getString("messages.player-hub.rpg.perks-lore",
+                "<gray>Ver perks desbloqueados e disponíveis.</gray>");
+        this.hubRpgPerkSummaryTitle = config.getString("messages.player-hub.rpg.perk-summary-title",
+                "<yellow>Perks: {unlocked}/{total}</yellow>");
+        this.hubRpgPerkSummaryLore = config.getString("messages.player-hub.rpg.perk-summary-lore",
+                "<gray>Bônus de combate e territorial por caminho.</gray>");
+        this.hubRpgDailyTitle = config.getString("messages.player-hub.rpg.daily-title",
+                "<gold><bold>Missões Diárias</bold></gold>");
+        this.hubRpgWeeklyTitle = config.getString("messages.player-hub.rpg.weekly-title",
+                "<gold><bold>Missões Semanais</bold></gold>");
+        this.hubRpgScheduleAvailable = config.getString("messages.player-hub.rpg.schedule-available",
+                "<green>● Disponível</green>");
+        this.hubRpgScheduleDone = config.getString("messages.player-hub.rpg.schedule-done",
+                "<aqua>✔ Concluídas</aqua>");
+        this.hubRpgScheduleLocked = config.getString("messages.player-hub.rpg.schedule-locked",
+                "<red>● Bloqueadas</red>");
+        this.hubRpgScheduleNone = config.getString("messages.player-hub.rpg.schedule-none",
+                "<gray>Sem missões deste tipo</gray>");
+        this.hubRpgScheduleHint = config.getString("messages.player-hub.rpg.schedule-hint",
+                "<dark_gray>Abra o diário para detalhes.</dark_gray>");
+        this.hubRpgProfileTitle = config.getString("messages.player-hub.rpg.profile-title",
+                "<white><bold>Meu Perfil</bold></white>");
+        this.hubRpgProfileLore = config.getString("messages.player-hub.rpg.profile-lore",
+                "<gray>Arquétipo, quests e progresso.</gray>");
+        this.hubConfigNotificationsTitle = config.getString("messages.player-hub.config.notifications-title",
+                "<yellow><bold>Notificações</bold></yellow>");
+        this.hubConfigNotificationsLore = config.getString("messages.player-hub.config.notifications-lore",
+                "<gray>Sons e títulos ao completar objetivos.</gray>");
+        this.hubConfigBossBarTitle = config.getString("messages.player-hub.config.bossbar-title",
+                "<yellow><bold>Boss Bar / HUD</bold></yellow>");
+        this.hubConfigBossBarLore = config.getString("messages.player-hub.config.bossbar-lore",
+                "<gray>Barra de progresso da quest rastreada.</gray>");
+        this.hubConfigHintTitle = config.getString("messages.player-hub.config.hint-title",
+                "<gray>Preferências pessoais</gray>");
+        this.hubConfigHintLore = config.getString("messages.player-hub.config.hint-lore",
+                "<dark_gray>Salvas no seu perfil RPG.</dark_gray>");
+        this.hubQuestsOpenJournalTitle = config.getString("messages.player-hub.quests.open-journal-title",
+                "<gold><bold>Abrir Diário Completo</bold></gold>");
+        this.hubQuestsOpenJournalLore = config.getString("messages.player-hub.quests.open-journal-lore",
+                "<gray>Ver todas as missões do seu caminho.</gray>");
         this.settingsNotificationsOn = config.getString("messages.settings.notifications-on",
                 "<green>Notificações de quest ligadas.</green>");
         this.settingsNotificationsOff = config.getString("messages.settings.notifications-off",
@@ -291,8 +467,10 @@ public final class PluginConfig {
         this.welcomeSoundVolume = (float) config.getDouble("feedback.welcome.sound-volume", 0.9);
         this.welcomeSoundPitch = (float) config.getDouble("feedback.welcome.sound-pitch", 0.9);
         this.welcomeGiveQuestBook = config.getBoolean("feedback.welcome.give-quest-book", false);
-        this.welcomeGiveGuideBook = config.getBoolean("feedback.welcome.give-guide-book",
-                config.getBoolean("guide-book.on-join", true));
+        this.welcomeGiveGuideBook = config.getBoolean("feedback.welcome.give-hub-item",
+                config.getBoolean("feedback.welcome.give-guide-book",
+                        config.getBoolean("player-hub.on-join",
+                                config.getBoolean("guide-book.on-join", true))));
         this.welcomeTitleFadeIn = config.getInt("feedback.welcome.title-fade-in", 15);
         this.welcomeTitleStay = config.getInt("feedback.welcome.title-stay", 80);
         this.welcomeTitleFadeOut = config.getInt("feedback.welcome.title-fade-out", 25);
@@ -561,6 +739,246 @@ public final class PluginConfig {
 
     public String getGuideBookAlreadyHave() {
         return guideBookAlreadyHave;
+    }
+
+    public String getHubTitle() {
+        return hubTitle;
+    }
+
+    public String getHubItemName() {
+        return hubItemName;
+    }
+
+    public String getHubItemLore() {
+        return hubItemLore;
+    }
+
+    public String getHubGranted() {
+        return hubGranted;
+    }
+
+    public String getHubRefreshed() {
+        return hubRefreshed;
+    }
+
+    public String getHubInventoryFull() {
+        return hubInventoryFull;
+    }
+
+    public String getHubAlreadyHave() {
+        return hubAlreadyHave;
+    }
+
+    public String getHubTabInicio() {
+        return hubTabInicio;
+    }
+
+    public String getHubTabCivs() {
+        return hubTabCivs;
+    }
+
+    public String getHubTabRpg() {
+        return hubTabRpg;
+    }
+
+    public String getHubTabConfig() {
+        return hubTabConfig;
+    }
+
+    public String getHubTabQuests() {
+        return hubTabQuests;
+    }
+
+    public String getHubFooterRefresh() {
+        return hubFooterRefresh;
+    }
+
+    public String getHubFooterClose() {
+        return hubFooterClose;
+    }
+
+    public String getHubFooterJournal() {
+        return hubFooterJournal;
+    }
+
+    public String getHubInicioProfileTitle() {
+        return hubInicioProfileTitle;
+    }
+
+    public String getHubInicioChoosePath() {
+        return hubInicioChoosePath;
+    }
+
+    public String getHubInicioChoosePathLore() {
+        return hubInicioChoosePathLore;
+    }
+
+    public String getHubInicioNextQuest() {
+        return hubInicioNextQuest;
+    }
+
+    public String getHubInicioNextQuestLore() {
+        return hubInicioNextQuestLore;
+    }
+
+    public String getHubInicioNoQuest() {
+        return hubInicioNoQuest;
+    }
+
+    public String getHubCivsTownTitle() {
+        return hubCivsTownTitle;
+    }
+
+    public String getHubCivsTownLore() {
+        return hubCivsTownLore;
+    }
+
+    public String getHubCivsTownInfoTitle() {
+        return hubCivsTownInfoTitle;
+    }
+
+    public String getHubCivsTownInfoLore() {
+        return hubCivsTownInfoLore;
+    }
+
+    public String getHubCivsRegionsTitle() {
+        return hubCivsRegionsTitle;
+    }
+
+    public String getHubCivsRegionsLore() {
+        return hubCivsRegionsLore;
+    }
+
+    public String getHubCivsAuctionTitle() {
+        return hubCivsAuctionTitle;
+    }
+
+    public String getHubCivsAuctionLore() {
+        return hubCivsAuctionLore;
+    }
+
+    public String getHubCivsSpellsTitle() {
+        return hubCivsSpellsTitle;
+    }
+
+    public String getHubCivsSpellsLore() {
+        return hubCivsSpellsLore;
+    }
+
+    public String getHubCivsFarmsTitle() {
+        return hubCivsFarmsTitle;
+    }
+
+    public String getHubCivsFarmsLore() {
+        return hubCivsFarmsLore;
+    }
+
+    public String getHubCivsCombatTitle() {
+        return hubCivsCombatTitle;
+    }
+
+    public String getHubCivsCombatLore() {
+        return hubCivsCombatLore;
+    }
+
+    public String getHubCivsChestShopTitle() {
+        return hubCivsChestShopTitle;
+    }
+
+    public String getHubCivsChestShopLore() {
+        return hubCivsChestShopLore;
+    }
+
+    public String getHubRpgJournalTitle() {
+        return hubRpgJournalTitle;
+    }
+
+    public String getHubRpgJournalLore() {
+        return hubRpgJournalLore;
+    }
+
+    public String getHubRpgPerksTitle() {
+        return hubRpgPerksTitle;
+    }
+
+    public String getHubRpgPerksLore() {
+        return hubRpgPerksLore;
+    }
+
+    public String getHubRpgPerkSummaryTitle() {
+        return hubRpgPerkSummaryTitle;
+    }
+
+    public String getHubRpgPerkSummaryLore() {
+        return hubRpgPerkSummaryLore;
+    }
+
+    public String getHubRpgDailyTitle() {
+        return hubRpgDailyTitle;
+    }
+
+    public String getHubRpgWeeklyTitle() {
+        return hubRpgWeeklyTitle;
+    }
+
+    public String getHubRpgScheduleAvailable() {
+        return hubRpgScheduleAvailable;
+    }
+
+    public String getHubRpgScheduleDone() {
+        return hubRpgScheduleDone;
+    }
+
+    public String getHubRpgScheduleLocked() {
+        return hubRpgScheduleLocked;
+    }
+
+    public String getHubRpgScheduleNone() {
+        return hubRpgScheduleNone;
+    }
+
+    public String getHubRpgScheduleHint() {
+        return hubRpgScheduleHint;
+    }
+
+    public String getHubRpgProfileTitle() {
+        return hubRpgProfileTitle;
+    }
+
+    public String getHubRpgProfileLore() {
+        return hubRpgProfileLore;
+    }
+
+    public String getHubConfigNotificationsTitle() {
+        return hubConfigNotificationsTitle;
+    }
+
+    public String getHubConfigNotificationsLore() {
+        return hubConfigNotificationsLore;
+    }
+
+    public String getHubConfigBossBarTitle() {
+        return hubConfigBossBarTitle;
+    }
+
+    public String getHubConfigBossBarLore() {
+        return hubConfigBossBarLore;
+    }
+
+    public String getHubConfigHintTitle() {
+        return hubConfigHintTitle;
+    }
+
+    public String getHubConfigHintLore() {
+        return hubConfigHintLore;
+    }
+
+    public String getHubQuestsOpenJournalTitle() {
+        return hubQuestsOpenJournalTitle;
+    }
+
+    public String getHubQuestsOpenJournalLore() {
+        return hubQuestsOpenJournalLore;
     }
 
     public String getSettingsNotificationsOn() {

@@ -35,11 +35,11 @@ public final class PlayerProfileListener implements Listener {
         plugin.getSkillTreeManager().applyUnlockedPerks(player);
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
         maybeShowWelcome(player, newProfile);
-        maybeGiveGuideBook(player);
+        maybeGiveHubItem(player);
         plugin.getQuestFeedbackService().refreshTrackedHud(player);
     }
 
-    private void maybeGiveGuideBook(Player player) {
+    private void maybeGiveHubItem(Player player) {
         if (!plugin.getPluginConfig().isGuideBookOnJoin()) {
             return;
         }
@@ -47,8 +47,8 @@ public final class PlayerProfileListener implements Listener {
             if (!player.isOnline()) {
                 return;
             }
-            if (!plugin.getPlayerGuideBookService().hasGuideBookInInventory(player)) {
-                plugin.getPlayerGuideBookService().giveGuideBook(player);
+            if (!plugin.getPlayerHubService().hasHubItemInInventory(player)) {
+                plugin.getPlayerHubService().giveHubItem(player);
             }
         }, 60L);
     }

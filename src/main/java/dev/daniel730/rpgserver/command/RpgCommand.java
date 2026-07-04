@@ -50,6 +50,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "quest" -> handleQuest(sender, args);
             case "book" -> handleBook(sender, args, 1);
             case "journal" -> handleJournal(sender);
+            case "hub", "menu" -> handleHub(sender, args);
             case "guide" -> handleGuide(sender, args);
             case "settings" -> handleSettings(sender, args);
             case "perks" -> handlePerks(sender);
@@ -222,7 +223,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleGuide(CommandSender sender, String[] args) {
+    private boolean handleHub(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Este comando só pode ser usado por jogadores.");
             return true;
@@ -232,19 +233,19 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length >= 2 && args[1].equalsIgnoreCase("refresh")) {
-            plugin.getPlayerGuideBookService().refreshGuide(player);
+            plugin.getPlayerHubService().refreshHub(player);
             return true;
         }
         if (args.length >= 2 && args[1].equalsIgnoreCase("give")) {
-            plugin.getPlayerGuideBookService().giveGuideBook(player);
+            plugin.getPlayerHubService().giveHubItem(player);
             return true;
         }
-        if (plugin.getPlayerGuideBookService().hasGuideBookInInventory(player)) {
-            plugin.getPlayerGuideBookService().openGuide(player);
-        } else {
-            plugin.getPlayerGuideBookService().openOrGiveGuide(player);
-        }
+        plugin.getPlayerHubService().openHub(player);
         return true;
+    }
+
+    private boolean handleGuide(CommandSender sender, String[] args) {
+        return handleHub(sender, args);
     }
 
     private boolean handleSettings(CommandSender sender, String[] args) {
@@ -420,7 +421,9 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest track &lt;id&gt;</gray> — rastrear quest");
         plugin.getMessageUtil().send(sender, "<gray>/rpg book [id|open]</gray> — livro da quest rastreada");
         plugin.getMessageUtil().send(sender, "<gray>/rpg journal</gray> — diário de quests (GUI)");
-        plugin.getMessageUtil().send(sender, "<gray>/rpg guide [give|refresh]</gray> — guia do reino (livro único)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg hub</gray> — central do reino (GUI)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg hub give|refresh</gray> — item ou atualizar");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg guide</gray> — alias da central");
         plugin.getMessageUtil().send(sender, "<gray>/rpg settings notifications|bossbar</gray> — preferências pessoais");
         plugin.getMessageUtil().send(sender, "<gray>/rpg perks</gray> — listar perks");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
@@ -435,7 +438,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "guide", "settings", "perks", "profile"));
+            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "hub", "menu", "guide", "settings", "perks", "profile"));
             if (sender.hasPermission("rpg.admin")) {
                 options.add("reload");
                 options.add("sync");
@@ -452,7 +455,8 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                     Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(),
                     args[2]);
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("guide")) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("guide")
+                || args[0].equalsIgnoreCase("hub") || args[0].equalsIgnoreCase("menu"))) {
             return filterPrefix(List.of("give", "refresh"), args[1]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("settings")) {

@@ -165,7 +165,7 @@ public final class QuestFeedbackService {
             plugin.getQuestBookService().grantWelcomeBook(player);
         }
         if (config.isWelcomeGiveGuideBook()) {
-            plugin.getPlayerGuideBookService().giveGuideBook(player);
+            plugin.getPlayerHubService().giveHubItem(player);
         }
     }
 

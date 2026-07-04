@@ -34,6 +34,10 @@ integrations:
   veinminer:
     enabled: true
 
+player-hub:
+  on-join: true
+
+# Deprecated alias — use player-hub.on-join
 guide-book:
   on-join: true
 
@@ -90,6 +94,7 @@ feedback:
   welcome:
     enabled: true
     give-quest-book: false
+    give-hub-item: true
     give-guide-book: true
     sound: ENTITY_PLAYER_LEVELUP
     sound-volume: 0.9
@@ -120,12 +125,11 @@ messages:
   welcome:
     # pt_BR (default)
     title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Bem-vindo ao Reino</bold></gradient>"
-    subtitle: "<gray>Abra </gray><yellow>/rpg guide</yellow><gray> ou </gray><yellow>/rpg journal</yellow>"
-    message: "<gold>★</gold> <white>Sua aventura começa agora!</white> <gray>Use o</gray> <yellow>Guia do Reino</yellow> <gray>ou</gray> <yellow>/rpg journal</yellow> <gray>para escolher um caminho.</gray>"
+    subtitle: "<gray>Abra </gray><yellow>/rpg hub</yellow><gray> ou </gray><yellow>/rpg journal</yellow>"
+    message: "<gold>★</gold> <white>Sua aventura começa agora!</white> <gray>Use a</gray> <yellow>Central do Reino</yellow> <gray>ou</gray> <yellow>/rpg journal</yellow> <gray>para escolher um caminho.</gray>"
     # en (alternate — copy keys above and set settings.locale: en)
-    # title: "<gradient:#FFD700:#FF8C00:#FFD700><bold>Welcome to the Realm</bold></gradient>"
-    # subtitle: "<gray>Open </gray><yellow>/rpg journal</yellow><gray> to begin</gray>"
-    # message: "<gold>★</gold> <white>Your adventure begins!</white> <gray>Use</gray> <yellow>/rpg journal</yellow> <gray>to choose your path.</gray>"
+    # subtitle: "<gray>Open </gray><yellow>/rpg hub</yellow><gray> or </gray><yellow>/rpg journal</yellow>"
+    # message: "<gold>★</gold> <white>Your adventure begins!</white> <gray>Use the</gray> <yellow>Realm Hub</yellow> <gray>or</gray> <yellow>/rpg journal</yellow> <gray>to choose your path.</gray>"
   quest-journal:
     locked-prerequisite: "<red>Falta concluir:</red> <white>{quest}</white>"
     locked-permission: "<red>Requer desbloqueio (permissão).</red>"
@@ -151,10 +155,82 @@ messages:
     grant: "<gray>Livro de quest recebido:</gray> <white>{quest}</white>"
     opened: "<gray>Abrindo livro:</gray> <white>{quest}</white>"
   guide-book:
-    grant: "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg guide</yellow>"
-    refreshed: "<gray>Guia atualizado com seu progresso atual.</gray>"
-    inventory-full: "<yellow>Inventário cheio — guia dropado no chão.</yellow>"
-    already-have: "<gray>Você já possui o Guia do Reino.</gray> <yellow>/rpg guide</yellow> <gray>para abrir.</gray>"
+    grant: "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg hub</yellow>"
+    refreshed: "<gray>Central atualizada com seu progresso.</gray>"
+    inventory-full: "<yellow>Inventário cheio — item dropado no chão.</yellow>"
+    already-have: "<gray>Você já possui a Central do Reino.</gray> <yellow>/rpg hub</yellow> <gray>para abrir.</gray>"
+  player-hub:
+    title: "<gold><bold>Central do Reino</bold></gold>"
+    item-name: "<gold><italic>Central do Reino</italic></gold>"
+    item-lore: "<gray>Clique direito ou </gray><yellow>/rpg hub</yellow>"
+    grant: "<gray>Central do Reino recebida.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg hub</yellow>"
+    refreshed: "<gray>Central atualizada com seu progresso.</gray>"
+    inventory-full: "<yellow>Inventário cheio — item dropado no chão.</yellow>"
+    already-have: "<gray>Você já possui a Central do Reino.</gray> <yellow>/rpg hub</yellow> <gray>para abrir.</gray>"
+    tabs:
+      inicio: "Início"
+      civs: "Civs"
+      rpg: "RPG"
+      config: "Config"
+      quests: "Quests"
+    footer:
+      refresh: "<aqua>↻ Atualizar</aqua>"
+      close: "<red>✕ Fechar</red>"
+      journal: "<yellow>Diário de Quests</yellow>"
+    inicio:
+      profile-title: "<gold>{player}</gold>"
+      choose-path: "<yellow><bold>Escolher Caminho</bold></yellow>"
+      choose-path-lore: "<gray>Abrir diário para escolher Guerreiro, Mercador ou Construtor.</gray>"
+      next-quest: "<green><bold>Próxima Missão</bold></green>"
+      next-quest-lore: "<aqua>{quest}</aqua> <dark_gray>— clique para rastrear</dark_gray>"
+      no-quest: "<gray>Sem missões pendentes</gray>"
+    civs:
+      town-title: "<gold><bold>Menu Civs</bold></gold>"
+      town-lore: "<gray>Painel territorial: cidades, magias, farms.</gray>"
+      town-info-title: "<yellow><bold>Minha Cidade</bold></yellow>"
+      town-info-lore: "<gray>Ver cidade, membros e convites.</gray>"
+      regions-title: "<green><bold>Regiões</bold></green>"
+      regions-lore: "<gray>Farms, armazéns, altares e bônus.</gray>"
+      auction-title: "<gold><bold>Leilão</bold></gold>"
+      auction-lore: "<gray>Casa de leilões Civs.</gray>"
+      spells-title: "<light_purple><bold>Magias</bold></light_purple>"
+      spells-lore: "<gray>Altar e grimório no menu Civs.</gray>"
+      farms-title: "<yellow><bold>Farms</bold></yellow>"
+      farms-lore: "<gray>Regiões agrícolas e produção.</gray>"
+      combat-title: "<red><bold>Combate</bold></red>"
+      combat-lore: "<gray>Mobs customizados e eventos.</gray>"
+      chestshop-title: "<aqua><bold>Lojas de Jogadores</bold></aqua>"
+      chestshop-lore: "<gray>Use placas ChestShop para comprar e vender.</gray>"
+    rpg:
+      journal-title: "<gold><bold>Diário de Quests</bold></gold>"
+      journal-lore: "<gray>Ver, aceitar e rastrear missões.</gray>"
+      perks-title: "<light_purple><bold>Perks</bold></light_purple>"
+      perks-lore: "<gray>Ver perks desbloqueados e disponíveis.</gray>"
+      perk-summary-title: "<yellow>Perks: {unlocked}/{total}</yellow>"
+      perk-summary-lore: "<gray>Bônus de combate e territorial por caminho.</gray>"
+      daily-title: "<gold><bold>Missões Diárias</bold></gold>"
+      weekly-title: "<gold><bold>Missões Semanais</bold></gold>"
+      schedule-available: "<green>● Disponível</green>"
+      schedule-done: "<aqua>✔ Concluídas</aqua>"
+      schedule-locked: "<red>● Bloqueadas</red>"
+      schedule-none: "<gray>Sem missões deste tipo</gray>"
+      schedule-hint: "<dark_gray>Abra o diário para detalhes.</dark_gray>"
+      profile-title: "<white><bold>Meu Perfil</bold></white>"
+      profile-lore: "<gray>Arquétipo, quests e progresso.</gray>"
+    config:
+      notifications-title: "<yellow><bold>Notificações</bold></yellow>"
+      notifications-lore: "<gray>Sons e títulos ao completar objetivos.</gray>"
+      bossbar-title: "<yellow><bold>Boss Bar / HUD</bold></yellow>"
+      bossbar-lore: "<gray>Barra de progresso da quest rastreada.</gray>"
+      hint-title: "<gray>Preferências pessoais</gray>"
+      hint-lore: "<dark_gray>Salvas no seu perfil RPG.</dark_gray>"
+    quests:
+      open-journal-title: "<gold><bold>Abrir Diário Completo</bold></gold>"
+      open-journal-lore: "<gray>Ver todas as missões do seu caminho.</gray>"
+    # en (alternate)
+    # title: "<gold><bold>Realm Hub</bold></gold>"
+    # item-name: "<gold><italic>Realm Hub</italic></gold>"
+    # item-lore: "<gray>Right-click or </gray><yellow>/rpg hub</yellow>"
   settings:
     notifications-on: "<green>Notificações de quest ligadas.</green>"
     notifications-off: "<gray>Notificações de quest desligadas.</gray>"

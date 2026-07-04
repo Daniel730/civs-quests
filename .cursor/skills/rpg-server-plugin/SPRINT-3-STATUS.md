@@ -1,9 +1,31 @@
 # Sprint 3 — Status & Handoff
 
-**Updated:** 2026-07-04 (unified guide book, quest tree lock, overlap dedup)  
+**Updated:** 2026-07-04 (player hub GUI replaces written book)  
 **Stack:** Civs, AuraSkills, ChestShop, Essentials, RPGServer, Vault, LuckPerms, PAPI  
 **Branch:** `sprint-3/rpg-features`  
 **Prior sprint:** `SPRINT-2-STATUS.md` (complete — smokeshow playtest validated)
+
+---
+
+## Session 2026-07-04 (late) — Player Hub GUI
+
+### Shipped
+
+| Item | Detail |
+|------|--------|
+| **Central do Reino** | `PlayerHubGui` — 54-slot inventory GUI (NOT written book) |
+| **Tabs** | Início \| Civs \| RPG \| Config \| Quests — archetype glass borders like journal |
+| **Item** | `RECOVERY_COMPASS` hub item (`rpg-hub-compass`); legacy book marker still works |
+| **Commands** | `/rpg hub`, `/rpg menu`, `/rpg guide` (alias), `give\|refresh` |
+| **Civs tab** | Click icons → run `/cv menu`, `/cv town`, `/cv auction` as player |
+| **Config tab** | Green/red wool toggles for notifications + boss bar (profile YAML) |
+| **Removed** | `PlayerGuideBookService` WRITTEN_BOOK pages; `PlayerGuideBookListener` |
+
+### Replaced
+
+- `PlayerGuideBookService` (4-page clickable book) → `PlayerHubService` + `PlayerHubGui`
+- Join grant: written book → recovery compass with enchant glint
+- Welcome messages point to `/rpg hub` instead of `/rpg guide`
 
 ---
 
@@ -13,9 +35,9 @@
 
 | Item | Detail |
 |------|--------|
-| **Guia do Reino** | `PlayerGuideBookService` — one WRITTEN_BOOK, tabs Início / Civs / RPG / Config |
-| **Commands** | `/rpg guide`, `/rpg guide refresh`, `/rpg settings notifications\|bossbar` |
-| **Join** | `guide-book.on-join: true`; disabled per-quest book + IB auto-grant |
+| **Central do Reino** | `PlayerHubGui` + `PlayerHubService` — inventory GUI, tabs Início / Civs / RPG / Config / Quests |
+| **Commands** | `/rpg hub`, `/rpg menu`, `/rpg guide` (alias), `/rpg settings notifications\|bossbar` |
+| **Join** | `player-hub.on-join: true`; compass item; disabled per-quest book + IB auto-grant |
 | **Archetype lock** | One path only; `ARCHETYPE_LOCKED` on conflict |
 | **Overlap fix** | `daily_hunter` → warrior, `daily_farm` → merchant; neutral dailies removed |
 | **Docs** | `QUEST-DESIGN-NOTES.md`, updated `rpg-quests` skill |

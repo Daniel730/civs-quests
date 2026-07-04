@@ -49,7 +49,7 @@ id: warrior_path
 name: "Caminho do Guerreiro"
 archetype: warrior
 description: "..."
-lore-book: warrior_intro        # optional, deprecated — use Guia do Reino (/rpg guide); IB only if grant-on-quest-start: true
+lore-book: warrior_intro        # optional, deprecated — use Central do Reino (/rpg hub); IB only if grant-on-quest-start: true
 requires:                       # RPG-004 chain — list of prior quest ids
   - merchant_path
 objectives:
@@ -72,14 +72,16 @@ Rules: `.cursor/rules/rpg-quests.mdc`. Examples: `src/main/resources/quests/`, `
 ## Rewards (`RewardExecutor` / `RewardDefinition`)
 
 Fields: `money`, `skill-xp.<skill>`, `permission` (one node), `essentials-kit`, `warp`.
-Each gated by `integrations.*.enabled` and hook presence. `lore-book` is deprecated — use **`PlayerGuideBookService`** (`/rpg guide`) for player help; IB grant only when `integrations.interactivebooks.grant-on-quest-start: true`.
+Each gated by `integrations.*.enabled` and hook presence. `lore-book` is deprecated — use **`PlayerHubService`** (`/rpg hub`) for player help; IB grant only when `integrations.interactivebooks.grant-on-quest-start: true`.
 
-## Player guide book (Sprint 3 redesign)
+## Player hub GUI (Sprint 3 — replaces written book)
 
-- **One item:** `PlayerGuideBookService` — WRITTEN_BOOK with lore marker `rpg-guide-book`.
-- **Commands:** `/rpg guide` (open/give), `/rpg guide refresh`, `/rpg settings notifications|bossbar`.
-- **Tabs (clickable pages):** Início, Civs (/cv), RPG, Configurações (per-player toggles in profile YAML).
-- **Join:** `guide-book.on-join: true` — replaces per-quest book spam.
+- **GUI:** `PlayerHubGui` + `PlayerHubHolder` + `PlayerHubListener` — 54-slot chest inventory matching `QuestJournalGui` aesthetics (archetype glass panes, enchant glint on actions).
+- **Item:** `PlayerHubService` — `RECOVERY_COMPASS` with lore marker `rpg-hub-compass` (legacy `rpg-guide-book` WRITTEN_BOOK still opens hub).
+- **Commands:** `/rpg hub`, `/rpg menu`, `/rpg guide` (alias), `/rpg hub give|refresh`.
+- **Tabs:** Início (profile, choose path, next quest), Civs (click → `/cv` commands), RPG (journal, perks, dailies/weeklies), Config (notification/bossbar toggles), Quests (mini preview → journal).
+- **Join:** `player-hub.on-join: true` — gives compass item; no WRITTEN_BOOK pages.
+- **Settings:** GUI toggles call `QuestFeedbackService.toggleNotifications/toggleBossBar` (saved in profile YAML).
 - **Archetype lock:** starting one path blocks other paths (`ARCHETYPE_LOCKED`).
 
 ## Requirements
