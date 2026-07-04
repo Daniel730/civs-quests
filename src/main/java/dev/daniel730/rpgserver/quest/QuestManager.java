@@ -4,6 +4,7 @@ import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypeRegistry;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypes;
+import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,6 +23,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Random;
 
 public final class QuestManager {
 
@@ -32,6 +36,7 @@ public final class QuestManager {
     private final RewardExecutor rewardExecutor;
     private final QuestProgressSync progressSync;
     private final Map<String, Quest> quests = new LinkedHashMap<>();
+    private final Map<String, List<Quest>> questsByObjectiveType = new LinkedHashMap<>();
 
     public QuestManager(RpgServerPlugin plugin) {
         this.plugin = plugin;
@@ -51,12 +56,25 @@ public final class QuestManager {
 
     public void loadQuests() {
         quests.clear();
+        questsByObjectiveType.clear();
         File questsFolder = new File(plugin.getDataFolder(), "quests");
         if (!questsFolder.exists()) {
             questsFolder.mkdirs();
             plugin.saveResource("quests/warrior_path.yml", false);
             plugin.saveResource("quests/builder_path.yml", false);
             plugin.saveResource("quests/merchant_path.yml", false);
+            plugin.saveResource("quests/welcome.yml", false);
+            plugin.saveResource("quests/first_steps.yml", false);
+            plugin.saveResource("quests/hunt_frost_watchtower.yml", false);
+            plugin.saveResource("quests/hunt_quarry_depths.yml", false);
+            plugin.saveResource("quests/hunt_sunken_caravan.yml", false);
+            plugin.saveResource("quests/daily_scout.yml", false);
+            plugin.saveResource("quests/daily_boar_hunt.yml", false);
+            plugin.saveResource("quests/daily_duel.yml", false);
+            plugin.saveResource("quests/daily_pillager.yml", false);
+            plugin.saveResource("quests/weekly_explorer.yml", false);
+            plugin.saveResource("quests/weekly_deep_delve.yml", false);
+            plugin.saveResource("quests/weekly_guild_bounty.yml", false);
             plugin.saveResource("quests/sprint2_civs_skills.yml", false);
             plugin.saveResource("quests/sprint2_auction.yml", false);
             plugin.saveResource("quests/sprint3_daily.yml", false);
@@ -94,7 +112,24 @@ public final class QuestManager {
                 plugin.getLogger().log(Level.WARNING, "Falha ao carregar quest " + file.getName(), ex);
             }
         }
+        rebuildObjectiveTypeIndex();
         plugin.getLogger().info("Carregadas " + quests.size() + " quests.");
+    }
+
+    private void rebuildObjectiveTypeIndex() {
+        questsByObjectiveType.clear();
+        for (Quest quest : quests.values()) {
+            for (Quest.Objective objective : quest.getObjectives()) {
+                questsByObjectiveType
+                        .computeIfAbsent(objective.getTypeId(), key -> new ArrayList<>())
+                        .add(quest);
+            }
+        }
+    }
+
+    public List<Quest> getQuestsByObjectiveType(String typeId) {
+        List<Quest> list = questsByObjectiveType.get(typeId);
+        return list == null ? List.of() : Collections.unmodifiableList(list);
     }
 
     private Quest parseQuest(YamlConfiguration config) {
@@ -106,6 +141,10 @@ public final class QuestManager {
         String archetype = config.getString("archetype", "");
         String description = config.getString("description", "");
         String unlocksPerk = config.getString("unlocks-perk");
+        List<String> unlocksPerkChoice = config.getStringList("unlocks-perk-choice");
+        List<String> lore = config.getStringList("lore");
+        int tier = config.getInt("tier", 0);
+        String category = config.getString("category", "");
         QuestSchedule schedule = QuestSchedule.fromYaml(config.getString("schedule"));
         List<String> requiredQuestIds = config.getStringList("requires");
         List<Map<?, ?>> rawObjectives = config.getMapList("objectives");
@@ -114,14 +153,15 @@ public final class QuestManager {
             objectives.add(objectiveTypeRegistry.parseObjective(raw));
         }
         RewardDefinition rewards = RewardDefinition.fromConfig(config.getConfigurationSection("rewards"));
-        return new Quest(id, name, archetype, description, unlocksPerk, schedule,
-                requiredQuestIds, objectives, rewards);
+        return new Quest(id, name, archetype, description, lore, tier, category,
+                unlocksPerk, unlocksPerkChoice, schedule, requiredQuestIds, objectives, rewards);
     }
 
     public void resetExpiredScheduledQuests(Player player) {
         PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
         ZoneId zone = resolveResetZone();
         boolean changed = false;
+        int resetCount = 0;
 
         for (Quest quest : quests.values()) {
             if (!quest.isScheduled() || !profile.isQuestComplete(quest.getId())) {
@@ -134,11 +174,18 @@ public final class QuestManager {
             if (QuestScheduleReset.isPeriodExpired(quest.getSchedule(), completedAt, zone)) {
                 profile.clearQuestState(quest.getId());
                 changed = true;
+                resetCount++;
             }
         }
 
         if (changed) {
             plugin.getProfileManager().markDirty(player.getUniqueId());
+            // #region agent log
+            AgentDebugLog.log(plugin, "H3", "QuestManager.resetExpiredScheduledQuests",
+                    "scheduled quests reset",
+                    Map.of("resetCount", resetCount,
+                            "zone", zone.toString()));
+            // #endregion
         }
     }
 
@@ -204,12 +251,54 @@ public final class QuestManager {
 
     public List<Quest> getScheduledQuests(Player player, PlayerProfile profile, QuestSchedule schedule) {
         List<Quest> result = new ArrayList<>();
+        Set<String> rotationIds = getRotationQuestIds(schedule);
         for (Quest quest : quests.values()) {
-            if (quest.getSchedule() == schedule && matchesPlayerArchetype(profile, quest)) {
-                result.add(quest);
+            if (quest.getSchedule() != schedule || !matchesPlayerArchetype(profile, quest)) {
+                continue;
             }
+            if (!rotationIds.isEmpty() && !rotationIds.contains(quest.getId())) {
+                continue;
+            }
+            result.add(quest);
         }
         return sortForJournal(player, profile, result);
+    }
+
+    public Set<String> getRotationQuestIds(QuestSchedule schedule) {
+        List<String> pool = switch (schedule) {
+            case DAILY -> plugin.getPluginConfig().getDailyRotationPool();
+            case WEEKLY -> plugin.getPluginConfig().getWeeklyRotationPool();
+            case NONE -> List.of();
+        };
+        int count = switch (schedule) {
+            case DAILY -> plugin.getPluginConfig().getDailyRotationCount();
+            case WEEKLY -> plugin.getPluginConfig().getWeeklyRotationCount();
+            case NONE -> 0;
+        };
+        if (pool.isEmpty() || count <= 0) {
+            return Set.of();
+        }
+        ZoneId zone = resolveResetZone();
+        String periodKey = schedule == QuestSchedule.DAILY
+                ? currentPeriodDay(zone)
+                : currentPeriodWeek(zone);
+        List<String> shuffled = new ArrayList<>(pool);
+        Collections.shuffle(shuffled, new Random(periodKey.hashCode()));
+        return Set.copyOf(shuffled.subList(0, Math.min(count, shuffled.size())));
+    }
+
+    public String currentPeriodWeek(ZoneId zone) {
+        var now = java.time.LocalDate.now(zone);
+        return now.get(java.time.temporal.IsoFields.WEEK_BASED_YEAR) + "-W"
+                + now.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+    }
+
+    public boolean isInRotation(Quest quest) {
+        if (quest == null || !quest.isScheduled()) {
+            return true;
+        }
+        Set<String> rotation = getRotationQuestIds(quest.getSchedule());
+        return rotation.isEmpty() || rotation.contains(quest.getId());
     }
 
     public List<Quest> getMiscQuests(Player player, PlayerProfile profile, Set<String> excludeIds) {
@@ -298,7 +387,7 @@ public final class QuestManager {
             if (!meetsRequirements(profile, candidate)) {
                 continue;
             }
-            if (!plugin.getLuckPermsHook().hasQuestPermission(player, candidate.getId())) {
+            if (!hasQuestUnlock(player, profile, candidate)) {
                 continue;
             }
             QuestStatus status = getQuestStatus(player, profile, candidate);
@@ -421,9 +510,7 @@ public final class QuestManager {
         String normalizedMob = mobKey.toLowerCase(Locale.ROOT);
         processCountObjectives(player, ObjectiveTypes.KILL_MOB, objective ->
                 objective.getMob() == null
-                        || objective.getMob().equalsIgnoreCase(normalizedMob)
-                        || normalizedMob.contains(objective.getMob().toLowerCase(Locale.ROOT)), 1);
-        checkEconomyObjectives(player);
+                        || objective.getMob().equalsIgnoreCase(normalizedMob), 1);
     }
 
     public void handleCustomMobKill(Player player, String mobId) {
@@ -433,8 +520,43 @@ public final class QuestManager {
         String normalizedMob = mobId.toLowerCase(Locale.ROOT);
         processCountObjectives(player, ObjectiveTypes.CUSTOM_MOB_KILL, objective ->
                 objective.getMob() != null
-                        && (objective.getMob().equalsIgnoreCase(normalizedMob)
-                        || normalizedMob.contains(objective.getMob().toLowerCase(Locale.ROOT))), 1);
+                        && objective.getMob().equalsIgnoreCase(normalizedMob), 1);
+    }
+
+    public void handleDiscoverPoi(Player player, String poiId) {
+        if (poiId == null || poiId.isBlank()) {
+            return;
+        }
+        String normalized = poiId.toLowerCase(Locale.ROOT);
+        processInstantObjectives(player, ObjectiveTypes.DISCOVER_POI, objective ->
+                objective.getRegion() != null
+                        && objective.getRegion().equalsIgnoreCase(normalized));
+    }
+
+    public void handleDiscoverBiome(Player player, String biomeId) {
+        if (biomeId == null || biomeId.isBlank()) {
+            return;
+        }
+        String normalized = biomeId.toLowerCase(Locale.ROOT);
+        processInstantObjectives(player, ObjectiveTypes.DISCOVER_BIOME, objective ->
+                objective.getBlock() != null
+                        && objective.getBlock().equalsIgnoreCase(normalized));
+    }
+
+    public void handleEnterCombat(Player player) {
+        if (!plugin.getCivsHook().isEnabled()) {
+            return;
+        }
+        processCountObjectives(player, ObjectiveTypes.ENTER_COMBAT, objective -> true, 1);
+    }
+
+    public void handleOpenHub(Player player) {
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        if (!profile.isHubOpened()) {
+            profile.setHubOpened(true);
+            plugin.getProfileManager().markDirty(player.getUniqueId());
+        }
+        processInstantObjectives(player, ObjectiveTypes.OPEN_HUB, objective -> true);
     }
 
     public void handleMineBlock(Player player, String blockKey) {
@@ -495,6 +617,32 @@ public final class QuestManager {
                 objective.getSkill() != null
                         && plugin.getCivsHook().getSkillLevel(player, objective.getSkill())
                         >= objective.getTargetLevel());
+    }
+
+    /** Backfills join_town from Civs roster (founders, members, and prior invites). */
+    public void checkTownMembership(Player player) {
+        if (!plugin.getCivsHook().isEnabled()) {
+            return;
+        }
+        processInstantObjectives(player, ObjectiveTypes.JOIN_TOWN, objective ->
+                plugin.getCivsHook().isTownMember(player, objective.getRegion()));
+    }
+
+    /** Backfills build_region from Civs accomplishments and owned regions. */
+    public void checkBuiltRegions(Player player) {
+        if (!plugin.getCivsHook().isEnabled()) {
+            return;
+        }
+        processInstantObjectives(player, ObjectiveTypes.BUILD_REGION, objective ->
+                objective.getRegion() != null
+                        && plugin.getCivsHook().hasBuiltRegion(player, objective.getRegion()));
+    }
+
+    /** Silent Civs backfill for join, builds, and internal skill gates. */
+    public void backfillCivsState(Player player) {
+        checkTownMembership(player);
+        checkBuiltRegions(player);
+        checkCivsSkillLevels(player);
     }
 
     public void handleAuctionList(Player player, int increment) {
@@ -683,9 +831,30 @@ public final class QuestManager {
     }
 
     private void ensureQuestStarted(Player player, PlayerProfile profile, Quest quest) {
+        if (profile.hasQuestStarted(quest.getId()) || profile.getActiveQuestIds().contains(quest.getId())) {
+            return;
+        }
+        int limit = plugin.getPluginConfig().getMaxActiveQuests();
+        if (limit > 0 && countActiveInProgressQuests(player, profile) >= limit) {
+            // #region agent log
+            AgentDebugLog.log(plugin, "H2", "QuestManager.ensureQuestStarted",
+                    "auto-start blocked by active quest limit",
+                    Map.of("questId", quest.getId(),
+                            "limit", limit,
+                            "activeInProgress", countActiveInProgressQuests(player, profile)));
+            // #endregion
+            return;
+        }
         if (!profile.markQuestStarted(quest.getId())) {
             return;
         }
+        // #region agent log
+        AgentDebugLog.log(plugin, "H2", "QuestManager.ensureQuestStarted",
+                "auto-starting quest from event progress",
+                Map.of("questId", quest.getId(),
+                        "limit", limit,
+                        "activeInProgress", countActiveInProgressQuests(player, profile)));
+        // #endregion
         onQuestStarted(player, profile, quest);
     }
 
@@ -697,6 +866,7 @@ public final class QuestManager {
         if (plugin.getVaultHook().isEnabled()) {
             profile.setQuestStartBalance(quest.getId(), plugin.getVaultHook().getBalance(player));
         }
+        plugin.getHuntSpawnService().spawnOnQuestAccept(player, quest);
         plugin.getQuestFeedbackService().refreshBossBar(player);
     }
 
@@ -749,6 +919,14 @@ public final class QuestManager {
             return 0;
         }
         profile.markQuestComplete(quest.getId());
+        // #region agent log
+        AgentDebugLog.log(plugin, "H1,H2", "QuestManager.completeQuest",
+                "quest marked complete",
+                Map.of("questId", quest.getId(),
+                        "schedule", quest.getSchedule().name(),
+                        "grantRewards", grantRewards,
+                        "notify", notify));
+        // #endregion
         if (quest.isScheduled()) {
             profile.setQuestCompletedAt(quest.getId(), System.currentTimeMillis());
         }
@@ -763,6 +941,11 @@ public final class QuestManager {
             rewardExecutor.grantRewards(player, quest);
             grantQuestCompletionPermission(player, quest.getId());
             unlockFollowUpQuestPermissions(player, quest.getId());
+            plugin.getPathTraitService().onPathQuestComplete(player, quest);
+            if (!quest.getUnlocksPerkChoice().isEmpty()) {
+                plugin.getMessageUtil().send(player,
+                        "<light_purple>Escolha um perk capstone em</light_purple> <yellow>/rpg tree</yellow>");
+            }
         }
         return 1;
     }
@@ -814,10 +997,23 @@ public final class QuestManager {
         if (!matchesPlayerArchetype(profile, quest)) {
             return false;
         }
-        if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+        if (!hasQuestUnlock(player, profile, quest)) {
             return false;
         }
         return meetsRequirements(profile, quest);
+    }
+
+    private boolean hasQuestUnlock(Player player, PlayerProfile profile, Quest quest) {
+        if (!plugin.getLuckPermsHook().isEnabled()) {
+            return true;
+        }
+        if (quest.getRequiredQuestIds().isEmpty() || isPathQuest(quest)) {
+            return true;
+        }
+        if (plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+            return true;
+        }
+        return quest.getRequiredQuestIds().stream().allMatch(profile::isQuestComplete);
     }
 
     public boolean meetsRequirements(PlayerProfile profile, Quest quest) {
@@ -864,7 +1060,7 @@ public final class QuestManager {
         if (!meetsRequirements(profile, quest)) {
             return QuestStatus.LOCKED;
         }
-        if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+        if (!hasQuestUnlock(player, profile, quest)) {
             return QuestStatus.LOCKED;
         }
         return getQuestStatus(profile, quest);
@@ -975,14 +1171,120 @@ public final class QuestManager {
         return null;
     }
 
-    public int countActiveInProgressQuests(PlayerProfile profile) {
+    public int countActiveInProgressQuests(Player player, PlayerProfile profile) {
         int count = 0;
         for (Quest quest : quests.values()) {
-            if (getQuestStatus(profile, quest) == QuestStatus.IN_PROGRESS) {
+            if (getQuestStatus(player, profile, quest) == QuestStatus.IN_PROGRESS) {
                 count++;
             }
         }
         return count;
+    }
+
+    public SanitizeResult sanitizeProfile(Player player, PlayerProfile profile) {
+        int strippedInvalid = 0;
+        int strippedCompletedActive = 0;
+        int demotedExcess = 0;
+
+        Set<String> questIds = new LinkedHashSet<>();
+        questIds.addAll(profile.getActiveQuestIds());
+        questIds.addAll(profile.getStartedQuestIds());
+        for (String key : profile.getCompletedObjectiveKeys()) {
+            int colon = key.indexOf(':');
+            if (colon > 0) {
+                questIds.add(key.substring(0, colon));
+            }
+        }
+        for (String key : profile.getObjectiveProgressSnapshot().keySet()) {
+            int colon = key.indexOf(':');
+            if (colon > 0) {
+                questIds.add(key.substring(0, colon));
+            }
+        }
+
+        for (String questId : questIds) {
+            Quest quest = quests.get(questId);
+            if (quest == null) {
+                profile.clearQuestState(questId);
+                strippedInvalid++;
+                continue;
+            }
+            if (profile.isQuestComplete(questId)) {
+                if (profile.getActiveQuestIds().contains(questId)
+                        || profile.getStartedQuestIds().contains(questId)) {
+                    profile.stripInProgressState(questId);
+                    strippedCompletedActive++;
+                }
+                continue;
+            }
+            if (!canWorkOnQuest(player, profile, quest)) {
+                profile.stripInProgressState(questId);
+                strippedInvalid++;
+            }
+        }
+
+        int limit = plugin.getPluginConfig().getMaxActiveQuests();
+        if (limit > 0) {
+            List<String> inProgressActive = new ArrayList<>();
+            for (String questId : profile.getActiveQuestIds()) {
+                Quest quest = quests.get(questId);
+                if (quest != null
+                        && getQuestStatus(player, profile, quest) == QuestStatus.IN_PROGRESS) {
+                    inProgressActive.add(questId);
+                }
+            }
+            if (inProgressActive.size() > limit) {
+                String trackedId = profile.getTrackedQuestId();
+                inProgressActive.sort((a, b) -> {
+                    if (a.equals(trackedId)) {
+                        return -1;
+                    }
+                    if (b.equals(trackedId)) {
+                        return 1;
+                    }
+                    Quest qa = quests.get(a);
+                    Quest qb = quests.get(b);
+                    int pa = qa == null ? 0 : getQuestProgress(profile, qa).completed();
+                    int pb = qb == null ? 0 : getQuestProgress(profile, qb).completed();
+                    return Integer.compare(pb, pa);
+                });
+                for (int i = limit; i < inProgressActive.size(); i++) {
+                    profile.removeActiveQuest(inProgressActive.get(i));
+                    demotedExcess++;
+                }
+            }
+        }
+
+        String trackedId = profile.getTrackedQuestId();
+        if (trackedId != null) {
+            Quest tracked = quests.get(trackedId);
+            if (tracked == null
+                    || profile.isQuestComplete(trackedId)
+                    || getQuestStatus(player, profile, tracked) != QuestStatus.IN_PROGRESS) {
+                profile.setTrackedQuestId(null);
+            }
+        }
+
+        if (strippedInvalid > 0 || strippedCompletedActive > 0 || demotedExcess > 0) {
+            plugin.getProfileManager().markDirty(player.getUniqueId());
+            // #region agent log
+            AgentDebugLog.log(plugin, "H2,H5", "QuestManager.sanitizeProfile",
+                    "profile sanitized",
+                    Map.of("strippedInvalid", strippedInvalid,
+                            "strippedCompletedActive", strippedCompletedActive,
+                            "demotedExcess", demotedExcess,
+                            "activeAfter", profile.getActiveQuestIds().size(),
+                            "inProgressAfter", countActiveInProgressQuests(player, profile)));
+            // #endregion
+        }
+        return new SanitizeResult(strippedInvalid, strippedCompletedActive, demotedExcess);
+    }
+
+    public record SanitizeResult(int strippedInvalid, int strippedCompletedActive, int demotedExcess) {
+    }
+
+    public void ensureProfileSanitized(Player player) {
+        sanitizeProfile(player, plugin.getProfileManager().getOrCreate(player));
     }
 
     /**
@@ -998,7 +1300,7 @@ public final class QuestManager {
         if (isConflictingPath(profile, quest)) {
             return StartResult.ARCHETYPE_LOCKED;
         }
-        if (!plugin.getLuckPermsHook().hasQuestPermission(player, quest.getId())) {
+        if (!hasQuestUnlock(player, profile, quest)) {
             return StartResult.NO_PERMISSION;
         }
         if (!meetsRequirements(profile, quest)) {
@@ -1009,13 +1311,14 @@ public final class QuestManager {
             return StartResult.ALREADY_ACTIVE;
         }
         int limit = plugin.getPluginConfig().getMaxActiveQuests();
-        if (limit > 0 && countActiveInProgressQuests(profile) >= limit) {
+        if (limit > 0 && countActiveInProgressQuests(player, profile) >= limit) {
             return StartResult.LIMIT_REACHED;
         }
         ensureQuestStarted(player, profile, quest);
         profile.addActiveQuest(quest.getId());
         maybeSetArchetype(profile, quest);
         profile.setTrackedQuestId(quest.getId());
+        progressSync.sync(player, true, true);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
         plugin.getPlayerHubService().refreshIfOpen(player);
@@ -1043,6 +1346,7 @@ public final class QuestManager {
         }
         profile.clearQuestState(quest.getId());
         plugin.getProfileManager().markDirty(player.getUniqueId());
+        plugin.getQuestFeedbackService().refreshTrackedHud(player);
         return true;
     }
 

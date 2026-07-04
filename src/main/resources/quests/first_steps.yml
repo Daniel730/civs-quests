@@ -1,0 +1,22 @@
+id: first_steps
+name: "Primeiros Passos"
+archetype: neutral
+tier: 1
+category: exploration
+description: "Explore os biomas próximos e familiarize-se com as planícies e florestas do território."
+requires:
+  - welcome
+objectives:
+  - id: discover_plains
+    type: discover_biome
+    biome: plains
+    description: "Descubra o bioma Planícies"
+  - id: discover_forest
+    type: discover_biome
+    biome: forest
+    description: "Descubra o bioma Floresta"
+rewards:
+  money: 25
+  skill-xp:
+    foraging: 50
+  permission: rpg.quest.first_steps

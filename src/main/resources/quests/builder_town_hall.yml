@@ -7,7 +7,7 @@ requires:
 objectives:
   - id: join_community
     type: join_town
-    description: "Aceite um convite e entre em uma cidade"
+    description: "Funde ou entre em uma cidade (dono ou membro)"
   - id: build_council_room
     type: build_region
     region: council_room

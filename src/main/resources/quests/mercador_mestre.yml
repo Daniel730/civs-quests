@@ -24,3 +24,8 @@ rewards:
   permission: rpg.quest.mercador_mestre
   lp-group: rpg-merchant
 unlocks-perk: merchant_golden_touch
+unlocks-perk-choice:
+  - merchant_guild_seal
+  - merchant_silk_route
+  - merchant_ledger_master
+  - merchant_smuggler

@@ -1,0 +1,27 @@
+id: hunt_sunken_caravan
+name: "Caçada da Caravana Afundada"
+archetype: merchant
+tier: 3
+category: exploration
+description: "Encontre os restos da caravana afundada e elimine os Saqueadores das Dunas que guardam o tesouro."
+lore:
+  - "Uma caravana rica afundou nas dunas — dizem que ainda há ouro enterrado."
+  - "Bandidos do deserto tomaram o local; aceite a caçada e recupere o que restou."
+requires:
+  - mercador_fortuna
+objectives:
+  - id: discover_sunken_caravan
+    type: discover_poi
+    poi: sunken_caravan
+    description: "Descubra a Caravana Afundada (sunken_caravan)"
+  - id: slay_sand_raider
+    type: custom_mob_kill
+    mob: sand_raider
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote o Saqueador das Dunas (sand_raider)"
+rewards:
+  money: 250
+  skill-xp:
+    farming: 400
+  permission: rpg.quest.hunt_sunken_caravan

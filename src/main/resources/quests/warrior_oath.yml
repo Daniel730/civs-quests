@@ -1,0 +1,21 @@
+id: warrior_oath
+name: "Juramento do Guerreiro"
+archetype: warrior
+tier: 1
+category: story
+description: "Prove sua coragem entrando em combate repetidas vezes após escolher o caminho do guerreiro."
+lore:
+  - "O altar exige sangue e aço — não palavras vazias."
+  - "Enfrente inimigos em combate Civs até provar que não recua diante do perigo."
+requires:
+  - warrior_path
+objectives:
+  - id: enter_combat_sessions
+    type: enter_combat
+    amount: 3
+    description: "Entre em combate 3 vezes"
+rewards:
+  money: 75
+  skill-xp:
+    fighting: 200
+  permission: rpg.quest.warrior_oath

@@ -1,0 +1,23 @@
+id: warrior_defesa_vila
+name: "Defesa da Vila"
+archetype: warrior
+tier: 2
+category: story
+description: "Patrulhe a vila do conselho e afaste ameaças que rondam as muralhas."
+requires:
+  - warrior_path
+objectives:
+  - id: scout_council
+    type: discover_poi
+    poi: council_village
+    description: "Patrulhe a Vila do Conselho"
+  - id: slay_raiders
+    type: kill_mob
+    mob: pillager
+    amount: 5
+    description: "Derrote 5 saqueadores nas redondezas"
+rewards:
+  money: 90
+  skill-xp:
+    fighting: 250
+  permission: rpg.quest.warrior_defesa_vila

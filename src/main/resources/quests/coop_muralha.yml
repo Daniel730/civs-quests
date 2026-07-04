@@ -1,0 +1,23 @@
+id: coop_muralha
+name: "Muralha Coletiva"
+archetype: builder
+tier: 2
+category: story
+description: "Defenda a cidade ao lado dos seus vizinhos — o território cresce quando todos lutam juntos."
+requires:
+  - builder_town_hall
+objectives:
+  - id: town_member
+    type: join_town
+    description: "Mantenha-se em uma cidade com outros civis"
+  - id: defend_town
+    type: enter_combat
+    amount: 3
+    description: "Entre em combate 3 vezes defendendo o território"
+rewards:
+  money: 100
+  civs-skill-xp:
+    building: 150
+  skill-xp:
+    fighting: 200
+  permission: rpg.quest.coop_muralha

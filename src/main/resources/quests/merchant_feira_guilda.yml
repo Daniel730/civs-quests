@@ -1,0 +1,22 @@
+id: merchant_feira_guilda
+name: "Feira da Guilda"
+archetype: merchant
+tier: 2
+category: story
+description: "Encontre o mercado da guilda perto do conselho e negocie com outros mercadores."
+requires:
+  - merchant_path
+objectives:
+  - id: visit_market
+    type: discover_poi
+    poi: guild_market
+    description: "Descubra o Mercado da Guilda"
+  - id: shop_sell_goods
+    type: shop_sell
+    amount: 5
+    description: "Venda 5 itens na sua loja ChestShop"
+rewards:
+  money: 80
+  skill-xp:
+    farming: 200
+  permission: rpg.quest.merchant_feira_guilda

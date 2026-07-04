@@ -20,6 +20,15 @@ public final class PlayerProfile {
     private final Map<String, Double> questStartBalances = new HashMap<>();
     private final Map<String, Long> questCompletionEpochMs = new HashMap<>();
     private final Set<String> unlockedPerkIds = new LinkedHashSet<>();
+    private final Set<String> discoveredPois = new LinkedHashSet<>();
+    private final Set<String> discoveredBiomes = new LinkedHashSet<>();
+    private final Set<String> lockedExclusiveGroups = new LinkedHashSet<>();
+    private final Map<String, Long> huntCooldowns = new HashMap<>();
+    private int pathEssence;
+    private int essenceSpent;
+    private int rebirthCount;
+    private String legacyPerkId;
+    private boolean hubOpened;
     private String dailyCtaShownDay;
     private boolean welcomeShown;
     private Boolean notificationsEnabled;
@@ -124,10 +133,15 @@ public final class PlayerProfile {
 
     public void clearQuestState(String questId) {
         completedQuestIds.remove(questId);
+        questCompletionEpochMs.remove(questId);
+        stripInProgressState(questId);
+    }
+
+    /** Clears in-progress step state without removing a completed quest record. */
+    public void stripInProgressState(String questId) {
         activeQuestIds.remove(questId);
         startedQuestIds.remove(questId);
         questStartBalances.remove(questId);
-        questCompletionEpochMs.remove(questId);
         if (questId != null && questId.equals(trackedQuestId)) {
             trackedQuestId = null;
         }
@@ -209,6 +223,135 @@ public final class PlayerProfile {
     public void setUnlockedPerkIds(Set<String> ids) {
         unlockedPerkIds.clear();
         unlockedPerkIds.addAll(ids);
+    }
+
+    public Set<String> getDiscoveredPois() {
+        return Collections.unmodifiableSet(discoveredPois);
+    }
+
+    public boolean hasDiscoveredPoi(String poiId) {
+        return discoveredPois.contains(poiId);
+    }
+
+    public void discoverPoi(String poiId) {
+        if (poiId != null && !poiId.isBlank()) {
+            discoveredPois.add(poiId);
+        }
+    }
+
+    public void setDiscoveredPois(Set<String> pois) {
+        discoveredPois.clear();
+        discoveredPois.addAll(pois);
+    }
+
+    public Set<String> getDiscoveredBiomes() {
+        return Collections.unmodifiableSet(discoveredBiomes);
+    }
+
+    public boolean hasDiscoveredBiome(String biomeId) {
+        return discoveredBiomes.contains(biomeId);
+    }
+
+    public void discoverBiome(String biomeId) {
+        if (biomeId != null && !biomeId.isBlank()) {
+            discoveredBiomes.add(biomeId);
+        }
+    }
+
+    public void setDiscoveredBiomes(Set<String> biomes) {
+        discoveredBiomes.clear();
+        discoveredBiomes.addAll(biomes);
+    }
+
+    public int getPathEssence() {
+        return pathEssence;
+    }
+
+    public void setPathEssence(int pathEssence) {
+        this.pathEssence = Math.max(0, pathEssence);
+    }
+
+    public void addPathEssence(int amount) {
+        if (amount > 0) {
+            pathEssence += amount;
+        }
+    }
+
+    public boolean spendPathEssence(int amount) {
+        if (amount <= 0 || pathEssence < amount) {
+            return false;
+        }
+        pathEssence -= amount;
+        essenceSpent += amount;
+        return true;
+    }
+
+    public int getEssenceSpent() {
+        return essenceSpent;
+    }
+
+    public void setEssenceSpent(int essenceSpent) {
+        this.essenceSpent = Math.max(0, essenceSpent);
+    }
+
+    public int getRebirthCount() {
+        return rebirthCount;
+    }
+
+    public void setRebirthCount(int rebirthCount) {
+        this.rebirthCount = Math.max(0, rebirthCount);
+    }
+
+    public String getLegacyPerkId() {
+        return legacyPerkId;
+    }
+
+    public void setLegacyPerkId(String legacyPerkId) {
+        this.legacyPerkId = legacyPerkId;
+    }
+
+    public Set<String> getLockedExclusiveGroups() {
+        return Collections.unmodifiableSet(lockedExclusiveGroups);
+    }
+
+    public void lockExclusiveGroup(String group) {
+        if (group != null && !group.isBlank()) {
+            lockedExclusiveGroups.add(group);
+        }
+    }
+
+    public boolean isExclusiveGroupLocked(String group) {
+        return group != null && lockedExclusiveGroups.contains(group);
+    }
+
+    public void setLockedExclusiveGroups(Set<String> groups) {
+        lockedExclusiveGroups.clear();
+        lockedExclusiveGroups.addAll(groups);
+    }
+
+    public boolean isHubOpened() {
+        return hubOpened;
+    }
+
+    public void setHubOpened(boolean hubOpened) {
+        this.hubOpened = hubOpened;
+    }
+
+    public Long getHuntCooldown(String key) {
+        return huntCooldowns.get(key);
+    }
+
+    public void setHuntCooldown(String key, long epochMs) {
+        huntCooldowns.put(key, epochMs);
+    }
+
+    public Map<String, Long> getHuntCooldownsSnapshot() {
+        return Collections.unmodifiableMap(huntCooldowns);
+    }
+
+    public void setHuntCooldowns(Map<String, Long> cooldowns) {
+        huntCooldowns.clear();
+        huntCooldowns.putAll(cooldowns);
     }
 
     public String getDailyCtaShownDay() {

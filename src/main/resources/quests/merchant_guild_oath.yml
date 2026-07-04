@@ -1,0 +1,25 @@
+id: merchant_guild_oath
+name: "Juramento da Guilda"
+archetype: merchant
+tier: 2
+category: story
+description: "Integre-se à economia do reino: anuncie mercadorias e compre de outros mercadores no leilão Civs."
+lore:
+  - "A Guilda dos Mercadores exige participação ativa no mercado comum."
+  - "Liste seus produtos e negocie com colegas — assim se constrói reputação."
+requires:
+  - sprint2_auction
+objectives:
+  - id: list_items
+    type: auction_list
+    amount: 3
+    description: "Liste 3 itens no leilão Civs"
+  - id: buy_items
+    type: auction_buy
+    amount: 2
+    description: "Compre 2 itens no leilão Civs"
+rewards:
+  money: 150
+  skill-xp:
+    farming: 300
+  permission: rpg.quest.merchant_guild_oath

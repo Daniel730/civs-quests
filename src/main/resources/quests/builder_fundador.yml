@@ -1,0 +1,23 @@
+id: builder_fundador
+name: "Fundador do Território"
+archetype: builder
+tier: 2
+category: story
+description: "Como fundador ou membro de uma cidade, prove que o território já é seu lar antes de erguer o conselho."
+requires:
+  - sprint2_civs_skills
+objectives:
+  - id: belong_to_town
+    type: join_town
+    description: "Esteja em uma cidade (como dono ou membro)"
+  - id: visit_council_village
+    type: discover_poi
+    poi: council_village
+    description: "Visite a Vila do Conselho"
+rewards:
+  money: 60
+  civs-skill-xp:
+    building: 100
+  skill-xp:
+    foraging: 150
+  permission: rpg.quest.builder_fundador

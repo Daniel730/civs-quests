@@ -1,0 +1,26 @@
+id: weekly_explorer
+name: "Explorador Semanal"
+archetype: neutral
+schedule: weekly
+category: weekly
+description: "Visite três marcos icônicos do reino esta semana — obelisco, cruzamento e pátio de treino."
+requires:
+  - first_steps
+objectives:
+  - id: visit_spawn_obelisk
+    type: discover_poi
+    poi: spawn_obelisk
+    description: "Visite o Obelisco de Spawn"
+  - id: visit_market_crossroads
+    type: discover_poi
+    poi: market_crossroads
+    description: "Visite o Cruzamento do Mercado"
+  - id: visit_training_yard
+    type: discover_poi
+    poi: training_yard
+    description: "Visite o Pátio de Treino"
+rewards:
+  money: 250
+  skill-xp:
+    foraging: 400
+  permission: rpg.quest.weekly_explorer

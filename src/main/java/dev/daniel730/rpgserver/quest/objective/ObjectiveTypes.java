@@ -19,6 +19,10 @@ public final class ObjectiveTypes {
     public static final String VEIN_MINE = "vein_mine";
     public static final String JOIN_TOWN = "join_town";
     public static final String CUSTOM_MOB_KILL = "custom_mob_kill";
+    public static final String OPEN_HUB = "open_hub";
+    public static final String DISCOVER_POI = "discover_poi";
+    public static final String DISCOVER_BIOME = "discover_biome";
+    public static final String ENTER_COMBAT = "enter_combat";
 
     private ObjectiveTypes() {
     }

@@ -1,0 +1,21 @@
+id: weekly_deep_delve
+name: "Escavação Profunda"
+archetype: builder
+schedule: weekly
+category: weekly
+description: "Desafio semanal dos construtores: explore o bioma das profundezas escuras."
+requires:
+  - builder_path
+  - sprint2_civs_skills
+objectives:
+  - id: discover_deep_dark
+    type: discover_biome
+    biome: deep_dark
+    description: "Descubra o bioma Profundezas Escuras (deep_dark)"
+rewards:
+  money: 280
+  civs-skill-xp:
+    mining: 150
+  skill-xp:
+    foraging: 450
+  permission: rpg.quest.weekly_deep_delve

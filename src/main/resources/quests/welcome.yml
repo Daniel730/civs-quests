@@ -1,0 +1,20 @@
+id: welcome
+name: "O Chamado do Reino"
+archetype: neutral
+tier: 1
+category: story
+description: "Abra a Central do Reino e descubra o obelisco que marca o início da sua jornada territorial."
+lore:
+  - "Um sussurro antigo ecoa pelo vento — o Reino convoca novos civis."
+  - "Siga até o obelisco de spawn e abra a Central para escolher seu destino."
+objectives:
+  - id: open_hub
+    type: open_hub
+    description: "Abra a Central do Reino (/rpg hub)"
+  - id: discover_obelisk
+    type: discover_poi
+    poi: spawn_obelisk
+    description: "Descubra o Obelisco de Spawn"
+rewards:
+  money: 10
+  permission: rpg.quest.welcome

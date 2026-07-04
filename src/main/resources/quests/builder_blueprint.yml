@@ -1,0 +1,28 @@
+id: builder_blueprint
+name: "Planta da Pedreira"
+archetype: builder
+tier: 2
+category: exploration
+description: "Mapeie as profundezas da pedreira e extraia ardósia profunda para os alicerces da cidade."
+lore:
+  - "Engenheiros precisam de ardósia profunda das camadas mais baixas."
+  - "Encontre a pedreira e traga material suficiente para a próxima expansão."
+requires:
+  - sprint2_civs_skills
+objectives:
+  - id: discover_quarry_depths
+    type: discover_poi
+    poi: quarry_depths
+    description: "Descubra as Profundezas da Pedreira (quarry_depths)"
+  - id: mine_deepslate
+    type: mine_block
+    block: deepslate
+    amount: 64
+    description: "Mine 64 blocos de ardósia profunda (deepslate)"
+rewards:
+  money: 80
+  civs-skill-xp:
+    mining: 75
+  skill-xp:
+    foraging: 150
+  permission: rpg.quest.builder_blueprint

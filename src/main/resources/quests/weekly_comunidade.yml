@@ -1,0 +1,24 @@
+id: weekly_comunidade
+name: "Crescimento da Comunidade"
+archetype: builder
+schedule: weekly
+description: "Erga estruturas que sustentam a cidade e acumule XP de Construção Civs esta semana."
+requires:
+  - builder_town_hall
+objectives:
+  - id: earn_building_xp
+    type: civs_skill_xp
+    skill: building
+    amount: 300
+    description: "Ganhe 300 XP de Construção Civs"
+  - id: build_bakery
+    type: build_region
+    region: bakery
+    description: "Construa uma padaria (bakery) para alimentar a cidade"
+rewards:
+  money: 300
+  civs-skill-xp:
+    building: 250
+  skill-xp:
+    foraging: 400
+  permission: rpg.quest.weekly_comunidade

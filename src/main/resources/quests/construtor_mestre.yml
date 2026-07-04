@@ -30,3 +30,8 @@ rewards:
   permission: rpg.quest.construtor_mestre
   lp-group: rpg-builder
 unlocks-perk: builder_master
+unlocks-perk-choice:
+  - builder_stoneheart
+  - builder_skybridge
+  - builder_quarry_sense
+  - builder_architect

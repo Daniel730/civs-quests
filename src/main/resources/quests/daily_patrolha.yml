@@ -1,0 +1,16 @@
+id: daily_patrolha
+name: "Patrulha Diária"
+archetype: warrior
+schedule: daily
+description: "Entre em combate hoje para manter as rotas seguras perto da vila."
+requires:
+  - warrior_path
+objectives:
+  - id: enter_fights
+    type: enter_combat
+    amount: 2
+    description: "Entre em combate 2 vezes hoje"
+rewards:
+  money: 35
+  skill-xp:
+    fighting: 75

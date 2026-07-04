@@ -1,0 +1,19 @@
+id: daily_boar_hunt
+name: "Caçada ao Javali"
+archetype: neutral
+schedule: daily
+category: daily
+description: "Aceite a caçada diária e derrote um Javali Selvagem nas planícies."
+requires:
+  - first_steps
+objectives:
+  - id: slay_wild_boar
+    type: custom_mob_kill
+    mob: wild_boar
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote 1 Javali Selvagem (wild_boar)"
+rewards:
+  money: 45
+  skill-xp:
+    foraging: 90

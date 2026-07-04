@@ -1,0 +1,25 @@
+id: merchant_ledger
+name: "Livro-Razão do Mercador"
+archetype: merchant
+tier: 2
+category: story
+description: "Consolide sua fortuna: acumule receita na loja e mantenha reservas sólidas no saldo."
+lore:
+  - "Todo mercador respeitado guarda um livro-razão impecável."
+  - "Prove que suas vendas prosperam e que você não vive no vermelho."
+requires:
+  - mercador_fortuna
+objectives:
+  - id: shop_income
+    type: shop_revenue
+    amount: 500
+    description: "Receba 500 moedas de vendas na sua loja"
+  - id: maintain_balance
+    type: balance_min
+    amount: 800
+    description: "Tenha pelo menos 800 moedas no saldo"
+rewards:
+  money: 125
+  skill-xp:
+    farming: 200
+  permission: rpg.quest.merchant_ledger

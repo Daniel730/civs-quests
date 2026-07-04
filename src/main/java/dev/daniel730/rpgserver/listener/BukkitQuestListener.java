@@ -1,6 +1,7 @@
 package dev.daniel730.rpgserver.listener;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -23,7 +24,7 @@ public final class BukkitQuestListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDeath(EntityDeathEvent event) {
         Player killer = event.getEntity().getKiller();
-        if (killer == null) {
+        if (killer == null || !countsForQuests(killer)) {
             return;
         }
         EntityType type = event.getEntityType();
@@ -33,7 +34,15 @@ public final class BukkitQuestListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        if (!countsForQuests(player)) {
+            return;
+        }
         Material material = event.getBlock().getType();
         plugin.getQuestManager().handleMineBlock(player, material.name().toLowerCase(Locale.ROOT));
+    }
+
+    private static boolean countsForQuests(Player player) {
+        GameMode mode = player.getGameMode();
+        return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
     }
 }

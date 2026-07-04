@@ -389,7 +389,10 @@ public final class QuestFeedbackService {
                     team.unregister();
                 }
             }
-            board.getObjective(SCOREBOARD_OBJECTIVE);
+            Objective objective = board.getObjective(SCOREBOARD_OBJECTIVE);
+            if (objective != null) {
+                objective.unregister();
+            }
             if (player.getScoreboard() == board) {
                 player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
             }

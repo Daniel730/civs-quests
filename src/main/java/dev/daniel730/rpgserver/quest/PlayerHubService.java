@@ -38,10 +38,13 @@ public final class PlayerHubService {
     }
 
     public void openHub(Player player, PlayerHubHolder.HubTab tab) {
+        plugin.getQuestManager().ensureProfileSanitized(player);
         PlayerHubHolder holder = new PlayerHubHolder();
         holder.resetNavigation(tab);
         PlayerHubGui.open(plugin, player, holder);
         plugin.getQuestFeedbackService().playJournalOpen(player);
+        plugin.getQuestManager().handleOpenHub(player);
+        plugin.getQuestManager().getProgressSync().sync(player, true, true);
     }
 
     public void refreshHub(Player player) {

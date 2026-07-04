@@ -1,0 +1,18 @@
+id: daily_conselho
+name: "Ronda do Conselho"
+archetype: builder
+schedule: daily
+description: "Passe pela vila do conselho e confira as obras do seu povo."
+requires:
+  - builder_path
+objectives:
+  - id: visit_council
+    type: discover_poi
+    poi: council_village
+    description: "Visite a Vila do Conselho hoje"
+rewards:
+  money: 25
+  civs-skill-xp:
+    building: 50
+  skill-xp:
+    foraging: 40

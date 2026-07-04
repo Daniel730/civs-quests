@@ -1,0 +1,20 @@
+id: explorer_vila_conselho
+name: "Explorador da Vila"
+archetype: neutral
+tier: 1
+category: story
+description: "Descubra a vila onde os conselhos se reúnem e o mercado da guilda pulsa com vida."
+requires:
+  - welcome
+objectives:
+  - id: find_council
+    type: discover_poi
+    poi: council_village
+    description: "Descubra a Vila do Conselho"
+  - id: find_market
+    type: discover_poi
+    poi: guild_market
+    description: "Descubra o Mercado da Guilda"
+rewards:
+  money: 40
+  permission: rpg.quest.explorer_vila_conselho

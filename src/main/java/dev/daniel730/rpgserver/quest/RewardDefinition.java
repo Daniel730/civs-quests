@@ -15,9 +15,10 @@ public final class RewardDefinition {
     private final String lpGroup;
     private final String essentialsKit;
     private final String warp;
+    private final String lootTable;
 
     public RewardDefinition(double money, Map<String, Double> skillXp, Map<String, Double> civsSkillXp,
-                            String permission, String lpGroup, String essentialsKit, String warp) {
+                            String permission, String lpGroup, String essentialsKit, String warp, String lootTable) {
         this.money = money;
         this.skillXp = Collections.unmodifiableMap(new LinkedHashMap<>(skillXp));
         this.civsSkillXp = Collections.unmodifiableMap(new LinkedHashMap<>(civsSkillXp));
@@ -25,10 +26,11 @@ public final class RewardDefinition {
         this.lpGroup = lpGroup;
         this.essentialsKit = essentialsKit;
         this.warp = warp;
+        this.lootTable = lootTable;
     }
 
     public static RewardDefinition empty() {
-        return new RewardDefinition(0, Map.of(), Map.of(), null, null, null, null);
+        return new RewardDefinition(0, Map.of(), Map.of(), null, null, null, null, null);
     }
 
     public static RewardDefinition fromConfig(ConfigurationSection section) {
@@ -42,7 +44,8 @@ public final class RewardDefinition {
         String lpGroup = blankToNull(section.getString("lp-group"));
         String essentialsKit = blankToNull(section.getString("essentials-kit"));
         String warp = blankToNull(section.getString("warp"));
-        return new RewardDefinition(money, skillXp, civsSkillXp, permission, lpGroup, essentialsKit, warp);
+        String lootTable = blankToNull(section.getString("loot-table"));
+        return new RewardDefinition(money, skillXp, civsSkillXp, permission, lpGroup, essentialsKit, warp, lootTable);
     }
 
     private static Map<String, Double> parseSkillMap(ConfigurationSection section) {
@@ -66,7 +69,8 @@ public final class RewardDefinition {
                 && permission == null
                 && lpGroup == null
                 && essentialsKit == null
-                && warp == null;
+                && warp == null
+                && lootTable == null;
     }
 
     public double getMoney() {
@@ -95,5 +99,9 @@ public final class RewardDefinition {
 
     public String getWarp() {
         return warp;
+    }
+
+    public String getLootTable() {
+        return lootTable;
     }
 }

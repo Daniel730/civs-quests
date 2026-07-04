@@ -3,9 +3,11 @@ package dev.daniel730.rpgserver.quest;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypes;
+import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Backfills RPG quest step state from Civs, AuraSkills, and Vault — never grants skill XP.
@@ -32,10 +34,24 @@ public final class QuestProgressSync {
         int questsCompleted = 0;
         boolean changed;
 
+        // #region agent log
+        AgentDebugLog.log(plugin, "H1,H2", "QuestProgressSync.sync",
+                "sync start",
+                Map.of("activeQuestCount", profile.getActiveQuestIds().size(),
+                        "startedQuestCount", profile.getStartedQuestIds().size(),
+                        "completedQuestCount", profile.getCompletedQuestIds().size(),
+                        "trackedQuestId", String.valueOf(profile.getTrackedQuestId()),
+                        "questCount", questManager.getAllQuests().size(),
+                        "grantRewards", grantRewards));
+        // #endregion
+
         do {
             changed = false;
             for (Quest quest : questManager.getAllQuests()) {
                 if (profile.isQuestComplete(quest.getId())) {
+                    continue;
+                }
+                if (!questManager.canWorkOnQuest(player, profile, quest)) {
                     continue;
                 }
                 if (!shouldSyncQuest(profile, quest)) {
@@ -53,6 +69,15 @@ public final class QuestProgressSync {
                     if (!isObjectiveSatisfied(player, profile, quest, objective)) {
                         continue;
                     }
+                    // #region agent log
+                    AgentDebugLog.log(plugin, "H1", "QuestProgressSync.sync",
+                            "sync objective satisfied",
+                            Map.of("questId", quest.getId(),
+                                    "objectiveId", objective.getId(),
+                                    "type", objective.getTypeId(),
+                                    "currentCount", resolveCurrentCount(player, profile, quest, objective),
+                                    "requiredAmount", objective.getAmount()));
+                    // #endregion
                     applyObjectiveProgress(player, profile, quest, objective);
                     questManager.completeObjective(player, profile, quest, objective, grantRewards, notify);
                     objectivesCompleted++;
@@ -62,6 +87,13 @@ public final class QuestProgressSync {
                 if (questManager.isQuestComplete(profile, quest) && !profile.isQuestComplete(quest.getId())) {
                     int completed = questManager.completeQuest(player, profile, quest, grantRewards, notify);
                     if (completed > 0) {
+                        // #region agent log
+                        AgentDebugLog.log(plugin, "H1,H2", "QuestProgressSync.sync",
+                                "sync completed quest",
+                                Map.of("questId", quest.getId(),
+                                        "schedule", quest.getSchedule().name(),
+                                        "grantRewards", grantRewards));
+                        // #endregion
                         questsCompleted += completed;
                         changed = true;
                     }
@@ -72,6 +104,13 @@ public final class QuestProgressSync {
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
+        // #region agent log
+        AgentDebugLog.log(plugin, "H1", "QuestProgressSync.sync",
+                "sync complete",
+                Map.of("objectivesCompleted", objectivesCompleted,
+                        "questsCompleted", questsCompleted,
+                        "grantRewards", grantRewards));
+        // #endregion
         return new SyncResult(objectivesCompleted, questsCompleted);
     }
 
@@ -97,11 +136,10 @@ public final class QuestProgressSync {
 
     private int resolveCurrentCount(Player player, PlayerProfile profile, Quest quest, Quest.Objective objective) {
         String typeId = objective.getTypeId();
-        if (ObjectiveTypes.KILL_MOB.equals(typeId) && plugin.getCivsHook().isEnabled()) {
-            return plugin.getCivsHook().getMobKillCount(player, objective.getMob());
-        }
-        if (ObjectiveTypes.CIVS_SKILL_XP.equals(typeId) && plugin.getCivsHook().isEnabled()) {
-            return (int) Math.floor(plugin.getCivsHook().getSkillTotalExp(player, objective.getSkill()));
+        // Incremental count objectives use RPG profile progress only — never Civs lifetime totals
+        // (live handlers increment per event; backfilling totals would instant-complete quests).
+        if (ObjectiveTypes.KILL_MOB.equals(typeId) || ObjectiveTypes.CIVS_SKILL_XP.equals(typeId)) {
+            return profile.getObjectiveProgress(quest.getId(), objective.getId());
         }
         if (ObjectiveTypes.EARN_MONEY.equals(typeId) && plugin.getVaultHook().isEnabled()) {
             Double startBalance = profile.getQuestStartBalance(quest.getId());
@@ -134,6 +172,19 @@ public final class QuestProgressSync {
         if (ObjectiveTypes.BALANCE_MIN.equals(typeId)) {
             return plugin.getVaultHook().isEnabled()
                     && plugin.getVaultHook().getBalance(player) >= objective.getAmount();
+        }
+        if (ObjectiveTypes.JOIN_TOWN.equals(typeId)) {
+            return plugin.getCivsHook().isEnabled()
+                    && plugin.getCivsHook().isTownMember(player, objective.getRegion());
+        }
+        if (ObjectiveTypes.DISCOVER_POI.equals(typeId)) {
+            return objective.getRegion() != null && profile.hasDiscoveredPoi(objective.getRegion());
+        }
+        if (ObjectiveTypes.DISCOVER_BIOME.equals(typeId)) {
+            return objective.getBlock() != null && profile.hasDiscoveredBiome(objective.getBlock());
+        }
+        if (ObjectiveTypes.OPEN_HUB.equals(typeId)) {
+            return profile.isHubOpened();
         }
         if (objective.isCountBased()) {
             return resolveCurrentCount(player, profile, quest, objective) >= objective.getAmount();

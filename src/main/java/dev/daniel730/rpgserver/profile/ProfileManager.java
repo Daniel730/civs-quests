@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +73,22 @@ public final class ProfileManager {
                     profile.setQuestStartBalances(balances);
                 }
                 profile.setUnlockedPerkIds(new HashSet<>(yaml.getStringList("unlocked-perks")));
+                profile.setDiscoveredPois(new HashSet<>(yaml.getStringList("discovered-pois")));
+                profile.setDiscoveredBiomes(new HashSet<>(yaml.getStringList("discovered-biomes")));
+                profile.setLockedExclusiveGroups(new HashSet<>(yaml.getStringList("locked-exclusive-groups")));
+                profile.setPathEssence(yaml.getInt("path-essence", 0));
+                profile.setEssenceSpent(yaml.getInt("essence-spent", 0));
+                profile.setRebirthCount(yaml.getInt("rebirth-count", 0));
+                profile.setLegacyPerkId(yaml.getString("legacy-perk"));
+                profile.setHubOpened(yaml.getBoolean("hub-opened", false));
+                if (yaml.isConfigurationSection("hunt-cooldowns")) {
+                    var cooldownSection = yaml.getConfigurationSection("hunt-cooldowns");
+                    Map<String, Long> cooldowns = new java.util.HashMap<>();
+                    for (String key : cooldownSection.getKeys(false)) {
+                        cooldowns.put(key, cooldownSection.getLong(key));
+                    }
+                    profile.setHuntCooldowns(cooldowns);
+                }
                 profile.setWelcomeShown(yaml.getBoolean("welcome-shown", false));
                 if (yaml.isConfigurationSection("quest-completion-times")) {
                     var timesSection = yaml.getConfigurationSection("quest-completion-times");
@@ -87,6 +104,22 @@ public final class ProfileManager {
                 }
                 if (yaml.contains("settings.bossbar")) {
                     profile.setBossBarEnabled(yaml.getBoolean("settings.bossbar"));
+                }
+                profile.setDiscoveredPois(new HashSet<>(yaml.getStringList("discovered-pois")));
+                profile.setDiscoveredBiomes(new HashSet<>(yaml.getStringList("discovered-biomes")));
+                profile.setPathEssence(yaml.getInt("path-essence", 0));
+                profile.setEssenceSpent(yaml.getInt("essence-spent", 0));
+                profile.setRebirthCount(yaml.getInt("rebirth-count", 0));
+                profile.setLegacyPerkId(yaml.getString("legacy-perk"));
+                profile.setLockedExclusiveGroups(new HashSet<>(yaml.getStringList("locked-exclusive-groups")));
+                profile.setHubOpened(yaml.getBoolean("hub-opened", false));
+                if (yaml.isConfigurationSection("hunt-cooldowns")) {
+                    var cooldownSection = yaml.getConfigurationSection("hunt-cooldowns");
+                    Map<String, Long> cooldowns = new java.util.HashMap<>();
+                    for (String key : cooldownSection.getKeys(false)) {
+                        cooldowns.put(key, cooldownSection.getLong(key));
+                    }
+                    profile.setHuntCooldowns(cooldowns);
                 }
             }
             return profile;
@@ -117,31 +150,45 @@ public final class ProfileManager {
     }
 
     public void saveProfileAsync(UUID uuid) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            if (saveProfileSync(uuid)) {
-                dirtyProfiles.remove(uuid);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            PlayerProfile profile = profiles.get(uuid);
+            if (profile == null) {
+                return;
             }
+            YamlConfiguration yaml = buildYamlSnapshot(uuid, profile);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    yaml.save(profileFile(uuid));
+                    dirtyProfiles.remove(uuid);
+                } catch (IOException ex) {
+                    plugin.getLogger().log(Level.SEVERE, "Falha ao salvar perfil " + uuid, ex);
+                }
+            });
         });
     }
 
-    private boolean saveProfileSync(UUID uuid) {
-        PlayerProfile profile = profiles.get(uuid);
-        if (profile == null) {
-            return false;
-        }
-        File file = profileFile(uuid);
+    private YamlConfiguration buildYamlSnapshot(UUID uuid, PlayerProfile profile) {
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.set("uuid", uuid.toString());
         yaml.set("archetype", profile.getArchetype());
         yaml.set("tracked-quest", profile.getTrackedQuestId());
-        yaml.set("active-quests", profile.getActiveQuestIds().stream().toList());
-        yaml.set("completed-quests", profile.getCompletedQuestIds().stream().toList());
-        yaml.set("completed-objectives", profile.getCompletedObjectiveKeys().stream().toList());
-        yaml.set("started-quests", profile.getStartedQuestIds().stream().toList());
-        yaml.set("objective-progress", profile.getObjectiveProgressSnapshot());
-        yaml.set("quest-start-balances", profile.getQuestStartBalancesSnapshot());
-        yaml.set("quest-completion-times", profile.getQuestCompletionTimesSnapshot());
-        yaml.set("unlocked-perks", profile.getUnlockedPerkIds().stream().toList());
+        yaml.set("active-quests", new ArrayList<>(profile.getActiveQuestIds()));
+        yaml.set("completed-quests", new ArrayList<>(profile.getCompletedQuestIds()));
+        yaml.set("completed-objectives", new ArrayList<>(profile.getCompletedObjectiveKeys()));
+        yaml.set("started-quests", new ArrayList<>(profile.getStartedQuestIds()));
+        yaml.set("objective-progress", new java.util.LinkedHashMap<>(profile.getObjectiveProgressSnapshot()));
+        yaml.set("quest-start-balances", new java.util.LinkedHashMap<>(profile.getQuestStartBalancesSnapshot()));
+        yaml.set("quest-completion-times", new java.util.LinkedHashMap<>(profile.getQuestCompletionTimesSnapshot()));
+        yaml.set("unlocked-perks", new ArrayList<>(profile.getUnlockedPerkIds()));
+        yaml.set("discovered-pois", new ArrayList<>(profile.getDiscoveredPois()));
+        yaml.set("discovered-biomes", new ArrayList<>(profile.getDiscoveredBiomes()));
+        yaml.set("locked-exclusive-groups", new ArrayList<>(profile.getLockedExclusiveGroups()));
+        yaml.set("path-essence", profile.getPathEssence());
+        yaml.set("essence-spent", profile.getEssenceSpent());
+        yaml.set("rebirth-count", profile.getRebirthCount());
+        yaml.set("legacy-perk", profile.getLegacyPerkId());
+        yaml.set("hub-opened", profile.isHubOpened());
+        yaml.set("hunt-cooldowns", new java.util.LinkedHashMap<>(profile.getHuntCooldownsSnapshot()));
         yaml.set("welcome-shown", profile.isWelcomeShown());
         yaml.set("daily-cta-shown-day", profile.getDailyCtaShownDay());
         if (profile.getNotificationsEnabled() != null) {
@@ -150,8 +197,25 @@ public final class ProfileManager {
         if (profile.getBossBarEnabled() != null) {
             yaml.set("settings.bossbar", profile.getBossBarEnabled());
         }
+        yaml.set("discovered-pois", new ArrayList<>(profile.getDiscoveredPois()));
+        yaml.set("discovered-biomes", new ArrayList<>(profile.getDiscoveredBiomes()));
+        yaml.set("path-essence", profile.getPathEssence());
+        yaml.set("essence-spent", profile.getEssenceSpent());
+        yaml.set("rebirth-count", profile.getRebirthCount());
+        yaml.set("legacy-perk", profile.getLegacyPerkId());
+        yaml.set("locked-exclusive-groups", new ArrayList<>(profile.getLockedExclusiveGroups()));
+        yaml.set("hub-opened", profile.isHubOpened());
+        yaml.set("hunt-cooldowns", new java.util.LinkedHashMap<>(profile.getHuntCooldownsSnapshot()));
+        return yaml;
+    }
+
+    private boolean saveProfileSync(UUID uuid) {
+        PlayerProfile profile = profiles.get(uuid);
+        if (profile == null) {
+            return false;
+        }
         try {
-            yaml.save(file);
+            buildYamlSnapshot(uuid, profile).save(profileFile(uuid));
             return true;
         } catch (IOException ex) {
             plugin.getLogger().log(Level.SEVERE, "Falha ao salvar perfil " + uuid, ex);

@@ -1,0 +1,18 @@
+id: daily_pillager
+name: "Patrulha Diária"
+archetype: warrior
+schedule: daily
+category: daily
+description: "Elimine saqueadores hoje — rotina diária de defesa para guerreiros."
+requires:
+  - warrior_path
+objectives:
+  - id: cull_pillagers
+    type: kill_mob
+    mob: pillager
+    amount: 3
+    description: "Mate 3 saqueadores (pillagers)"
+rewards:
+  money: 40
+  skill-xp:
+    fighting: 100

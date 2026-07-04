@@ -60,6 +60,10 @@ public final class ObjectiveTypeRegistry {
         register(ObjectiveTypes.VEIN_MINE, ObjectiveTypeRegistry::parseVeinMine);
         register(ObjectiveTypes.JOIN_TOWN, ObjectiveTypeRegistry::parseJoinTown);
         register(ObjectiveTypes.CUSTOM_MOB_KILL, ObjectiveTypeRegistry::parseCustomMobKill);
+        register(ObjectiveTypes.DISCOVER_POI, ObjectiveTypeRegistry::parseDiscoverPoi);
+        register(ObjectiveTypes.DISCOVER_BIOME, ObjectiveTypeRegistry::parseDiscoverBiome);
+        register(ObjectiveTypes.ENTER_COMBAT, ObjectiveTypeRegistry::parseEnterCombat);
+        register(ObjectiveTypes.OPEN_HUB, ObjectiveTypeRegistry::parseOpenHub);
     }
 
     private static Quest.Objective parseBuildRegion(String id, Map<?, ?> raw) {
@@ -185,8 +189,47 @@ public final class ObjectiveTypeRegistry {
         String description = stringOrDefault(raw, "description", id);
         String mob = requiredString(raw, "mob", id);
         int amount = intValue(raw, "amount", 1);
+        boolean spawnOnAccept = boolValue(raw, "spawn-on-accept", false);
         return new Quest.Objective(id, ObjectiveTypes.CUSTOM_MOB_KILL, description, null, null, 0,
-                mob, null, amount, true);
+                mob, null, amount, true, spawnOnAccept);
+    }
+
+    private static Quest.Objective parseDiscoverPoi(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String poi = requiredString(raw, "poi", id);
+        return new Quest.Objective(id, ObjectiveTypes.DISCOVER_POI, description, poi, null, 0,
+                null, null, 1, false);
+    }
+
+    private static Quest.Objective parseDiscoverBiome(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        String biome = requiredString(raw, "biome", id);
+        return new Quest.Objective(id, ObjectiveTypes.DISCOVER_BIOME, description, null, null, 0,
+                null, biome, 1, false);
+    }
+
+    private static Quest.Objective parseEnterCombat(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        int amount = intValue(raw, "amount", 1);
+        return new Quest.Objective(id, ObjectiveTypes.ENTER_COMBAT, description, null, null, 0,
+                null, null, amount, true);
+    }
+
+    private static Quest.Objective parseOpenHub(String id, Map<?, ?> raw) {
+        String description = stringOrDefault(raw, "description", id);
+        return new Quest.Objective(id, ObjectiveTypes.OPEN_HUB, description, null, null, 0,
+                null, null, 1, false);
+    }
+
+    private static boolean boolValue(Map<?, ?> raw, String key, boolean defaultValue) {
+        Object value = raw.get(key);
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        if (value != null) {
+            return Boolean.parseBoolean(String.valueOf(value));
+        }
+        return defaultValue;
     }
 
     private static String optionalString(Map<?, ?> raw, String key) {

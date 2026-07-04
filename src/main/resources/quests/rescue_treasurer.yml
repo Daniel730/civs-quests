@@ -1,0 +1,23 @@
+id: rescue_treasurer
+name: "Resgate do Tesoureiro"
+archetype: neutral
+tier: 2
+category: story
+description: "Localize a rota da seda mercante e prove que pode financiar a operação de resgate."
+lore:
+  - "O tesoureiro foi capturado durante uma viagem pela rota da seda."
+  - "Reúna fundos suficientes e encontre o acampamento para negociar sua libertação."
+objectives:
+  - id: discover_merchant_silk_road
+    type: discover_poi
+    poi: merchant_silk_road
+    description: "Descubra a Rota da Seda Mercante (merchant_silk_road)"
+  - id: gather_funds
+    type: balance_min
+    amount: 1000
+    description: "Tenha pelo menos 1000 moedas no saldo"
+rewards:
+  money: 200
+  skill-xp:
+    farming: 350
+  permission: rpg.quest.rescue_treasurer

@@ -21,3 +21,8 @@ rewards:
   permission: rpg.quest.warrior_champion
   lp-group: rpg-warrior
 unlocks-perk: warrior_veteran
+unlocks-perk-choice:
+  - warrior_siege_heart
+  - warrior_frost_walker
+  - warrior_duel_master
+  - warrior_battle_cry

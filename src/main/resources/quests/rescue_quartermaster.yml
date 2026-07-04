@@ -1,0 +1,25 @@
+id: rescue_quartermaster
+name: "Resgate do Intendente"
+archetype: neutral
+tier: 2
+category: story
+description: "Encontre o porto abandonado e elimine batedores bandidos que impedem o resgate do intendente."
+lore:
+  - "O intendente da cidade está preso perto do porto abandonado."
+  - "Batedores bandidos patrulham a área — limpe o caminho antes que seja tarde."
+objectives:
+  - id: discover_abandoned_port
+    type: discover_poi
+    poi: abandoned_port
+    description: "Descubra o Porto Abandonado (abandoned_port)"
+  - id: slay_bandit_scouts
+    type: custom_mob_kill
+    mob: bandit_scout
+    amount: 2
+    spawn-on-accept: true
+    description: "Derrote 2 Batedores Bandidos (bandit_scout)"
+rewards:
+  money: 175
+  skill-xp:
+    fighting: 300
+  permission: rpg.quest.rescue_quartermaster

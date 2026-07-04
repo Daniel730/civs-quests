@@ -1,0 +1,29 @@
+id: hunt_quarry_depths
+name: "Caçada nas Profundezas"
+archetype: builder
+tier: 3
+category: exploration
+description: "Desça até a pedreira abandonada e derrote o Golem de Pedra que bloqueia a escavação."
+lore:
+  - "Operários abandonaram a pedreira quando um golem despertou nas profundezas."
+  - "Aceite a caçada e limpe o local para retomar a extração."
+requires:
+  - construtor_armazem
+objectives:
+  - id: discover_quarry_depths
+    type: discover_poi
+    poi: quarry_depths
+    description: "Descubra as Profundezas da Pedreira (quarry_depths)"
+  - id: slay_stone_golem
+    type: custom_mob_kill
+    mob: stone_golem
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote o Golem de Pedra (stone_golem)"
+rewards:
+  money: 250
+  civs-skill-xp:
+    mining: 150
+  skill-xp:
+    foraging: 400
+  permission: rpg.quest.hunt_quarry_depths

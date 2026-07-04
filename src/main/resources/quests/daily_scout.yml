@@ -1,0 +1,17 @@
+id: daily_scout
+name: "Explorador Diário"
+archetype: neutral
+schedule: daily
+category: daily
+description: "Explore as planícies hoje — missão diária de reconhecimento para todos os caminhos."
+requires:
+  - first_steps
+objectives:
+  - id: scout_plains
+    type: discover_biome
+    biome: plains
+    description: "Visite o bioma Planícies"
+rewards:
+  money: 30
+  skill-xp:
+    foraging: 60

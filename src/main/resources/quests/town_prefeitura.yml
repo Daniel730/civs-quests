@@ -1,0 +1,25 @@
+id: town_prefeitura
+name: "Ascensão da Prefeitura"
+archetype: builder
+tier: 3
+category: story
+description: "Depois da sala do conselho, erga a prefeitura e consolide o governo da sua cidade."
+requires:
+  - builder_town_hall
+objectives:
+  - id: build_hall
+    type: build_region
+    region: town_hall
+    description: "Construa uma prefeitura (town_hall)"
+  - id: building_mastery
+    type: civs_skill_level
+    skill: building
+    level: 3
+    description: "Alcance nível 3 em Construção Civs"
+rewards:
+  money: 150
+  civs-skill-xp:
+    building: 200
+  skill-xp:
+    foraging: 350
+  permission: rpg.quest.town_prefeitura

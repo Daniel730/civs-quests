@@ -1,0 +1,21 @@
+id: weekly_guild_bounty
+name: "Recompensa da Guilda"
+archetype: neutral
+schedule: weekly
+category: weekly
+description: "Caçada semanal conjunta para guerreiros e mercadores: derrote o Ladrão da Guilda."
+requires:
+  - first_steps
+objectives:
+  - id: slay_guild_thief
+    type: custom_mob_kill
+    mob: guild_thief
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote o Ladrão da Guilda (guild_thief)"
+rewards:
+  money: 300
+  skill-xp:
+    fighting: 400
+    farming: 400
+  permission: rpg.quest.weekly_guild_bounty

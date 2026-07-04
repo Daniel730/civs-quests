@@ -1,0 +1,26 @@
+id: rescue_stonemason
+name: "Resgate do Pedreiro"
+archetype: neutral
+tier: 2
+category: story
+description: "Encontre a forja antiga e prove domínio em Mineração Civs para resgatar o mestre pedreiro."
+lore:
+  - "O mestre pedreiro desapareceu nas ruínas da forja antiga."
+  - "Somente quem domina Mineração Civs pode abrir os túneis bloqueados."
+objectives:
+  - id: discover_ancient_forge
+    type: discover_poi
+    poi: ancient_forge
+    description: "Descubra a Forja Antiga (ancient_forge)"
+  - id: mining_level_3
+    type: civs_skill_level
+    skill: mining
+    level: 3
+    description: "Alcance nível 3 em Mineração Civs"
+rewards:
+  money: 175
+  civs-skill-xp:
+    mining: 100
+  skill-xp:
+    foraging: 250
+  permission: rpg.quest.rescue_stonemason

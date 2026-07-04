@@ -1,0 +1,17 @@
+id: daily_duel
+name: "Duelo Diário"
+archetype: warrior
+schedule: daily
+category: daily
+description: "Entre em combate Civs pelo menos uma vez hoje — treino diário de guerreiro."
+requires:
+  - warrior_path
+objectives:
+  - id: enter_combat_once
+    type: enter_combat
+    amount: 1
+    description: "Entre em combate 1 vez"
+rewards:
+  money: 35
+  skill-xp:
+    fighting: 80

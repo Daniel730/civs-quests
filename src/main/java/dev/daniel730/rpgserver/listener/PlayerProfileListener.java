@@ -2,6 +2,8 @@ package dev.daniel730.rpgserver.listener;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
+import dev.daniel730.rpgserver.quest.QuestManager;
+import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,9 +26,21 @@ public final class PlayerProfileListener implements Listener {
         Player player = event.getPlayer();
         boolean newProfile = !profileFile(player).exists();
         plugin.getProfileManager().loadProfile(player.getUniqueId());
+        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        int activeBefore = profile.getActiveQuestIds().size();
+        QuestManager.SanitizeResult sanitized = plugin.getQuestManager().sanitizeProfile(player, profile);
+        // #region agent log
+        AgentDebugLog.log(plugin, "H5", "PlayerProfileListener.onJoin",
+                "player joined",
+                java.util.Map.of("activeBefore", activeBefore,
+                        "activeAfter", profile.getActiveQuestIds().size(),
+                        "strippedInvalid", sanitized.strippedInvalid(),
+                        "strippedCompletedActive", sanitized.strippedCompletedActive(),
+                        "demotedExcess", sanitized.demotedExcess()));
+        // #endregion
         plugin.getQuestManager().resetExpiredScheduledQuests(player);
         if (plugin.getCivsHook().isEnabled()) {
-            plugin.getQuestManager().checkCivsSkillLevels(player);
+            plugin.getQuestManager().backfillCivsState(player);
         }
         if (plugin.getPluginConfig().isSyncOnJoinFromCivs()) {
             plugin.getQuestManager().getProgressSync()
@@ -34,6 +48,8 @@ public final class PlayerProfileListener implements Listener {
         }
         plugin.getSkillTreeManager().applyUnlockedPerks(player);
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
+        plugin.getPathTraitService().reapplyPathTraits(player);
+        plugin.getQuestFeedbackService().notifyDailyCtaIfNeeded(player);
         maybeShowWelcome(player, newProfile);
         maybeGiveHubItem(player);
         plugin.getQuestFeedbackService().refreshTrackedHud(player);

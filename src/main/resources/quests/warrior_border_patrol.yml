@@ -1,0 +1,26 @@
+id: warrior_border_patrol
+name: "Patrulha da Fronteira"
+archetype: warrior
+tier: 2
+category: exploration
+description: "Patrulhe a taiga gelada e elimine saqueadores que ameaçam as rotas comerciais."
+lore:
+  - "Relatos de pillagers na taiga preocupam os líderes da cidade."
+  - "Explore o bioma e cace os invasores antes que ataquem caravanas."
+requires:
+  - sprint2_spells
+objectives:
+  - id: discover_taiga
+    type: discover_biome
+    biome: taiga
+    description: "Descubra o bioma Taiga"
+  - id: cull_pillagers
+    type: kill_mob
+    mob: pillager
+    amount: 5
+    description: "Mate 5 saqueadores (pillagers)"
+rewards:
+  money: 100
+  skill-xp:
+    fighting: 250
+  permission: rpg.quest.warrior_border_patrol

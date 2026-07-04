@@ -1,0 +1,29 @@
+id: hunt_frost_watchtower
+name: "Caçada na Torre de Gelo"
+archetype: warrior
+tier: 3
+category: exploration
+description: "Localize a Torre de Gelo congelada e derrote o Espectro Gelado que a guarda."
+lore:
+  - "Veteranos falam de uma torre abandonada onde o frio nunca recua."
+  - "Um wraith gelado aparece ao anoitecer — só os mais corajosos ousam subir."
+  - "Aceite a caçada e enfrente o Espectro Gelado onde a torre toca o céu."
+requires:
+  - bandit_chief_slayer
+objectives:
+  - id: discover_frost_watchtower
+    type: discover_poi
+    poi: frost_watchtower
+    description: "Descubra a Torre de Gelo (frost_watchtower)"
+  - id: slay_frost_wraith
+    type: custom_mob_kill
+    mob: frost_wraith
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote o Espectro Gelado (frost_wraith)"
+rewards:
+  money: 200
+  skill-xp:
+    fighting: 500
+  loot-table: warrior_rare
+  permission: rpg.quest.hunt_frost_watchtower

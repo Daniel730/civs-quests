@@ -1,0 +1,28 @@
+id: builder_aqueduct
+name: "Aqueduto Territorial"
+archetype: builder
+tier: 2
+category: story
+description: "Erga um armazém no território e acumule XP de Construção Civs para abastecer a infraestrutura."
+lore:
+  - "Cidades prósperas dependem de armazéns e aquedutos interligados."
+  - "Construa o armazém e prove domínio em Construção Civs."
+requires:
+  - construtor_armazem
+objectives:
+  - id: build_warehouse
+    type: build_region
+    region: warehouse
+    description: "Construa um armazém (warehouse) no seu território"
+  - id: earn_building_xp
+    type: civs_skill_xp
+    skill: building
+    amount: 200
+    description: "Ganhe 200 XP de Construção Civs"
+rewards:
+  money: 120
+  civs-skill-xp:
+    building: 100
+  skill-xp:
+    foraging: 200
+  permission: rpg.quest.builder_aqueduct

@@ -1,0 +1,24 @@
+id: neutral_porto_perdido
+name: "Eco do Porto Perdido"
+archetype: neutral
+tier: 2
+category: story
+description: "Siga rumores sobre um porto abandonado além da vila do conselho."
+requires:
+  - explorer_vila_conselho
+objectives:
+  - id: find_port
+    type: discover_poi
+    poi: abandoned_port
+    description: "Descubra o Porto Abandonado"
+  - id: slay_scouts
+    type: custom_mob_kill
+    mob: bandit_scout
+    amount: 1
+    spawn-on-accept: true
+    description: "Derrote 1 Batedor Bandido no porto"
+rewards:
+  money: 120
+  skill-xp:
+    fighting: 200
+  permission: rpg.quest.neutral_porto_perdido
