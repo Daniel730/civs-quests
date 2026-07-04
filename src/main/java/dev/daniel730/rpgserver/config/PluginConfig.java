@@ -180,6 +180,22 @@ public final class PluginConfig {
     private final int welcomeTitleStay;
     private final int welcomeTitleFadeOut;
 
+    private final boolean rebirthEnabled;
+    private final java.util.List<String> rebirthCapstoneIds;
+    private final double rebirthEssenceRefundPercent;
+    private final int pathEssencePerTier;
+    private final java.util.Map<String, PathTraitConfig> pathTraits;
+    private final double huntSpawnPartyRadius;
+    private final long huntSpawnCooldownSeconds;
+    private final java.util.List<String> dailyRotationPool;
+    private final java.util.List<String> weeklyRotationPool;
+    private final int dailyRotationCount;
+    private final int weeklyRotationCount;
+
+    public record PathTraitConfig(String buffStat, double buffValue, String buffOperation,
+                                  String debuffStat, double debuffValue, String debuffOperation) {
+    }
+
     public PluginConfig(FileConfiguration config) {
         this.debug = config.getBoolean("settings.debug", false);
         this.civsEnabled = config.getBoolean("integrations.civs.enabled", true);
@@ -470,6 +486,45 @@ public final class PluginConfig {
         this.rewardCivsSkillXpMultiplier = config.getDouble("progression.reward-multipliers.civs-skill-xp", 1.0);
         this.rewardSummaryHeader = config.getString("messages.reward-summary.header",
                 "<gold>★ Recompensas recebidas</gold>");
+
+        this.rebirthEnabled = config.getBoolean("progression.rebirth.enabled", true);
+        java.util.List<String> capstones = config.getStringList("progression.rebirth.capstone-quests");
+        this.rebirthCapstoneIds = capstones.isEmpty()
+                ? java.util.List.of("warrior_champion", "construtor_mestre", "mercador_mestre")
+                : java.util.List.copyOf(capstones);
+        this.rebirthEssenceRefundPercent = config.getDouble("progression.rebirth.essence-refund-percent", 0.6);
+        this.pathEssencePerTier = config.getInt("progression.path-essence-per-tier", 10);
+        this.pathTraits = loadPathTraits(config.getConfigurationSection("progression.path-traits"));
+        this.huntSpawnPartyRadius = config.getDouble("progression.hunt-spawn.party-radius", 32.0);
+        this.huntSpawnCooldownSeconds = config.getLong("progression.hunt-spawn.cooldown-seconds", 300L);
+        this.dailyRotationPool = java.util.List.copyOf(config.getStringList("quests.rotation.daily-pool"));
+        this.weeklyRotationPool = java.util.List.copyOf(config.getStringList("quests.rotation.weekly-pool"));
+        this.dailyRotationCount = config.getInt("quests.rotation.daily-count", 0);
+        this.weeklyRotationCount = config.getInt("quests.rotation.weekly-count", 0);
+    }
+
+    private static java.util.Map<String, PathTraitConfig> loadPathTraits(
+            org.bukkit.configuration.ConfigurationSection section) {
+        java.util.Map<String, PathTraitConfig> traits = new java.util.LinkedHashMap<>();
+        if (section == null) {
+            return traits;
+        }
+        for (String key : section.getKeys(false)) {
+            org.bukkit.configuration.ConfigurationSection trait = section.getConfigurationSection(key);
+            if (trait == null) {
+                continue;
+            }
+            org.bukkit.configuration.ConfigurationSection buff = trait.getConfigurationSection("buff");
+            org.bukkit.configuration.ConfigurationSection debuff = trait.getConfigurationSection("debuff");
+            traits.put(key.toLowerCase(java.util.Locale.ROOT), new PathTraitConfig(
+                    buff == null ? null : buff.getString("stat"),
+                    buff == null ? 0 : buff.getDouble("value", 0),
+                    buff == null ? "add" : buff.getString("operation", "add"),
+                    debuff == null ? null : debuff.getString("stat"),
+                    debuff == null ? 0 : debuff.getDouble("value", 0),
+                    debuff == null ? "add" : debuff.getString("operation", "add")));
+        }
+        return traits;
     }
 
     public boolean isDebug() {
@@ -1179,5 +1234,52 @@ public final class PluginConfig {
 
     public int getWelcomeTitleFadeOut() {
         return welcomeTitleFadeOut;
+    }
+
+    public boolean isRebirthEnabled() {
+        return rebirthEnabled;
+    }
+
+    public java.util.List<String> getRebirthCapstoneIds() {
+        return rebirthCapstoneIds;
+    }
+
+    public double getRebirthEssenceRefundPercent() {
+        return rebirthEssenceRefundPercent;
+    }
+
+    public int getPathEssencePerTier() {
+        return pathEssencePerTier;
+    }
+
+    public PathTraitConfig getPathTrait(String archetype) {
+        if (archetype == null) {
+            return null;
+        }
+        return pathTraits.get(archetype.toLowerCase(java.util.Locale.ROOT));
+    }
+
+    public double getHuntSpawnPartyRadius() {
+        return huntSpawnPartyRadius;
+    }
+
+    public long getHuntSpawnCooldownSeconds() {
+        return huntSpawnCooldownSeconds;
+    }
+
+    public java.util.List<String> getDailyRotationPool() {
+        return dailyRotationPool;
+    }
+
+    public java.util.List<String> getWeeklyRotationPool() {
+        return weeklyRotationPool;
+    }
+
+    public int getDailyRotationCount() {
+        return dailyRotationCount;
+    }
+
+    public int getWeeklyRotationCount() {
+        return weeklyRotationCount;
     }
 }

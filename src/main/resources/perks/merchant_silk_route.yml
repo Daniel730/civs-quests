@@ -1,0 +1,13 @@
+id: merchant_silk_route
+name: "Rota da Seda"
+archetype: merchant
+branch: trade
+tier: 2
+exclusive-group: merchant_capstone
+essence-cost: 15
+requires:
+  - mercador_mestre
+type: auraskills-stat
+stat: luck
+value: 2.0
+operation: add

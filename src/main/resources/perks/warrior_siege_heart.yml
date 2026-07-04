@@ -1,0 +1,13 @@
+id: warrior_siege_heart
+name: "Coração de Cerco"
+archetype: warrior
+branch: siege
+tier: 2
+exclusive-group: warrior_capstone
+essence-cost: 15
+requires:
+  - warrior_champion
+type: auraskills-stat
+stat: health
+value: 4.0
+operation: add

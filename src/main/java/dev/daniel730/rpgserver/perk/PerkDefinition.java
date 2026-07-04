@@ -36,17 +36,26 @@ public final class PerkDefinition {
     private final String id;
     private final String name;
     private final String archetype;
+    private final String branch;
+    private final int tier;
+    private final String exclusiveGroup;
+    private final int essenceCost;
     private final List<String> requiredIds;
     private final PerkType type;
     private final String statKey;
     private final double value;
     private final String operation;
 
-    public PerkDefinition(String id, String name, String archetype, List<String> requiredIds,
+    public PerkDefinition(String id, String name, String archetype, String branch, int tier,
+                          String exclusiveGroup, int essenceCost, List<String> requiredIds,
                           PerkType type, String statKey, double value, String operation) {
         this.id = id;
         this.name = name;
         this.archetype = archetype == null ? "" : archetype;
+        this.branch = branch == null ? "" : branch;
+        this.tier = tier;
+        this.exclusiveGroup = exclusiveGroup == null ? "" : exclusiveGroup;
+        this.essenceCost = Math.max(0, essenceCost);
         this.requiredIds = Collections.unmodifiableList(new ArrayList<>(requiredIds));
         this.type = type;
         this.statKey = statKey;
@@ -64,6 +73,22 @@ public final class PerkDefinition {
 
     public String getArchetype() {
         return archetype;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public int getTier() {
+        return tier;
+    }
+
+    public String getExclusiveGroup() {
+        return exclusiveGroup;
+    }
+
+    public int getEssenceCost() {
+        return essenceCost;
     }
 
     public List<String> getRequiredIds() {

@@ -5,6 +5,30 @@ settings:
   debug: false
   locale: pt_BR
 
+# Reporte automático de erros do servidor → GitHub Issues / webhook
+# NÃO commite tokens reais. Configure no servidor em plugins/RPGServer/config.yml
+error-reporting:
+  enabled: true
+  server-name: bot-server
+  dedupe-minutes: 15
+  # Vazio = todos os plugins; ou liste ex.: [Civs, RPGServer]
+  include-plugins: []
+  sources:
+    paper-server-exception: true   # Paper ServerExceptionEvent
+    uncaught-threads: true         # Thread.UncaughtExceptionHandler
+    log4j-errors: true             # ERROR+ com stacktrace no log do servidor
+  github:
+    enabled: true
+    token: ""                      # prefer token-file on production
+    token-file: "/home/daniel/mineserver/secrets/github-pat.txt"
+    owner: Daniel730
+    repo: civs-quests
+    labels:
+      - server-error
+  webhook:
+    enabled: false
+    url: ""
+
 integrations:
   civs:
     enabled: true
@@ -36,7 +60,46 @@ player-hub:
 progression:
   autosave-minutes: 5
   default-track: main
-  sync-on-join-from-civs: false
+  sync-on-join-from-civs: true
+  path-essence-per-tier: 10
+  rebirth:
+    enabled: true
+    essence-refund-percent: 0.6
+    capstone-quests:
+      - warrior_champion
+      - construtor_mestre
+      - mercador_mestre
+  hunt-spawn:
+    party-radius: 32
+    cooldown-seconds: 300
+  path-traits:
+    warrior:
+      buff:
+        stat: strength
+        value: 2
+        operation: add
+      debuff:
+        stat: luck
+        value: -1
+        operation: add
+    merchant:
+      buff:
+        stat: luck
+        value: 2
+        operation: add
+      debuff:
+        stat: strength
+        value: -1
+        operation: add
+    builder:
+      buff:
+        stat: toughness
+        value: 2
+        operation: add
+      debuff:
+        stat: wisdom
+        value: -1
+        operation: add
   reward-multipliers:
     money: 1.0
     skill-xp: 1.0
@@ -48,6 +111,18 @@ quests:
   allow-abandon: true
   starter-quest-id: welcome
   reset-timezone: UTC
+  rotation:
+    daily-pool:
+      - daily_scout
+      - daily_boar_hunt
+      - daily_duel
+      - daily_pillager
+    weekly-pool:
+      - weekly_explorer
+      - weekly_deep_delve
+      - weekly_guild_bounty
+    daily-count: 0
+    weekly-count: 0
 
 # Spectacle & HUD — sounds, particles, boss bar / scoreboard
 feedback:

@@ -260,7 +260,17 @@ public final class PlayerHubGui {
                 messages.parse(config.getHubRpgPerksTitle()),
                 List.of(messages.parse(config.getHubRpgPerksLore())), true));
 
-        inventorySet(holder, 15, infoItem(Material.EXPERIENCE_BOTTLE,
+        holder.mapAction(15, PlayerHubHolder.HubClick.openSkillTree());
+        inventorySet(holder, 15, actionItem(Material.ENCHANTED_BOOK,
+                messages.parse("<light_purple><bold>Árvore de Perks</bold></light_purple>"),
+                List.of(messages.parse("<gray>Desbloqueie perks com Essência de Caminho.</gray>")), true));
+
+        holder.mapAction(17, PlayerHubHolder.HubClick.openCodex());
+        inventorySet(holder, 17, actionItem(Material.MAP,
+                messages.parse("<aqua><bold>Codex</bold></aqua>"),
+                List.of(messages.parse("<gray>POIs e biomas descobertos.</gray>")), true));
+
+        inventorySet(holder, 22, infoItem(Material.EXPERIENCE_BOTTLE,
                 messages.parse(config.getHubRpgPerkSummaryTitle()
                         .replace("{unlocked}", String.valueOf(unlocked))
                         .replace("{total}", String.valueOf(total))),

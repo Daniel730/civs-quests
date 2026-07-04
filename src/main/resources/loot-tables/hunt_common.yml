@@ -1,0 +1,14 @@
+id: hunt_common
+entries:
+  - material: IRON_INGOT
+    min-amount: 2
+    max-amount: 5
+    chance: 1.0
+  - material: COOKED_BEEF
+    min-amount: 4
+    max-amount: 8
+    chance: 0.8
+  - material: ARROW
+    min-amount: 8
+    max-amount: 16
+    chance: 0.6

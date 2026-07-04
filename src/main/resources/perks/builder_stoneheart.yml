@@ -1,0 +1,13 @@
+id: builder_stoneheart
+name: "Coração de Pedra"
+archetype: builder
+branch: fortress
+tier: 2
+exclusive-group: builder_capstone
+essence-cost: 15
+requires:
+  - construtor_mestre
+type: civs-territorial
+stat: build_speed
+value: 0.1
+operation: multiply

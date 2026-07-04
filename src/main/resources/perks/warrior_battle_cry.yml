@@ -1,0 +1,13 @@
+id: warrior_battle_cry
+name: "Grito de Batalha"
+archetype: warrior
+branch: rally
+tier: 2
+exclusive-group: warrior_capstone
+essence-cost: 15
+requires:
+  - warrior_champion
+type: auraskills-stat
+stat: strength
+value: 3.0
+operation: add

@@ -1,7 +1,9 @@
 package dev.daniel730.rpgserver.command;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
+import dev.daniel730.rpgserver.gui.CodexGui;
 import dev.daniel730.rpgserver.gui.QuestJournalGui;
+import dev.daniel730.rpgserver.gui.SkillTreeGui;
 import dev.daniel730.rpgserver.perk.PerkDefinition;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.progression.SkillTreeManager;
@@ -54,7 +56,12 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "hub", "menu" -> handleHub(sender, args);
             case "settings" -> handleSettings(sender, args);
             case "perks" -> handlePerks(sender);
+            case "tree" -> handleTree(sender);
+            case "codex" -> handleCodex(sender);
+            case "rebirth" -> handleRebirth(sender);
+            case "poi" -> handlePoi(sender, args);
             case "sync" -> handleSync(sender, args);
+            case "sanitize" -> handleSanitize(sender, args);
             default -> {
                 sendHelp(sender);
                 yield true;
@@ -337,10 +344,94 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             String color = switch (status) {
                 case UNLOCKED -> "<green>";
                 case AVAILABLE -> "<yellow>";
-                case LOCKED -> "<gray>";
+                case LOCKED, CHOICE_LOCKED -> "<gray>";
             };
             plugin.getMessageUtil().send(player,
                     color + perk.getName() + "</color> <dark_gray>[" + status.getDisplay() + "]</dark_gray>");
+        }
+        return true;
+    }
+
+    private boolean handleTree(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.perks")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        SkillTreeGui.open(plugin, player);
+        plugin.getQuestFeedbackService().playJournalOpen(player);
+        return true;
+    }
+
+    private boolean handleCodex(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.quest")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        CodexGui.open(plugin, player);
+        plugin.getQuestFeedbackService().playJournalOpen(player);
+        return true;
+    }
+
+    private boolean handleRebirth(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.rebirth")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (!plugin.getPluginConfig().isRebirthEnabled()) {
+            plugin.getMessageUtil().send(player, "<red>Renascimento desativado.</red>");
+            return true;
+        }
+        return switch (plugin.getRebirthService().tryRebirth(player)) {
+            case SUCCESS -> true;
+            case NOT_ELIGIBLE -> {
+                plugin.getMessageUtil().send(player,
+                        "<red>Conclua um capstone (Guerreiro, Mercador ou Construtor) para renascer.</red>");
+                yield true;
+            }
+        };
+    }
+
+    private boolean handlePoi(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("rpg.admin")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (args.length < 3 || !args[1].equalsIgnoreCase("mark")) {
+            plugin.getMessageUtil().send(sender, "<yellow>Uso:</yellow> /rpg poi mark <poi-id> [jogador]");
+            return true;
+        }
+        String poiId = args[2];
+        Player target;
+        if (args.length >= 4) {
+            target = Bukkit.getPlayer(args[3]);
+            if (target == null) {
+                plugin.getMessageUtil().send(sender, "<red>Jogador não encontrado.</red>");
+                return true;
+            }
+        } else if (sender instanceof Player player) {
+            target = player;
+        } else {
+            sender.sendMessage("Especifique um jogador.");
+            return true;
+        }
+        if (plugin.getDiscoveryService().markPoiDiscovered(target, poiId)) {
+            plugin.getMessageUtil().send(sender,
+                    "<green>POI marcado:</green> <white>" + poiId + "</white> para <white>"
+                            + target.getName() + "</white>");
+        } else {
+            plugin.getMessageUtil().send(sender, "<red>POI desconhecido:</red> " + poiId);
         }
         return true;
     }
@@ -361,6 +452,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             int totalQuests = 0;
             int players = 0;
             for (Player online : Bukkit.getOnlinePlayers()) {
+                plugin.getQuestManager().ensureProfileSanitized(online);
                 QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
                         .sync(online, grantRewards, true);
                 totalObjectives += result.objectivesCompleted();
@@ -379,6 +471,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, "<red>Jogador não encontrado ou offline.</red>");
             return true;
         }
+        plugin.getQuestManager().ensureProfileSanitized(target);
         QuestProgressSync.SyncResult result = plugin.getQuestManager().getProgressSync()
                 .sync(target, grantRewards, true);
         plugin.getMessageUtil().send(sender,
@@ -386,6 +479,39 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                         .replace("{player}", target.getName())
                         .replace("{objectives}", String.valueOf(result.objectivesCompleted()))
                         .replace("{quests}", String.valueOf(result.questsCompleted())));
+        return true;
+    }
+
+    private boolean handleSanitize(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("rpg.admin")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (args.length >= 2) {
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                plugin.getMessageUtil().send(sender, "<red>Jogador não encontrado ou offline.</red>");
+                return true;
+            }
+            QuestManager.SanitizeResult result = plugin.getQuestManager().sanitizeProfile(
+                    target, plugin.getProfileManager().getOrCreate(target));
+            plugin.getMessageUtil().send(sender,
+                    "<green>Perfil reparado para</green> <white>" + target.getName()
+                            + "</white>: removidos inválidos=" + result.strippedInvalid()
+                            + ", completos em ativo=" + result.strippedCompletedActive()
+                            + ", excesso=" + result.demotedExcess());
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            plugin.getMessageUtil().send(sender, "<red>Especifique um jogador: /rpg sanitize <jogador></red>");
+            return true;
+        }
+        QuestManager.SanitizeResult result = plugin.getQuestManager().sanitizeProfile(
+                player, plugin.getProfileManager().getOrCreate(player));
+        plugin.getMessageUtil().send(player,
+                "<green>Perfil reparado:</green> inválidos=" + result.strippedInvalid()
+                        + ", completos em ativo=" + result.strippedCompletedActive()
+                        + ", excesso=" + result.demotedExcess());
         return true;
     }
 
@@ -401,11 +527,16 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         plugin.getMessageUtil().send(sender, "<gray>/rpg guide</gray> — alias da central (GUI)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg settings notifications|bossbar</gray> — preferências pessoais");
         plugin.getMessageUtil().send(sender, "<gray>/rpg perks</gray> — listar perks");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg tree</gray> — árvore de perks (GUI)");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg codex</gray> — codex de exploração");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg rebirth</gray> — renascimento (capstone)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
         if (sender.hasPermission("rpg.admin")) {
+            plugin.getMessageUtil().send(sender, "<gray>/rpg poi mark &lt;id&gt; [jogador]</gray> — marcar POI");
             plugin.getMessageUtil().send(sender, "<gray>/rpg reload</gray> — recarregar config");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync [jogador]</gray> — sincronizar progresso de quests");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync --rewards [jogador]</gray> — sync e conceder recompensas");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg sanitize [jogador]</gray> — reparar estado de quests corrompido");
         }
     }
 
@@ -413,10 +544,13 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(Arrays.asList("help", "quest", "book", "journal", "hub", "menu", "guide", "settings", "perks", "profile"));
+            List<String> options = new ArrayList<>(Arrays.asList(
+                    "help", "quest", "book", "journal", "hub", "menu", "guide", "settings",
+                    "perks", "tree", "codex", "rebirth", "profile"));
             if (sender.hasPermission("rpg.admin")) {
                 options.add("reload");
                 options.add("sync");
+                options.add("sanitize");
             }
             return filterPrefix(options, args[0]);
         }

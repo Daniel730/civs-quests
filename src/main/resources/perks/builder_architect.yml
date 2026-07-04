@@ -1,0 +1,13 @@
+id: builder_architect
+name: "Arquiteto Real"
+archetype: builder
+branch: planning
+tier: 2
+exclusive-group: builder_capstone
+essence-cost: 15
+requires:
+  - construtor_mestre
+type: civs-territorial
+stat: shop_discount
+value: 0.05
+operation: add

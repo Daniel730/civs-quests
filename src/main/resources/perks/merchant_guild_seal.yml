@@ -1,0 +1,13 @@
+id: merchant_guild_seal
+name: "Selo da Guilda"
+archetype: merchant
+branch: guild
+tier: 2
+exclusive-group: merchant_capstone
+essence-cost: 15
+requires:
+  - mercador_mestre
+type: civs-territorial
+stat: shop_discount
+value: 0.08
+operation: add

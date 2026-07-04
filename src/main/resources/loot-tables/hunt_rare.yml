@@ -1,0 +1,14 @@
+id: hunt_rare
+entries:
+  - material: DIAMOND
+    min-amount: 1
+    max-amount: 2
+    chance: 0.35
+  - material: EMERALD
+    min-amount: 2
+    max-amount: 4
+    chance: 0.6
+  - material: GOLDEN_APPLE
+    min-amount: 1
+    max-amount: 1
+    chance: 0.25

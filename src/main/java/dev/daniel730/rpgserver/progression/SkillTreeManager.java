@@ -4,6 +4,7 @@ import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.perk.PerkDefinition;
 import dev.daniel730.rpgserver.perk.TerritorialPerk;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
+import dev.daniel730.rpgserver.quest.Quest;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -21,7 +23,8 @@ public final class SkillTreeManager {
     public enum PerkStatus {
         UNLOCKED("Desbloqueado"),
         AVAILABLE("Disponível"),
-        LOCKED("Bloqueado");
+        LOCKED("Bloqueado"),
+        CHOICE_LOCKED("Escolha bloqueada");
 
         private final String display;
 
@@ -46,15 +49,7 @@ public final class SkillTreeManager {
         File perksFolder = new File(plugin.getDataFolder(), "perks");
         if (!perksFolder.exists()) {
             perksFolder.mkdirs();
-            plugin.saveResource("perks/warrior_berserk.yml", false);
-            plugin.saveResource("perks/builder_discount.yml", false);
-            plugin.saveResource("perks/builder_fortress.yml", false);
-            plugin.saveResource("perks/warrior_veteran.yml", false);
-            plugin.saveResource("perks/merchant_bazaar.yml", false);
-            plugin.saveResource("perks/merchant_golden_touch.yml", false);
-            plugin.saveResource("perks/builder_master.yml", false);
-            plugin.saveResource("perks/warrior_duelist.yml", false);
-            plugin.saveResource("perks/merchant_trader.yml", false);
+            saveDefaultPerks();
         }
 
         File[] files = perksFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -73,6 +68,25 @@ public final class SkillTreeManager {
         plugin.getLogger().info("Carregados " + perks.size() + " perks.");
     }
 
+    private void saveDefaultPerks() {
+        String[] defaults = {
+                "warrior_berserk.yml", "builder_discount.yml", "builder_fortress.yml",
+                "warrior_veteran.yml", "merchant_bazaar.yml", "merchant_golden_touch.yml",
+                "builder_master.yml", "warrior_duelist.yml", "merchant_trader.yml",
+                "warrior_siege_heart.yml", "warrior_frost_walker.yml", "warrior_duel_master.yml",
+                "warrior_battle_cry.yml", "builder_stoneheart.yml", "builder_skybridge.yml",
+                "builder_quarry_sense.yml", "builder_architect.yml", "merchant_guild_seal.yml",
+                "merchant_silk_route.yml", "merchant_ledger_master.yml", "merchant_smuggler.yml"
+        };
+        for (String resource : defaults) {
+            try {
+                plugin.saveResource("perks/" + resource, false);
+            } catch (IllegalArgumentException ignored) {
+                // optional bundled perk
+            }
+        }
+    }
+
     private PerkDefinition parsePerk(YamlConfiguration config) {
         String id = config.getString("id");
         if (id == null || id.isBlank()) {
@@ -80,6 +94,10 @@ public final class SkillTreeManager {
         }
         String name = config.getString("name", id);
         String archetype = config.getString("archetype", "");
+        String branch = config.getString("branch", "");
+        int tier = config.getInt("tier", 1);
+        String exclusiveGroup = config.getString("exclusive-group", "");
+        int essenceCost = config.getInt("essence-cost", 0);
         List<String> requires = config.getStringList("requires");
         PerkDefinition.PerkType type = PerkDefinition.PerkType.fromYaml(config.getString("type"));
         if (type == null) {
@@ -91,7 +109,8 @@ public final class SkillTreeManager {
         }
         double value = config.getDouble("value", 0);
         String operation = config.getString("operation", "add");
-        return new PerkDefinition(id, name, archetype, requires, type, statKey, value, operation);
+        return new PerkDefinition(id, name, archetype, branch, tier, exclusiveGroup, essenceCost,
+                requires, type, statKey, value, operation);
     }
 
     public PerkDefinition getPerk(String id) {
@@ -115,6 +134,17 @@ public final class SkillTreeManager {
         return filtered;
     }
 
+    public List<PerkDefinition> getPerksForBranch(String archetype, String branch) {
+        List<PerkDefinition> filtered = new ArrayList<>();
+        for (PerkDefinition perk : getPerksForArchetype(archetype)) {
+            if (branch == null || branch.isBlank() || branch.equalsIgnoreCase(perk.getBranch())) {
+                filtered.add(perk);
+            }
+        }
+        filtered.sort((a, b) -> Integer.compare(a.getTier(), b.getTier()));
+        return filtered;
+    }
+
     public boolean meetsRequirements(PlayerProfile profile, PerkDefinition perk) {
         for (String requiredId : perk.getRequiredIds()) {
             if (profile.isPerkUnlocked(requiredId)) {
@@ -125,6 +155,35 @@ public final class SkillTreeManager {
             }
         }
         return true;
+    }
+
+    public boolean isCapstoneChoiceAvailable(PlayerProfile profile, PerkDefinition perk) {
+        for (Quest quest : plugin.getQuestManager().getAllQuests()) {
+            if (!profile.isQuestComplete(quest.getId())) {
+                continue;
+            }
+            if (quest.getUnlocksPerkChoice().contains(perk.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isBlockedByExclusiveGroup(PlayerProfile profile, PerkDefinition perk) {
+        if (perk.getExclusiveGroup().isBlank()) {
+            return false;
+        }
+        if (profile.isExclusiveGroupLocked(perk.getExclusiveGroup())) {
+            for (String unlockedId : profile.getUnlockedPerkIds()) {
+                PerkDefinition unlocked = perks.get(unlockedId);
+                if (unlocked != null
+                        && perk.getExclusiveGroup().equalsIgnoreCase(unlocked.getExclusiveGroup())) {
+                    return !unlocked.getId().equals(perk.getId());
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public boolean matchesArchetype(PlayerProfile profile, PerkDefinition perk) {
@@ -139,10 +198,31 @@ public final class SkillTreeManager {
         if (profile.isPerkUnlocked(perk.getId())) {
             return PerkStatus.UNLOCKED;
         }
-        if (!matchesArchetype(profile, perk) || !meetsRequirements(profile, perk)) {
+        if (!matchesArchetype(profile, perk)) {
+            return PerkStatus.LOCKED;
+        }
+        if (isBlockedByExclusiveGroup(profile, perk)) {
+            return PerkStatus.CHOICE_LOCKED;
+        }
+        if (!meetsRequirements(profile, perk)) {
+            return PerkStatus.LOCKED;
+        }
+        if (perk.getEssenceCost() > 0 && profile.getPathEssence() < perk.getEssenceCost()) {
+            return PerkStatus.LOCKED;
+        }
+        if (isCapstoneChoicePerk(perk) && !isCapstoneChoiceAvailable(profile, perk)) {
             return PerkStatus.LOCKED;
         }
         return PerkStatus.AVAILABLE;
+    }
+
+    private boolean isCapstoneChoicePerk(PerkDefinition perk) {
+        for (Quest quest : plugin.getQuestManager().getAllQuests()) {
+            if (quest.getUnlocksPerkChoice().contains(perk.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean tryUnlock(Player player, String perkId) {
@@ -159,10 +239,24 @@ public final class SkillTreeManager {
         if (profile.isPerkUnlocked(perkId)) {
             return false;
         }
-        if (!matchesArchetype(profile, perk) || !meetsRequirements(profile, perk)) {
+        if (getPerkStatus(profile, perk) != PerkStatus.AVAILABLE) {
+            return false;
+        }
+        if (perk.getEssenceCost() > 0 && !profile.spendPathEssence(perk.getEssenceCost())) {
+            if (notify) {
+                plugin.getMessageUtil().send(player,
+                        "<red>Essência insuficiente.</red> <gray>Necessário:</gray> <white>"
+                                + perk.getEssenceCost() + "</white>");
+            }
             return false;
         }
         profile.unlockPerk(perkId);
+        if (!perk.getExclusiveGroup().isBlank()) {
+            profile.lockExclusiveGroup(perk.getExclusiveGroup());
+        }
+        if (isCapstoneChoicePerk(perk)) {
+            profile.setLegacyPerkId(perkId);
+        }
         applyPerk(player, perk);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         if (notify) {
@@ -213,7 +307,10 @@ public final class SkillTreeManager {
             if (profile.isPerkUnlocked(perk.getId())) {
                 continue;
             }
-            if (matchesArchetype(profile, perk) && meetsRequirements(profile, perk)) {
+            if (perk.getEssenceCost() > 0 || isCapstoneChoicePerk(perk)) {
+                continue;
+            }
+            if (getPerkStatus(profile, perk) == PerkStatus.AVAILABLE) {
                 profile.unlockPerk(perk.getId());
                 applyPerk(player, perk);
                 plugin.getMessageUtil().send(player, "<green>Perk desbloqueado:</green> " + perk.getName());

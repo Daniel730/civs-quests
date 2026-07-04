@@ -13,6 +13,7 @@ public final class PlayerHubHolder implements InventoryHolder {
 
     public static final int FOOTER_REFRESH_SLOT = 45;
     public static final int FOOTER_BACK_SLOT = 47;
+    public static final int FOOTER_JOURNAL_SLOT = 48;
     public static final int FOOTER_TRACK_SLOT = 49;
     public static final int FOOTER_SYNC_SLOT = 51;
     public static final int FOOTER_CLOSE_SLOT = 53;
@@ -84,7 +85,9 @@ public final class PlayerHubHolder implements InventoryHolder {
     public enum HubScreen {
         TAB,
         PATH_PICKER,
-        QUEST_TREE
+        QUEST_TREE,
+        SKILL_TREE,
+        CODEX
     }
 
     public enum HubTab {
@@ -126,6 +129,8 @@ public final class PlayerHubHolder implements InventoryHolder {
         TOGGLE_NOTIFICATIONS,
         TOGGLE_BOSSBAR,
         OPEN_JOURNAL,
+        OPEN_SKILL_TREE,
+        OPEN_CODEX,
         OPEN_SUBVIEW,
         OPEN_CIVS_MENU,
         TRACK_NEXT,
@@ -147,6 +152,14 @@ public final class PlayerHubHolder implements InventoryHolder {
 
         public static HubClick subview(HubScreen screen) {
             return new HubClick(HubAction.OPEN_SUBVIEW, screen.name());
+        }
+
+        public static HubClick openSkillTree() {
+            return new HubClick(HubAction.OPEN_SKILL_TREE, null);
+        }
+
+        public static HubClick openCodex() {
+            return new HubClick(HubAction.OPEN_CODEX, null);
         }
 
         public static HubClick civsMenu(String menuName) {

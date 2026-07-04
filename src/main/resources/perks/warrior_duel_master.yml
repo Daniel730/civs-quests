@@ -1,0 +1,13 @@
+id: warrior_duel_master
+name: "Mestre do Duelo"
+archetype: warrior
+branch: duel
+tier: 2
+exclusive-group: warrior_capstone
+essence-cost: 15
+requires:
+  - warrior_champion
+type: auraskills-stat
+stat: crit_damage
+value: 5.0
+operation: add

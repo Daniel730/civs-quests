@@ -1,0 +1,18 @@
+id: warrior_rare
+entries:
+  - material: IRON_SWORD
+    min-amount: 1
+    max-amount: 1
+    chance: 0.4
+  - material: SHIELD
+    min-amount: 1
+    max-amount: 1
+    chance: 0.35
+  - material: DIAMOND
+    min-amount: 1
+    max-amount: 3
+    chance: 0.5
+  - material: GOLDEN_APPLE
+    min-amount: 1
+    max-amount: 2
+    chance: 0.3

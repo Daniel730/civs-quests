@@ -1,0 +1,13 @@
+id: merchant_ledger_master
+name: "Mestre do Livro-Razão"
+archetype: merchant
+branch: finance
+tier: 2
+exclusive-group: merchant_capstone
+essence-cost: 15
+requires:
+  - mercador_mestre
+type: civs-territorial
+stat: shop_discount
+value: 0.05
+operation: add

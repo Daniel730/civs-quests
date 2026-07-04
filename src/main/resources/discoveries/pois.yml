@@ -1,0 +1,57 @@
+pois:
+  spawn_obelisk:
+    id: spawn_obelisk
+    name: "Obelisco de Spawn"
+    world: world
+    x: 2020
+    y: 68
+    z: -2020
+    radius: 48
+  council_village:
+    id: council_village
+    name: "Vila do Conselho"
+    world: world
+    x: 2036
+    y: 68
+    z: -2005
+    radius: 56
+  frost_watchtower:
+    id: frost_watchtower
+    name: "Torre de Gelo"
+    world: world
+    x: 2180
+    y: 72
+    z: -1880
+    radius: 40
+  quarry_depths:
+    id: quarry_depths
+    name: "Profundezas da Pedreira"
+    world: world
+    x: 1960
+    y: 48
+    z: -2080
+    radius: 44
+  sunken_caravan:
+    id: sunken_caravan
+    name: "Caravana Submersa"
+    world: world
+    x: 2120
+    y: 62
+    z: -2150
+    radius: 44
+  guild_market:
+    id: guild_market
+    name: "Mercado da Guilda"
+    world: world
+    x: 2055
+    y: 68
+    z: -1990
+    radius: 40
+  abandoned_port:
+    id: abandoned_port
+    name: "Porto Abandonado"
+    world: world
+    x: 2100
+    y: 64
+    z: -1950
+    radius: 48

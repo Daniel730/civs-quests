@@ -18,6 +18,16 @@ import dev.daniel730.rpgserver.listener.CivsInternalSkillListener;
 import dev.daniel730.rpgserver.listener.CivsQuestListener;
 import dev.daniel730.rpgserver.listener.CivsSpellQuestListener;
 import dev.daniel730.rpgserver.listener.EconomyQuestListener;
+import dev.daniel730.rpgserver.discovery.DiscoveryRegistry;
+import dev.daniel730.rpgserver.discovery.DiscoveryService;
+import dev.daniel730.rpgserver.listener.CombatQuestListener;
+import dev.daniel730.rpgserver.listener.CodexListener;
+import dev.daniel730.rpgserver.listener.DiscoveryListener;
+import dev.daniel730.rpgserver.listener.SkillTreeListener;
+import dev.daniel730.rpgserver.progression.PathTraitService;
+import dev.daniel730.rpgserver.progression.RebirthService;
+import dev.daniel730.rpgserver.quest.HuntSpawnService;
+import dev.daniel730.rpgserver.quest.LootTableService;
 import dev.daniel730.rpgserver.listener.PlayerHubListener;
 import dev.daniel730.rpgserver.listener.PlayerProfileListener;
 import dev.daniel730.rpgserver.listener.QuestJournalListener;
@@ -26,6 +36,8 @@ import dev.daniel730.rpgserver.progression.SkillTreeManager;
 import dev.daniel730.rpgserver.quest.PlayerHubService;
 import dev.daniel730.rpgserver.quest.QuestFeedbackService;
 import dev.daniel730.rpgserver.quest.QuestManager;
+import dev.daniel730.rpgserver.error.ErrorReportingConfig;
+import dev.daniel730.rpgserver.error.ErrorReportingManager;
 import dev.daniel730.rpgserver.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
@@ -51,7 +63,14 @@ public final class RpgServerPlugin extends JavaPlugin {
     private PlayerHubService playerHubService;
     private QuestFeedbackService questFeedbackService;
     private SkillTreeManager skillTreeManager;
+    private DiscoveryRegistry discoveryRegistry;
+    private DiscoveryService discoveryService;
+    private HuntSpawnService huntSpawnService;
+    private RebirthService rebirthService;
+    private PathTraitService pathTraitService;
+    private LootTableService lootTableService;
     private MessageUtil messageUtil;
+    private ErrorReportingManager errorReportingManager;
 
     private CivsQuestListener civsQuestListener;
     private CivsInternalSkillListener civsInternalSkillListener;
@@ -59,6 +78,7 @@ public final class RpgServerPlugin extends JavaPlugin {
     private CivsSpellQuestListener civsSpellQuestListener;
     private AuraSkillsQuestListener auraSkillsQuestListener;
     private EconomyQuestListener economyQuestListener;
+    private CombatQuestListener combatQuestListener;
 
     @Override
     public void onEnable() {
@@ -89,6 +109,14 @@ public final class RpgServerPlugin extends JavaPlugin {
         playerHubService = new PlayerHubService(this);
         questFeedbackService = new QuestFeedbackService(this);
         skillTreeManager = new SkillTreeManager(this);
+        discoveryRegistry = new DiscoveryRegistry(this);
+        discoveryService = new DiscoveryService(this, discoveryRegistry);
+        huntSpawnService = new HuntSpawnService(this);
+        rebirthService = new RebirthService(this);
+        pathTraitService = new PathTraitService(this);
+        lootTableService = new LootTableService(this);
+        discoveryRegistry.load();
+        lootTableService.load();
         questManager.loadQuests();
         skillTreeManager.loadPerks();
 
@@ -109,17 +137,35 @@ public final class RpgServerPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerHubListener(this), this);
         getServer().getPluginManager().registerEvents(new QuestJournalListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitQuestListener(this), this);
+        getServer().getPluginManager().registerEvents(new DiscoveryListener(this), this);
+        getServer().getPluginManager().registerEvents(new SkillTreeListener(this), this);
+        getServer().getPluginManager().registerEvents(new CodexListener(this), this);
         registerIntegrationListeners();
+
+        errorReportingManager = new ErrorReportingManager(this);
+        errorReportingManager.enable(new ErrorReportingConfig(getConfig()));
 
         int autosaveMinutes = pluginConfig.getAutosaveMinutes();
         long autosaveTicks = autosaveMinutes * 60L * 20L;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, profileManager::saveDirtyProfiles, autosaveTicks, autosaveTicks);
 
+        Bukkit.getScheduler().runTaskTimer(this, this::resetScheduledQuestsForOnlinePlayers,
+                20L * 60L, 20L * 60L);
+
         getLogger().info("RPGServer habilitado (v" + getDescription().getVersion() + ").");
+    }
+
+    private void resetScheduledQuestsForOnlinePlayers() {
+        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            questManager.resetExpiredScheduledQuests(online);
+        }
     }
 
     @Override
     public void onDisable() {
+        if (errorReportingManager != null) {
+            errorReportingManager.disable();
+        }
         if (questFeedbackService != null) {
             questFeedbackService.clearAll();
         }
@@ -147,10 +193,26 @@ public final class RpgServerPlugin extends JavaPlugin {
         messageUtil = new MessageUtil(pluginConfig);
         questManager.loadQuests();
         skillTreeManager.loadPerks();
+        discoveryRegistry.load();
+        lootTableService.load();
+        refreshIntegrationHooks();
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            questManager.ensureProfileSanitized(online);
             questFeedbackService.refreshTrackedHud(online);
         }
         reregisterIntegrationListeners();
+        if (errorReportingManager != null) {
+            errorReportingManager.reload(new ErrorReportingConfig(getConfig()));
+        }
+    }
+
+    private void refreshIntegrationHooks() {
+        vaultHook.refresh();
+        civsHook.refresh();
+        auraSkillsHook.refresh();
+        essentialsHook.refresh();
+        luckPermsHook.refresh();
+        placeholderHook.refresh();
     }
 
     private void registerIntegrationListeners() {
@@ -167,6 +229,8 @@ public final class RpgServerPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(civsInternalSkillListener, this);
             getServer().getPluginManager().registerEvents(auctionQuestListener, this);
             getServer().getPluginManager().registerEvents(civsSpellQuestListener, this);
+            combatQuestListener = new CombatQuestListener(this);
+            getServer().getPluginManager().registerEvents(combatQuestListener, this);
         }
         if (auraSkillsHook.isEnabled()) {
             auraSkillsQuestListener = new AuraSkillsQuestListener(this);
@@ -192,12 +256,14 @@ public final class RpgServerPlugin extends JavaPlugin {
         unregisterListener(civsInternalSkillListener);
         unregisterListener(auctionQuestListener);
         unregisterListener(civsSpellQuestListener);
+        unregisterListener(combatQuestListener);
         unregisterListener(auraSkillsQuestListener);
         economyQuestListener = null;
         civsQuestListener = null;
         civsInternalSkillListener = null;
         auctionQuestListener = null;
         civsSpellQuestListener = null;
+        combatQuestListener = null;
         auraSkillsQuestListener = null;
         registerIntegrationListeners();
     }
@@ -274,5 +340,25 @@ public final class RpgServerPlugin extends JavaPlugin {
 
     public MessageUtil getMessageUtil() {
         return messageUtil;
+    }
+
+    public DiscoveryService getDiscoveryService() {
+        return discoveryService;
+    }
+
+    public HuntSpawnService getHuntSpawnService() {
+        return huntSpawnService;
+    }
+
+    public RebirthService getRebirthService() {
+        return rebirthService;
+    }
+
+    public PathTraitService getPathTraitService() {
+        return pathTraitService;
+    }
+
+    public LootTableService getLootTableService() {
+        return lootTableService;
     }
 }
