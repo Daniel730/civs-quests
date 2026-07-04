@@ -161,10 +161,7 @@ public final class QuestFeedbackService {
         }
         playSound(player, config.getWelcomeSound(), config.getWelcomeSoundVolume(),
                 config.getWelcomeSoundPitch());
-        if (config.isWelcomeGiveQuestBook()) {
-            plugin.getQuestBookService().grantWelcomeBook(player);
-        }
-        if (config.isWelcomeGiveGuideBook()) {
+        if (config.isWelcomeGiveHubItem()) {
             plugin.getPlayerHubService().giveHubItem(player);
         }
     }

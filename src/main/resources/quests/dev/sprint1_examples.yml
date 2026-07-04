@@ -5,7 +5,6 @@ id: sprint1_examples
 name: "[DEV] Exemplos Sprint 1"
 archetype: merchant
 description: "Referência admin: kill_mob, mine_block, earn_money, shop_*, balance_min."
-lore-book: sprint1_guide
 requires:
   - merchant_path
 objectives:

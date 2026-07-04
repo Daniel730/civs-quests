@@ -7,7 +7,6 @@ import dev.daniel730.rpgserver.hook.ChestShopHook;
 import dev.daniel730.rpgserver.hook.CivsCustomMobHook;
 import dev.daniel730.rpgserver.hook.CivsHook;
 import dev.daniel730.rpgserver.hook.EssentialsHook;
-import dev.daniel730.rpgserver.hook.InteractiveBooksHook;
 import dev.daniel730.rpgserver.hook.LuckPermsHook;
 import dev.daniel730.rpgserver.hook.PlaceholderHook;
 import dev.daniel730.rpgserver.hook.VaultHook;
@@ -25,7 +24,6 @@ import dev.daniel730.rpgserver.listener.QuestJournalListener;
 import dev.daniel730.rpgserver.profile.ProfileManager;
 import dev.daniel730.rpgserver.progression.SkillTreeManager;
 import dev.daniel730.rpgserver.quest.PlayerHubService;
-import dev.daniel730.rpgserver.quest.QuestBookService;
 import dev.daniel730.rpgserver.quest.QuestFeedbackService;
 import dev.daniel730.rpgserver.quest.QuestManager;
 import dev.daniel730.rpgserver.util.MessageUtil;
@@ -45,13 +43,11 @@ public final class RpgServerPlugin extends JavaPlugin {
     private ChestShopHook chestShopHook;
     private CivsCustomMobHook civsCustomMobHook;
     private EssentialsHook essentialsHook;
-    private InteractiveBooksHook interactiveBooksHook;
     private PlaceholderHook placeholderHook;
     private LuckPermsHook luckPermsHook;
     private VeinMinerHook veinMinerHook;
     private ProfileManager profileManager;
     private QuestManager questManager;
-    private QuestBookService questBookService;
     private PlayerHubService playerHubService;
     private QuestFeedbackService questFeedbackService;
     private SkillTreeManager skillTreeManager;
@@ -77,7 +73,6 @@ public final class RpgServerPlugin extends JavaPlugin {
         chestShopHook = new ChestShopHook(this);
         civsCustomMobHook = new CivsCustomMobHook(this);
         essentialsHook = new EssentialsHook(this);
-        interactiveBooksHook = new InteractiveBooksHook(this);
         placeholderHook = new PlaceholderHook(this);
         luckPermsHook = new LuckPermsHook(this);
         veinMinerHook = new VeinMinerHook(this);
@@ -86,13 +81,11 @@ public final class RpgServerPlugin extends JavaPlugin {
         civsHook.enable();
         auraSkillsHook.enable();
         essentialsHook.enable();
-        interactiveBooksHook.enable();
         placeholderHook.enable();
         luckPermsHook.enable();
 
         profileManager = new ProfileManager(this);
         questManager = new QuestManager(this);
-        questBookService = new QuestBookService(this);
         playerHubService = new PlayerHubService(this);
         questFeedbackService = new QuestFeedbackService(this);
         skillTreeManager = new SkillTreeManager(this);
@@ -247,10 +240,6 @@ public final class RpgServerPlugin extends JavaPlugin {
         return essentialsHook;
     }
 
-    public InteractiveBooksHook getInteractiveBooksHook() {
-        return interactiveBooksHook;
-    }
-
     public PlaceholderHook getPlaceholderHook() {
         return placeholderHook;
     }
@@ -269,10 +258,6 @@ public final class RpgServerPlugin extends JavaPlugin {
 
     public QuestManager getQuestManager() {
         return questManager;
-    }
-
-    public QuestBookService getQuestBookService() {
-        return questBookService;
     }
 
     public PlayerHubService getPlayerHubService() {

@@ -2,33 +2,34 @@ package dev.daniel730.rpgserver.quest;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.gui.PlayerHubGui;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Player quick-access hub — inventory GUI (not a written book).
- * Opens via {@code /rpg hub}, {@code /rpg menu}, {@code /rpg guide}, or hub compass item.
+ * Player quick-access hub — inventory GUI (never a written book).
+ * Opens via {@code /rpg hub}, {@code /rpg menu}, {@code /rpg guide}, {@code /rpg book},
+ * or right-clicking the hub compass item (tagged with PDC {@code rpg-hub-item}).
  */
 public final class PlayerHubService {
 
-    public static final String HUB_ITEM_MARKER = "rpg-hub-compass";
-    /** @deprecated legacy written-book marker — still opens hub */
-    public static final String LEGACY_GUIDE_BOOK_MARKER = "rpg-guide-book";
+    public static final String HUB_ITEM_KEY = "rpg-hub-item";
 
     private final RpgServerPlugin plugin;
+    private final NamespacedKey hubItemKey;
 
     public PlayerHubService(RpgServerPlugin plugin) {
         this.plugin = plugin;
+        this.hubItemKey = new NamespacedKey(plugin, HUB_ITEM_KEY);
     }
 
     public void openHub(Player player) {
@@ -85,22 +86,16 @@ public final class PlayerHubService {
         if (item == null || !item.hasItemMeta()) {
             return false;
         }
-        List<Component> lore = item.getItemMeta().lore();
-        if (lore == null || lore.isEmpty()) {
-            return false;
-        }
-        String firstLine = PlainTextComponentSerializer.plainText().serialize(lore.getFirst());
-        return HUB_ITEM_MARKER.equals(firstLine) || LEGACY_GUIDE_BOOK_MARKER.equals(firstLine);
+        PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
+        return pdc.has(hubItemKey, PersistentDataType.BYTE);
     }
 
     public ItemStack createHubItem() {
         ItemStack item = new ItemStack(Material.RECOVERY_COMPASS);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(plugin.getMessageUtil().parse(plugin.getPluginConfig().getHubItemName()));
-        meta.lore(List.of(
-                Component.text(HUB_ITEM_MARKER, NamedTextColor.DARK_GRAY),
-                plugin.getMessageUtil().parse(plugin.getPluginConfig().getHubItemLore())
-        ));
+        meta.lore(List.of(plugin.getMessageUtil().parse(plugin.getPluginConfig().getHubItemLore())));
+        meta.getPersistentDataContainer().set(hubItemKey, PersistentDataType.BYTE, (byte) 1);
         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);

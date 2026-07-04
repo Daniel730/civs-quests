@@ -2,7 +2,6 @@ id: builder_path
 name: "Caminho do Construtor"
 archetype: builder
 description: "Transforme wilderness em domínio — abrigo, pedreira e mestria em Coleta."
-lore-book: builder_intro
 objectives:
   - id: build_shelter
     type: build_region

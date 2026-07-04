@@ -27,18 +27,10 @@ integrations:
     enabled: true
     kit-rewards: true
     warp-rewards: true
-  interactivebooks:
-    enabled: true
-    quest-book-auto-grant: false
-    grant-on-quest-start: false
   veinminer:
     enabled: true
 
 player-hub:
-  on-join: true
-
-# Deprecated alias — use player-hub.on-join
-guide-book:
   on-join: true
 
 progression:
@@ -93,9 +85,7 @@ feedback:
     sound-volume: 0.7
   welcome:
     enabled: true
-    give-quest-book: false
     give-hub-item: true
-    give-guide-book: true
     sound: ENTITY_PLAYER_LEVELUP
     sound-volume: 0.9
     sound-pitch: 0.9
@@ -150,15 +140,6 @@ messages:
   quest-sync:
     success-all: "<green>Sync concluído</green> para <white>{players}</white> jogador(es): <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."
     success-one: "<green>Sync concluído</green> para <white>{player}</white>: <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."
-  quest-book:
-    refreshed: "<gray>Livro atualizado:</gray> <white>{quest}</white>"
-    grant: "<gray>Livro de quest recebido:</gray> <white>{quest}</white>"
-    opened: "<gray>Abrindo livro:</gray> <white>{quest}</white>"
-  guide-book:
-    grant: "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg hub</yellow>"
-    refreshed: "<gray>Central atualizada com seu progresso.</gray>"
-    inventory-full: "<yellow>Inventário cheio — item dropado no chão.</yellow>"
-    already-have: "<gray>Você já possui a Central do Reino.</gray> <yellow>/rpg hub</yellow> <gray>para abrir.</gray>"
   player-hub:
     title: "<gold><bold>Central do Reino</bold></gold>"
     item-name: "<gold><italic>Central do Reino</italic></gold>"

@@ -2,7 +2,6 @@ id: bandit_chief_slayer
 name: "Caçador do Chefe"
 archetype: warrior
 description: "Equipe-se no altar, invoque o Chefe Bandido em combate e reclame a glória da vitória."
-lore-book: boss_guide
 requires:
   - warrior_siege_prep
 objectives:

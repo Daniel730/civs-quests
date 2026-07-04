@@ -2,7 +2,6 @@ id: sprint2_spells
 name: "Iniciação às Magias"
 archetype: warrior
 description: "Abra /cv menu → Magias no altar, conjure feitiços Civs e domine fireball em combate."
-lore-book: magias_intro
 requires:
   - warrior_path
 objectives:

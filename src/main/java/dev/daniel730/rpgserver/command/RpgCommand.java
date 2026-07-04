@@ -48,10 +48,10 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleReload(sender);
             case "profile" -> handleProfile(sender);
             case "quest" -> handleQuest(sender, args);
-            case "book" -> handleBook(sender, args, 1);
+            case "book" -> handleBookRedirect(sender);
+            case "guide" -> handleGuide(sender, args);
             case "journal" -> handleJournal(sender);
             case "hub", "menu" -> handleHub(sender, args);
-            case "guide" -> handleGuide(sender, args);
             case "settings" -> handleSettings(sender, args);
             case "perks" -> handlePerks(sender);
             case "sync" -> handleSync(sender, args);
@@ -101,7 +101,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length < 2) {
-            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest <list|status|book|accept|track>");
+            plugin.getMessageUtil().send(player, "<yellow>Uso:</yellow> /rpg quest <list|status|accept|track>");
             return true;
         }
         String action = args[1].toLowerCase(Locale.ROOT);
@@ -114,7 +114,12 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                 sendQuestStatus(player);
                 yield true;
             }
-            case "book" -> handleBook(player, args, 2);
+            case "book" -> {
+                plugin.getMessageUtil().send(player,
+                        "<gray>Os livros foram substituídos pelo diário GUI.</gray> <yellow>/rpg journal</yellow>");
+                yield handleJournal(player);
+            }
+            case "journal" -> handleJournal(player);
             case "accept" -> {
                 handleQuestAccept(player, args);
                 yield true;
@@ -125,53 +130,10 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             }
             default -> {
                 plugin.getMessageUtil().send(player,
-                        "<yellow>Uso:</yellow> /rpg quest <list|status|book|accept|track>");
+                        "<yellow>Uso:</yellow> /rpg quest <list|status|accept|track>");
                 yield true;
             }
         };
-    }
-
-    private boolean handleBook(CommandSender sender, String[] args, int idIndex) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Este comando só pode ser usado por jogadores.");
-            return true;
-        }
-        if (!sender.hasPermission("rpg.quest")) {
-            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
-            return true;
-        }
-        boolean open = false;
-        String questId = null;
-        if (args.length > idIndex) {
-            if (args[idIndex].equalsIgnoreCase("open")) {
-                open = true;
-                if (args.length > idIndex + 1) {
-                    questId = args[idIndex + 1];
-                }
-            } else {
-                questId = args[idIndex];
-            }
-        }
-        return deliverQuestBook(player, questId, open);
-    }
-
-    private boolean deliverQuestBook(Player player, String questId, boolean open) {
-        Quest quest = plugin.getQuestBookService().resolveQuest(player, questId);
-        if (quest == null) {
-            plugin.getMessageUtil().send(player,
-                    "<red>Nenhuma quest encontrada.</red> Use <white>/rpg quest book &lt;id&gt;</white>");
-            return true;
-        }
-        if (open) {
-            plugin.getQuestBookService().openQuestBook(player, quest);
-            plugin.getMessageUtil().send(player,
-                    plugin.getPluginConfig().getQuestBookOpened().replace("{quest}", quest.getName()));
-        } else {
-            plugin.getQuestBookService().giveQuestBook(player, quest);
-            plugin.getMessageUtil().send(player,
-                    plugin.getPluginConfig().getQuestBookGrant().replace("{quest}", quest.getName()));
-        }
-        return true;
     }
 
     private void handleQuestAccept(Player player, String[] args) {
@@ -240,6 +202,21 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             plugin.getPlayerHubService().giveHubItem(player);
             return true;
         }
+        plugin.getPlayerHubService().openHub(player);
+        return true;
+    }
+
+    private boolean handleBookRedirect(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            return true;
+        }
+        if (!sender.hasPermission("rpg.quest")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        plugin.getMessageUtil().send(player,
+                "<gray>Os livros foram substituídos pela Central do Reino.</gray> <yellow>/rpg hub</yellow>");
         plugin.getPlayerHubService().openHub(player);
         return true;
     }
@@ -416,14 +393,12 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         plugin.getMessageUtil().send(sender, "<gold>Comandos RPG</gold>");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest list</gray> — listar quests");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest status</gray> — progresso detalhado");
-        plugin.getMessageUtil().send(sender, "<gray>/rpg quest book [id]</gray> — livro de quest");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest accept &lt;id&gt;</gray> — aceitar quest");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest track &lt;id&gt;</gray> — rastrear quest");
-        plugin.getMessageUtil().send(sender, "<gray>/rpg book [id|open]</gray> — livro da quest rastreada");
         plugin.getMessageUtil().send(sender, "<gray>/rpg journal</gray> — diário de quests (GUI)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg hub</gray> — central do reino (GUI)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg hub give|refresh</gray> — item ou atualizar");
-        plugin.getMessageUtil().send(sender, "<gray>/rpg guide</gray> — alias da central");
+        plugin.getMessageUtil().send(sender, "<gray>/rpg guide</gray> — alias da central (GUI)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg settings notifications|bossbar</gray> — preferências pessoais");
         plugin.getMessageUtil().send(sender, "<gray>/rpg perks</gray> — listar perks");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
@@ -466,24 +441,11 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             return filterPrefix(List.of("on", "off", "toggle", "ligar", "desligar"), args[2]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("quest")) {
-            return filterPrefix(List.of("list", "status", "book", "accept", "track"), args[1]);
-        }
-        if (args.length == 2 && args[0].equalsIgnoreCase("book")) {
-            List<String> bookOptions = new ArrayList<>(List.of("open"));
-            bookOptions.addAll(questIdCompletions());
-            return filterPrefix(bookOptions, args[1]);
+            return filterPrefix(List.of("list", "status", "book", "journal", "accept", "track"), args[1]);
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("quest")
-                && (args[1].equalsIgnoreCase("book") || args[1].equalsIgnoreCase("accept")
-                || args[1].equalsIgnoreCase("track"))) {
-            if (args[1].equalsIgnoreCase("book") && args[2].equalsIgnoreCase("open")) {
-                return filterPrefix(questIdCompletions(), "");
-            }
+                && (args[1].equalsIgnoreCase("accept") || args[1].equalsIgnoreCase("track"))) {
             return filterPrefix(questIdCompletions(), args[2]);
-        }
-        if (args.length == 4 && args[0].equalsIgnoreCase("quest") && args[1].equalsIgnoreCase("book")
-                && args[2].equalsIgnoreCase("open")) {
-            return filterPrefix(questIdCompletions(), args[3]);
         }
         return List.of();
     }

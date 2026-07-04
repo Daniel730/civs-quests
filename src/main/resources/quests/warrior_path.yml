@@ -2,7 +2,6 @@ id: warrior_path
 name: "Caminho do Guerreiro"
 archetype: warrior
 description: "Erga um altar de combate, cace os mortos-vivos e prove seu valor em Fighting."
-lore-book: warrior_intro
 objectives:
   - id: build_altar
     type: build_region

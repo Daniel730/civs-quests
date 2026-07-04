@@ -2,7 +2,6 @@ id: sprint2_auction
 name: "Primeiro Leilão"
 archetype: merchant
 description: "Abra /cv menu → Casa de Leilões: anuncie um item e compre de outro jogador."
-lore-book: leilao_intro
 requires:
   - merchant_path
 objectives:

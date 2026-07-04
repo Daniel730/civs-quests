@@ -105,7 +105,6 @@ public final class QuestManager {
         String name = config.getString("name", id);
         String archetype = config.getString("archetype", "");
         String description = config.getString("description", "");
-        String loreBook = config.getString("lore-book");
         String unlocksPerk = config.getString("unlocks-perk");
         QuestSchedule schedule = QuestSchedule.fromYaml(config.getString("schedule"));
         List<String> requiredQuestIds = config.getStringList("requires");
@@ -115,7 +114,7 @@ public final class QuestManager {
             objectives.add(objectiveTypeRegistry.parseObjective(raw));
         }
         RewardDefinition rewards = RewardDefinition.fromConfig(config.getConfigurationSection("rewards"));
-        return new Quest(id, name, archetype, description, loreBook, unlocksPerk, schedule,
+        return new Quest(id, name, archetype, description, unlocksPerk, schedule,
                 requiredQuestIds, objectives, rewards);
     }
 
@@ -691,10 +690,6 @@ public final class QuestManager {
     }
 
     private void onQuestStarted(Player player, PlayerProfile profile, Quest quest) {
-        if (plugin.getPluginConfig().isGrantLoreBooksOnQuestStart()
-                && quest.getLoreBook() != null && !quest.getLoreBook().isBlank()) {
-            plugin.getInteractiveBooksHook().grantLoreBook(player, quest.getLoreBook());
-        }
         profile.addActiveQuest(quest.getId());
         if (profile.getTrackedQuestId() == null) {
             profile.setTrackedQuestId(quest.getId());

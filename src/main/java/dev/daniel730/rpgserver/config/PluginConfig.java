@@ -16,10 +16,7 @@ public final class PluginConfig {
     private final boolean essentialsEnabled;
     private final boolean essentialsKitRewardsEnabled;
     private final boolean essentialsWarpRewardsEnabled;
-    private final boolean interactiveBooksEnabled;
-    private final boolean questBookAutoGrant;
     private final boolean guideBookOnJoin;
-    private final boolean grantLoreBooksOnQuestStart;
     private final boolean veinMinerEnabled;
     private final String questPermissionPrefix;
     private final int autosaveMinutes;
@@ -63,13 +60,6 @@ public final class PluginConfig {
     private final String questJournalPageIndicator;
     private final String questSyncSuccessAll;
     private final String questSyncSuccessOne;
-    private final String questBookRefreshed;
-    private final String questBookGrant;
-    private final String questBookOpened;
-    private final String guideBookGranted;
-    private final String guideBookRefreshed;
-    private final String guideBookInventoryFull;
-    private final String guideBookAlreadyHave;
     private final String hubTitle;
     private final String hubItemName;
     private final String hubItemLore;
@@ -178,8 +168,7 @@ public final class PluginConfig {
     private final String welcomeSound;
     private final float welcomeSoundVolume;
     private final float welcomeSoundPitch;
-    private final boolean welcomeGiveQuestBook;
-    private final boolean welcomeGiveGuideBook;
+    private final boolean welcomeGiveHubItem;
     private final int welcomeTitleFadeIn;
     private final int welcomeTitleStay;
     private final int welcomeTitleFadeOut;
@@ -196,9 +185,6 @@ public final class PluginConfig {
         this.essentialsEnabled = config.getBoolean("integrations.essentials.enabled", true);
         this.essentialsKitRewardsEnabled = config.getBoolean("integrations.essentials.kit-rewards", true);
         this.essentialsWarpRewardsEnabled = config.getBoolean("integrations.essentials.warp-rewards", true);
-        this.interactiveBooksEnabled = config.getBoolean("integrations.interactivebooks.enabled", true);
-        this.questBookAutoGrant = config.getBoolean("integrations.interactivebooks.quest-book-auto-grant", false);
-        this.grantLoreBooksOnQuestStart = config.getBoolean("integrations.interactivebooks.grant-on-quest-start", false);
         this.guideBookOnJoin = config.getBoolean("player-hub.on-join",
                 config.getBoolean("guide-book.on-join", true));
         this.veinMinerEnabled = config.getBoolean("integrations.veinminer.enabled", false);
@@ -278,20 +264,6 @@ public final class PluginConfig {
         this.questSyncSuccessOne = config.getString("messages.quest-sync.success-one",
                 "<green>Sync concluído</green> para <white>{player}</white>: "
                         + "<yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled.");
-        this.questBookRefreshed = config.getString("messages.quest-book.refreshed",
-                "<gray>Livro atualizado:</gray> <white>{quest}</white>");
-        this.questBookGrant = config.getString("messages.quest-book.grant",
-                "<gray>Livro de quest recebido:</gray> <white>{quest}</white>");
-        this.questBookOpened = config.getString("messages.quest-book.opened",
-                "<gray>Abrindo livro:</gray> <white>{quest}</white>");
-        this.guideBookGranted = config.getString("messages.guide-book.grant",
-                "<gray>Guia do Reino recebido.</gray> <yellow>Clique direito</yellow> <gray>ou</gray> <yellow>/rpg guide</yellow>");
-        this.guideBookRefreshed = config.getString("messages.guide-book.refreshed",
-                "<gray>Guia atualizado com seu progresso atual.</gray>");
-        this.guideBookInventoryFull = config.getString("messages.guide-book.inventory-full",
-                "<yellow>Inventário cheio — guia dropado no chão.</yellow>");
-        this.guideBookAlreadyHave = config.getString("messages.guide-book.already-have",
-                "<gray>Você já possui o Guia do Reino.</gray> <yellow>/rpg guide</yellow> <gray>para abrir.</gray>");
         this.hubTitle = config.getString("messages.player-hub.title",
                 "<gold><bold>Central do Reino</bold></gold>");
         this.hubItemName = config.getString("messages.player-hub.item-name",
@@ -466,11 +438,9 @@ public final class PluginConfig {
         this.welcomeSound = config.getString("feedback.welcome.sound", "ENTITY_PLAYER_LEVELUP");
         this.welcomeSoundVolume = (float) config.getDouble("feedback.welcome.sound-volume", 0.9);
         this.welcomeSoundPitch = (float) config.getDouble("feedback.welcome.sound-pitch", 0.9);
-        this.welcomeGiveQuestBook = config.getBoolean("feedback.welcome.give-quest-book", false);
-        this.welcomeGiveGuideBook = config.getBoolean("feedback.welcome.give-hub-item",
-                config.getBoolean("feedback.welcome.give-guide-book",
-                        config.getBoolean("player-hub.on-join",
-                                config.getBoolean("guide-book.on-join", true))));
+        this.welcomeGiveHubItem = config.getBoolean("feedback.welcome.give-hub-item",
+                config.getBoolean("player-hub.on-join",
+                        config.getBoolean("guide-book.on-join", true)));
         this.welcomeTitleFadeIn = config.getInt("feedback.welcome.title-fade-in", 15);
         this.welcomeTitleStay = config.getInt("feedback.welcome.title-stay", 80);
         this.welcomeTitleFadeOut = config.getInt("feedback.welcome.title-fade-out", 25);
@@ -523,18 +493,6 @@ public final class PluginConfig {
 
     public boolean isEssentialsWarpRewardsEnabled() {
         return essentialsWarpRewardsEnabled;
-    }
-
-    public boolean isInteractiveBooksEnabled() {
-        return interactiveBooksEnabled;
-    }
-
-    public boolean isQuestBookAutoGrant() {
-        return questBookAutoGrant;
-    }
-
-    public boolean isGrantLoreBooksOnQuestStart() {
-        return grantLoreBooksOnQuestStart;
     }
 
     public boolean isGuideBookOnJoin() {
@@ -711,34 +669,6 @@ public final class PluginConfig {
 
     public String getQuestSyncSuccessOne() {
         return questSyncSuccessOne;
-    }
-
-    public String getQuestBookRefreshed() {
-        return questBookRefreshed;
-    }
-
-    public String getQuestBookGrant() {
-        return questBookGrant;
-    }
-
-    public String getQuestBookOpened() {
-        return questBookOpened;
-    }
-
-    public String getGuideBookGranted() {
-        return guideBookGranted;
-    }
-
-    public String getGuideBookRefreshed() {
-        return guideBookRefreshed;
-    }
-
-    public String getGuideBookInventoryFull() {
-        return guideBookInventoryFull;
-    }
-
-    public String getGuideBookAlreadyHave() {
-        return guideBookAlreadyHave;
     }
 
     public String getHubTitle() {
@@ -1186,12 +1116,8 @@ public final class PluginConfig {
         return welcomeSoundPitch;
     }
 
-    public boolean isWelcomeGiveQuestBook() {
-        return welcomeGiveQuestBook;
-    }
-
-    public boolean isWelcomeGiveGuideBook() {
-        return welcomeGiveGuideBook;
+    public boolean isWelcomeGiveHubItem() {
+        return welcomeGiveHubItem;
     }
 
     public int getWelcomeTitleFadeIn() {
