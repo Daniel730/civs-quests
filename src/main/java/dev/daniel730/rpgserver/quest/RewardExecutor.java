@@ -32,6 +32,7 @@ public final class RewardExecutor {
             grantPermission(player, rewards, summaryLines);
             grantLpGroup(player, rewards, summaryLines);
             grantEssentials(player, rewards, summaryLines);
+            grantLootTable(player, rewards, summaryLines);
         }
 
         if (hasPerkUnlock) {
@@ -114,6 +115,30 @@ public final class RewardExecutor {
                 summaryLines.add("<blue>🌀</blue> <white>Teleporte: " + rewards.getWarp() + "</white>");
             }
         }
+    }
+
+    private void grantLootTable(Player player, RewardDefinition rewards, List<String> summaryLines) {
+        if (rewards.getLootTable() == null) {
+            return;
+        }
+        List<org.bukkit.inventory.ItemStack> drops = plugin.getLootTableService()
+                .grantTable(player, rewards.getLootTable());
+        if (drops.isEmpty()) {
+            return;
+        }
+        summaryLines.add("<gold>🎁</gold> <white>Itens:</white> <yellow>" + describeDrops(drops) + "</yellow>");
+    }
+
+    private static String describeDrops(List<org.bukkit.inventory.ItemStack> drops) {
+        StringBuilder builder = new StringBuilder();
+        for (org.bukkit.inventory.ItemStack drop : drops) {
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+            builder.append(drop.getAmount()).append("x ").append(capitalize(
+                    drop.getType().name().toLowerCase(Locale.ROOT).replace('_', ' ')));
+        }
+        return builder.toString();
     }
 
     private void grantPerkUnlock(Player player, String perkId, List<String> summaryLines) {
