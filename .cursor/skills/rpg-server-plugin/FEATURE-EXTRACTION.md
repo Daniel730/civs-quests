@@ -101,9 +101,9 @@ RPG **never** stores parallel skill XP. Quest rewards call AuraSkills API; Civs 
 ## RPG backlog (by priority)
 
 **P0:** Objective registry, 8+ objective types, requirements, rewards, AuraSkillsHook, ChestShopQuestListener  
-**P1:** SkillTreeManager, perk StatModifiers via AuraSkills, Essentials/InteractiveBooks hooks, quest journal GUI, full PAPI  
-**P2:** Daily/weekly quests ✅ (RPG-016, local — sprint3_daily + weekly_warrior/merchant/builder), Civs-native territorial objectives ✅ (Sprint 2), VeinMiner synergy (RPG-009 deferred), NPC dialog stages  
-**P3:** In-game quest editor (optional)  
+**P1:** SkillTreeGui, DiscoveryService, HuntSpawnService, RebirthService, Civs light NPC  
+**P2:** Daily/weekly rotation pools ✅ (YAML), Codex GUI, path traits, loot tables  
+**P3:** In-game quest editor, Dynmap markers  
 
 ## Reference plugins — still native (not on server)
 

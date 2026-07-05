@@ -26,21 +26,36 @@ description: >-
 | `earn_money` | Vault balance delta | `amount: 1000` |
 | `balance_min` | Essentials/Vault | `amount: 500` |
 | `shop_buy` / `shop_sell` / `shop_revenue` | ChestShop `TransactionEvent` | `amount`, optional filters |
-| `join_town` | Civs `PlayerAcceptsTownInviteEvent` | optional `town:` filter |
+| `join_town` | Civs `PlayerAcceptsTownInviteEvent`, `TownCreatedEvent`; backfill via `CivsHook.isTownMember` | optional `town:` filter; founders count |
 | `vein_mine` | VeinMiner `PlayerVeinMineEvent` | optional `block:`, `amount` |
 
 **Crop harvest:** no `harvest_crop` type — use `mine_block: wheat` on mature crop break (`daily_farm`).
 
-### Sprint 3 quest examples
+### Sprint 4 quest examples
 
 | ID | Schedule | Chain / notes |
 |----|----------|---------------|
-| `construtor_armazem` | — | Mid builder: warehouse + `civs_skill_level` mining 3; requires `sprint2_civs_skills` |
-| `construtor_mestre` | — | Capstone: requires `construtor_armazem`; `lp-group` + `builder_master` perk |
-| `daily_farm` | daily | `mine_block: wheat` ×32; farming XP |
-| `sprint2_spells` | — | `lore-book: magias_intro`; fighting XP ~250 for 8 spell casts |
+| `welcome` | — | Neutral prologue: `open_hub`, `discover_poi` spawn_obelisk |
+| `hunt_frost_watchtower` | — | Warrior exploration: POI + `custom_mob_kill` frost_wraith with `spawn-on-accept: true` |
+| `daily_scout` | daily | Neutral: `discover_biome` rotation |
+| `weekly_explorer` | weekly | Discover 3 POIs |
 
-Add new types: register in `ObjectiveTypes` + parser in registry + listener method.
+**Sprint 4 objective types (implement in ObjectiveTypeRegistry):**
+
+| type | YAML fields | Listener |
+|------|-------------|----------|
+| `discover_poi` | `poi:` | DiscoveryService + PlayerMoveEvent |
+| `discover_biome` | `biome:` | DiscoveryService biome change |
+| `enter_combat` | `amount:` | Civs `EnterCombatEvent` |
+| `open_hub` | — | PlayerHubListener on hub open |
+
+**Hunt quests:** `spawn-on-accept: true` on `custom_mob_kill` → `HuntSpawnService` on quest accept.
+
+**Rewards:** optional `loot-table:` in rewards block → `LootTableService`.
+
+**Perks:** YAML fields `branch`, `tier`, `exclusive-group`, `essence-cost`. Capstone `unlocks-perk-choice:` on quest YAML.
+
+**Rebirth:** capstone-gated via `RebirthService`; keeps Codex, refunds 60% Path Essence.
 
 ## Quest YAML schema (actual — matches `QuestManager.parseQuest` + `RewardDefinition`)
 
@@ -144,6 +159,7 @@ Config: `progression.sync-on-join-from-civs: true` — silent sync on join (no r
 | type | Source |
 |------|--------|
 | `build_region` | Civs `building` accomplishments, `items` stash, or owned `RegionManager` regions |
+| `join_town` | Civs `TownManager.getTownsForPlayer` (owner or member) |
 | `skill_level` | AuraSkills `getSkillLevel` |
 | `civs_skill_level` | Civs `Civilian` internal skill level |
 | `civs_skill_xp` | Civs skill `getTotalExp()` (floor) |
