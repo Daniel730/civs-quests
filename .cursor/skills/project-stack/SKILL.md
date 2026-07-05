@@ -52,20 +52,19 @@ Skip: MiniMOTD, ChestSort, ChunkLoader, Chunky, GSit, EssentialsChat, NBTAPI, pr
 | Heroes | Civs — spell/class design | P2 |
 | BeautyQuests / LMBishop Quests | RPG — objective patterns only | done Sprint 1 |
 
-## Sprint status (2026-07-03)
+## Sprint status (2026-07-05)
 
-**Sprint 1 & 2 DONE, Sprint 3 deployed to bot-server (2026-07-03).** See [SPRINT-3-STATUS.md](../rpg-server-plugin/SPRINT-3-STATUS.md). Live state: [FINAL-HANDOFF.md](../rpg-server-plugin/FINAL-HANDOFF.md) — **22 quests, 9 perks, 3 custom mobs, clean boot**.
+**Sprint 1–4 DONE and deployed** (2026-07-04). See [SPRINT-4-STATUS.md](../rpg-server-plugin/SPRINT-4-STATUS.md) and [SPRINT-4-DEPLOY.md](../rpg-server-plugin/SPRINT-4-DEPLOY.md).
 
 | Sprint | Area | Done |
 |--------|------|------|
-| 1 | Civs CIVS-001–004 | GainExpEvent, SkillListener, PAPI skills, addSkillXp |
-| 1 | RPG RPG-001–008 | ObjectiveTypeRegistry, 7+ objective types, rewards, ChestShop/Essentials/IB hooks |
-| 2 | Civs CIVS-006–008 | StatManager, auction BIN, SpellPreCastEvent + smokeshow bug fixes |
-| 2 | RPG RPG-010–015 | Civs territorial objectives, SkillTreeManager+perks, journal GUI, PAPI progress, reload re-register, auction/spell objectives |
-| 3 | RPG-016 | Daily/weekly quest scaffold + content (`sprint3_daily`, `weekly_*`); `/rpg sync` profile backfill |
+| 1 | Civs CIVS-001–004, RPG RPG-001–008 | Objective registry, hooks, rewards |
+| 2 | CIVS-006–008, RPG RPG-010–015 | StatManager, perks, journal, PAPI |
+| 3 | RPG-016–017 | Daily/weekly scaffold, `/rpg sync`, PlayerHub GUI |
+| 4 | RPG-018–024, CIVS-012 | Discovery, SkillTreeGui, rebirth, 21 new quest YAMLs, custom mobs |
+| 5 (bugfix) | hub nav, quest credit, rewards, council mobs | Civs back-button intercept for Hub→Civs→Hub; `CustomMobKillEvent.getCreditedPlayer()` for party hunt credit; `RewardExecutor.grantLootTable` for item rewards; `CustomMobSpawnEffect` mob-only nearby count + safe-spawn location fix |
 
-**Live server:** pre-Sprint-3 JAR (7 quests, 2 perks). Sprint 2/3 changes need deploy + commit.
-**Sprint 3 remaining:** [CIVS-009](https://github.com/Daniel730/Civs/issues/9) turret MVP local (shields open, not deployed), [RPG-009](https://github.com/Daniel730/civs-quests/issues/9) VeinMiner (deferred). CIVS-010 closed + deployed. GitHub sync: [GITHUB-SYNC.md](../rpg-server-plugin/GITHUB-SYNC.md).
+**Project scope:** see `docs/PROJECT-SCOPE.pdf` (Civs repo) for the living Skyrim/Valheim/Enshrouded vision doc.
 
 ## Backlog quick ref
 

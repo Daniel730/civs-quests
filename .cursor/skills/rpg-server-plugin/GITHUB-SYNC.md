@@ -77,25 +77,26 @@ Cross-repo: use full `owner/repo#N` when one PR only closes issues in the other 
 
 ---
 
-## Current snapshot (2026-07-03 late night)
+## Current snapshot (2026-07-05)
 
-### Open (prioritize)
-
-| # | Repo | Ticket | Notes |
-|---|------|--------|-------|
-| 9 | Civs | CIVS-009 | Turret MVP local; town shields open |
-| 9 | RPG | RPG-009 | VeinMiner hook stubbed; config default false — deferred |
-
-### Recently closed / fixed this session
+### Open
 
 | # | Repo | Ticket | Notes |
 |---|------|--------|-------|
-| — | both | Playtest hot-swap | NoClassDefFoundError — fixed by full-restart deploy (`wsl-deploy-bot-server.sh`) |
-| — | RPG | LuckPerms hook | ServicesManager fix; removed Paper library loader |
+| — | — | — | **All Sprint 4 P1 closed 2026-07-04 deploy** |
 
-### Deploy rule (agents)
+### Sprint 4 content landed
 
-**Never scp JARs while server is running.** Always `wsl-deploy-bot-server.sh` or stop → scp → start.
+21 new quest files in `src/main/resources/quests/` (50 total), Java parsers shipped (`discover_poi`, `discover_biome`, `enter_combat`, `open_hub`).
+
+### Bugfix pass (2026-07-05, not yet deployed)
+
+| Bug | Fix |
+|-----|-----|
+| Civs GUI → RPG Hub back navigation broken | `PlayerHubListener` intercepts the Civs root-menu back click once history bottoms out; reopens Hub on Civs tab |
+| Quest kill credit missed party hunts | `CivsCustomMobHook` prefers `CustomMobKillEvent.getCreditedPlayer()` (fallback `getKiller()`) |
+| Quest item rewards never granted | `RewardExecutor.grantLootTable` wired to `LootTableService.grantTable` for `loot-table:` rewards |
+| Council room `custom_mob:guild_thief` not spawning | Civs `CustomMobSpawnEffect` now counts only nearby non-player `LivingEntity` (players/villagers no longer block spawn) and stops double-offsetting Y before `CustomMobManager.findSafeSpawn` |
 
 ### Previously closed
 
