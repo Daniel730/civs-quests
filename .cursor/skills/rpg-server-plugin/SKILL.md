@@ -8,7 +8,7 @@ description: >-
 
 # RPG Server Plugin
 
-> **Related skills:** [project-stack](../project-stack/SKILL.md) · [rpg-quests](../rpg-quests/SKILL.md) · [civs-custom](../civs-custom/SKILL.md) · [GITHUB-SYNC.md](GITHUB-SYNC.md) · [SPRINT-1-STATUS.md](SPRINT-1-STATUS.md) · [FEATURE-EXTRACTION.md](FEATURE-EXTRACTION.md)
+> **Related skills:** [project-stack](../project-stack/SKILL.md) · [rpg-quests](../rpg-quests/SKILL.md) · [civs-custom](../civs-custom/SKILL.md) · [GITHUB-SYNC.md](GITHUB-SYNC.md) · [ERROR-REPORTING.md](ERROR-REPORTING.md) · [SPRINT-1-STATUS.md](SPRINT-1-STATUS.md) · [FEATURE-EXTRACTION.md](FEATURE-EXTRACTION.md)
 
 ## Target
 
@@ -54,6 +54,7 @@ dev.daniel730.rpgserver/
 ├── listener/      # Civs, AuraSkills, Bukkit, ChestShop, Economy
 ├── profile/       # PlayerProfile YAML
 ├── command/       # /rpg
+├── error/         # error-reporting → GitHub Issues / webhook
 ├── placeholder/   # %rpg_*%
 └── config/        # PluginConfig
 ```

@@ -361,4 +361,8 @@ public final class RpgServerPlugin extends JavaPlugin {
     public LootTableService getLootTableService() {
         return lootTableService;
     }
+
+    public ErrorReportingManager getErrorReportingManager() {
+        return errorReportingManager;
+    }
 }

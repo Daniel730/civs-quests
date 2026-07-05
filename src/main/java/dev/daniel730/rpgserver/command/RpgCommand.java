@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,6 +63,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             case "poi" -> handlePoi(sender, args);
             case "sync" -> handleSync(sender, args);
             case "sanitize" -> handleSanitize(sender, args);
+            case "errors" -> handleErrors(sender);
             default -> {
                 sendHelp(sender);
                 yield true;
@@ -515,6 +517,32 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleErrors(CommandSender sender) {
+        if (!sender.hasPermission("rpg.admin")) {
+            plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
+            return true;
+        }
+        if (plugin.getErrorReportingManager() == null) {
+            plugin.getMessageUtil().send(sender, "<red>Error reporting ainda nao foi inicializado.</red>");
+            return true;
+        }
+        Path directory = plugin.getErrorReportingManager().getReportService().getLocalReportDirectory();
+        List<Path> reports = plugin.getErrorReportingManager().getReportService().getRecentLocalReports(5);
+        plugin.getMessageUtil().send(sender, "<gold>Reports locais de erro</gold>");
+        plugin.getMessageUtil().send(sender, "<gray>Diretorio:</gray> <white>" + directory.toAbsolutePath() + "</white>");
+        if (reports.isEmpty()) {
+            plugin.getMessageUtil().send(sender, "<gray>Nenhum report local encontrado.</gray>");
+            return true;
+        }
+        for (Path report : reports) {
+            plugin.getMessageUtil().send(sender, "<gray>-</gray> <white>" + report.getFileName() + "</white>");
+        }
+        plugin.getMessageUtil().send(sender,
+                "<yellow>Cursor:</yellow> abra <white>" + directory.resolve("latest.md").toAbsolutePath()
+                        + "</white> e peça para corrigir a causa raiz.");
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         plugin.getMessageUtil().send(sender, "<gold>Comandos RPG</gold>");
         plugin.getMessageUtil().send(sender, "<gray>/rpg quest list</gray> — listar quests");
@@ -537,6 +565,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync [jogador]</gray> — sincronizar progresso de quests");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync --rewards [jogador]</gray> — sync e conceder recompensas");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sanitize [jogador]</gray> — reparar estado de quests corrompido");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg errors</gray> — listar reports locais para Cursor");
         }
     }
 
@@ -551,6 +580,7 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
                 options.add("reload");
                 options.add("sync");
                 options.add("sanitize");
+                options.add("errors");
             }
             return filterPrefix(options, args[0]);
         }

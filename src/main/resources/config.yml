@@ -8,7 +8,7 @@ settings:
 # Reporte automático de erros do servidor → GitHub Issues / webhook
 # NÃO commite tokens reais. Configure no servidor em plugins/RPGServer/config.yml
 error-reporting:
-  enabled: true
+  enabled: false
   server-name: bot-server
   dedupe-minutes: 15
   # Vazio = todos os plugins; ou liste ex.: [Civs, RPGServer]
@@ -25,6 +25,10 @@ error-reporting:
     repo: civs-quests
     labels:
       - server-error
+  local:
+    enabled: true
+    directory: "error-reports"       # plugins/RPGServer/error-reports/
+    keep-last: 50
   webhook:
     enabled: false
     url: ""
