@@ -86,6 +86,18 @@ public final class CivsCustomMobHook {
 
     private static KillerAccessor resolveKillerAccessor(Class<?> eventClass) throws ReflectiveOperationException {
         try {
+            // Prefer the credited player: for quest-owned mobs (spawnForQuest), Civs credits the
+            // quest owner when a party member within partyRadius lands the kill, not the killer.
+            Method getCreditedPlayer = eventClass.getMethod("getCreditedPlayer");
+            Method getKillerForFallback = eventClass.getMethod("getKiller");
+            return event -> {
+                Player credited = (Player) getCreditedPlayer.invoke(event);
+                return credited != null ? credited : (Player) getKillerForFallback.invoke(event);
+            };
+        } catch (NoSuchMethodException ignored) {
+            // legacy Civs API without party kill credit
+        }
+        try {
             Method getKiller = eventClass.getMethod("getKiller");
             return event -> (Player) getKiller.invoke(event);
         } catch (NoSuchMethodException ignored) {
