@@ -1,0 +1,26 @@
+{
+  "name": "RPG Server — monitor de erros",
+  "description": "A cada 6h: busca reports do bot-server, analisa stacktrace, sugere correção e opcionalmente comenta em issue GitHub. Não faz deploy.",
+  "workflow": {
+    "triggers": [
+      {
+        "cron": {
+          "cron": "0 */6 * * *"
+        }
+      }
+    ],
+    "actions": [],
+    "prompts": [
+      "Você monitora erros do servidor Minecraft de produção (bot-server) do projeto Civs + RPG Server.\n\n## Passo 1 — Obter dados\n\n1. Execute no terminal (WSL):\n   `wsl bash scripts/wsl-fetch-rpg-errors.sh`\n2. Se WSL/SSH não estiver disponível neste ambiente (ex.: Cloud Agent sem acesso à rede privada), use GitHub:\n   `gh issue list --repo Daniel730/civs-quests --label server-error --state open --limit 5`\n   e leia o body da issue mais recente.\n3. Leia os ficheiros locais gerados:\n   - `.error-snapshots/summary.md`\n   - `.error-snapshots/latest.md` (se existir)\n\n## Passo 2 — Análise\n\n- Se não houver erros novos (sem `latest.md` ou report vazio/antigo), responda apenas: **Nenhum erro novo.**\n- Caso contrário:\n  - Identifique plugin dono (RPG = dev.daniel730.rpgserver, Civs = org.redcastlemedia.multitallented.civs).\n  - Causa raiz em linguagem clara (PT).\n  - Impacto no jogador/servidor.\n  - Fix proposto com ficheiros/repos afetados (Civs e/ou rpg-server-plugin).\n  - Comandos de verificação: `mvn compile` no repo alterado.\n\n## Passo 3 — Ação (só com aprovação implícita do utilizador)\n\n- **Pode:** resumir no chat, comentar numa issue existente (`gh issue comment`), ou criar issue se não existir e o erro for novo.\n- **Não pode:** deploy, restart do servidor, commit/push/PR sem o utilizador pedir explicitamente.\n- **Não pode:** expor tokens, PATs ou segredos do config.\n\n## Contexto\n\n- Reports locais no servidor: `plugins/RPGServer/error-reports/latest.md`\n- Comando in-game: `/rpg errors` (admin)\n- Docs: `.cursor/skills/rpg-server-plugin/ERROR-REPORTING.md`\n- Ownership: AuraSkills = skill XP; Civs = towns/regions; RPG = quests/hooks apenas.\n"
+    ],
+    "model": "",
+    "agentOptions": {
+      "skipInstall": false
+    },
+    "memoryEnabled": true,
+    "gitConfig": {
+      "repo": "Daniel730/civs-quests",
+      "branch": "master"
+    }
+  }
+}
