@@ -1,56 +1,42 @@
-# Sprint 4 — Exploration, Skill Tree GUI, Rebirth
+# Sprint 4 — Master Plan Complete
 
-**Completed:** 2026-07-04  
-**Deploy:** done 2026-07-04 16:50 UTC — backup `plugins-backup-20260704-1648`. See `SPRINT-4-DEPLOY.md`.
+**Completed:** 2026-07-09  
+**Build:** Civs + RPG `mvn compile` OK
 
-## Scope — all done locally
+## Delivered (master plan)
 
-| Ticket | Area | Status |
-|--------|------|--------|
-| RPG-018 | DiscoveryService + POI/biome objectives + Codex | **done** |
-| RPG-019 | HuntSpawnService + timed quest mobs | **done** |
-| RPG-020 | SkillTreeGui (Skyrim-style) + perk branches | **done** |
-| RPG-021 | Path traits (class buff/debuff) | **done** |
-| RPG-022 | Rebirth + Path Essence (capstone-gated) | **done** |
-| RPG-023 | Quest rotation pools (daily/weekly) | **done** |
-| RPG-024 | Progression + exploration quest content | **done** (21 new YAMLs, 50 total) |
-| CIVS-012 | CustomMobManager.spawnForQuest + new mob defs | **done** |
+| Area | Status |
+|------|--------|
+| Discovery + Codex + 5 objective types | done |
+| Hunt spawns + loot tables + party credit | done |
+| Path traits (Civs + AuraSkills) | done |
+| Skill tree GUI (3-column Skyrim layout) | done |
+| 37 perks, capstone exclusive choice | done |
+| Rebirth + confirm GUI + Path Essence | done |
+| Rotation pools (2 daily / 1 weekly) | done |
+| 56 quests + 3 rescue chains | done |
+| 27 POIs + `/rpg poi mark` + export | done |
+| Tutorial CHOOSE → welcome quest bridge | done |
+| Guide NPCs (4 static guides in Civs) | done |
+| Error reporting module | done |
 
-## Build
+## Content counts
 
-```
-Civs mvn compile: OK
-RPG mvn compile: OK
-```
+- **Quests:** 56 YAML (excl. dev examples)
+- **Perks:** 37 YAML
+- **POIs:** 27 in `discoveries/pois.yml`
+- **Custom mobs:** 7 in Civs
 
-## New systems
+## Deploy
 
-- **Objectives:** `open_hub`, `discover_poi`, `discover_biome`, `enter_combat`; `spawn-on-accept` on hunts
-- **DiscoveryService** + `discoveries/pois.yml` (9 POIs — tune coords before deploy)
-- **HuntSpawnService** → Civs `spawnForQuest(owner, partyRadius)`
-- **SkillTreeGui** + **CodexGui** — `/rpg tree`, `/rpg codex`
-- **RebirthService** — `/rpg rebirth` after capstone
-- **PathTraitService** — class buff/debuff on path lock
-- **LootTableService** — `hunt_common`, `hunt_rare`, `warrior_rare`
-- **21 perks** (9 legacy + 12 branch)
-- **7 Civs custom mobs** (4 new hunt targets)
+Rebuild **both** JARs (Civs first → RPG). Not auto-deployed from this session.
 
-## Commands
+## Quick test
 
-| Command | Description |
-|---------|-------------|
-| `/rpg tree` | Skyrim-style perk tree GUI |
-| `/rpg codex` | Exploration discoveries |
-| `/rpg rebirth` | Renascimento (requires capstone) |
-| `/rpg poi mark <id>` | Admin: register POI at current location |
-
-## Before deploy
-
-1. Set real coordinates in `plugins/RPGServer/discoveries/pois.yml` (or `/rpg poi mark`)
-2. Rebuild Civs JAR → update RPG `system` scope if needed
-3. Smoke test: welcome quest, hunt spawn, skill tree unlock, rebirth preview
-4. Set `quests.rotation.daily-count` / `weekly-count` in config when ready to limit rotatives
-
-## Tonight's server safety
-
-**No deploy.** Do not copy new `quests/` or JAR to production until smoke-tested.
+1. `/rpg hub` → path picker → PATH_DETAIL preview → accept path
+2. `/rpg tree` → 3-column perk branches
+3. `/rpg codex` → discoveries
+4. Walk POIs / council at 2036,68,-2005
+5. Right-click guide NPCs near village
+6. `/rpg rebirth` after capstone (confirm GUI)
+7. `/rpg poi mark <id>` (admin) to tune coords

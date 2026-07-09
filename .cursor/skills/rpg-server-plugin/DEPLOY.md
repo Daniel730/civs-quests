@@ -229,3 +229,18 @@ This happens when **restart/stop runs twice** before the first boot finishes (`D
 
 **Verify:** `grep -E 'ChestShop.*Enabling|Vault loaded|ERROR.*ChestShop' logs/latest.log` should show enable + `Vault loaded!` with no ERROR lines.
 
+
+## Public Minecraft access (DuckDNS)
+
+| Item | Value |
+|------|--------|
+| LAN IP (port forward target) | **192.168.1.252** (not 192.168.1.50 — see below) |
+| Minecraft port | **25565** (server-port in server.properties) |
+| Client address | **forever-server.duckdns.org** (no :25565 needed on default port) |
+| Router (CHITA-Hub5) | TCP **25565** WAN → **192.168.1.252:25565** |
+
+**Why 192.168.1.50 appeared:** bot-server can show both .50 (old primary NM address) and .252 (reserved target) on enp4s0; hostname -I lists .50 first. Forward the router to **.252**.
+
+Network fix on the host (gateway, static .252, DuckDNS refresh): copy or use scripts/fix-minecraft-network.sh → ~/fix-minecraft-network.sh, then **sudo ~/fix-minecraft-network.sh** (password required). Token: /etc/duckdns.token.
+
+From outside LAN, verify DNS and port: Resolve-DnsName forever-server.duckdns.org; Test-NetConnection forever-server.duckdns.org -Port 25565. On the same Wi-Fi, DuckDNS may fail without router NAT hairpin — use LAN IP or mobile data to test.
