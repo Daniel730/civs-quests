@@ -1,6 +1,8 @@
 id: warrior_berserk
 name: "Fúria do Guerreiro"
 archetype: warrior
+branch: fury
+tier: 1
 requires:
   - warrior_path
 type: auraskills-stat

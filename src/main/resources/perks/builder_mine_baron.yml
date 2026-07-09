@@ -1,0 +1,13 @@
+id: builder_mine_baron
+name: "Barão da Mina"
+archetype: builder
+branch: mineracao
+tier: 3
+exclusive-group: builder_capstone
+essence-cost: 25
+requires:
+  - builder_deep_delver
+type: civs-territorial
+stat: build_speed
+value: 0.12
+operation: add

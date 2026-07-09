@@ -76,7 +76,13 @@ public final class SkillTreeManager {
                 "warrior_siege_heart.yml", "warrior_frost_walker.yml", "warrior_duel_master.yml",
                 "warrior_battle_cry.yml", "builder_stoneheart.yml", "builder_skybridge.yml",
                 "builder_quarry_sense.yml", "builder_architect.yml", "merchant_guild_seal.yml",
-                "merchant_silk_route.yml", "merchant_ledger_master.yml", "merchant_smuggler.yml"
+                "merchant_silk_route.yml", "merchant_ledger_master.yml", "merchant_smuggler.yml",
+                "warrior_bulwark.yml", "warrior_tracker.yml", "merchant_broker.yml",
+                "merchant_haggler.yml", "merchant_auctioneer.yml", "builder_planner.yml",
+                "builder_deep_delver.yml", "warrior_berserker_lord.yml", "warrior_siege_breaker.yml",
+                "warrior_beast_slayer.yml", "merchant_monopoly.yml", "merchant_guildmaster.yml",
+                "merchant_tycoon.yml", "builder_citadel.yml", "builder_mine_baron.yml",
+                "builder_metropolis.yml"
         };
         for (String resource : defaults) {
             try {

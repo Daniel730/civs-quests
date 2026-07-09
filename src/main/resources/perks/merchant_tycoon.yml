@@ -1,0 +1,13 @@
+id: merchant_tycoon
+name: "Magnata"
+archetype: merchant
+branch: fortuna
+tier: 3
+exclusive-group: merchant_capstone
+essence-cost: 25
+requires:
+  - merchant_ledger_master
+type: auraskills-stat
+stat: luck
+value: 4.0
+operation: add

@@ -1,11 +1,11 @@
-id: merchant_bazaar
-name: "Feirante Experiente"
+id: merchant_haggler
+name: "Pechincheiro"
 archetype: merchant
 branch: bazar
-tier: 1
+tier: 2
 requires:
-  - mercador_fortuna
+  - merchant_bazaar
 type: civs-territorial
 stat: shop_discount
-value: 0.03
+value: 0.04
 operation: add

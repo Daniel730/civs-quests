@@ -1,0 +1,11 @@
+id: builder_deep_delver
+name: "Escavador Profundo"
+archetype: builder
+branch: mineracao
+tier: 2
+requires:
+  - builder_quarry_sense
+type: civs-territorial
+stat: build_speed
+value: 0.06
+operation: add

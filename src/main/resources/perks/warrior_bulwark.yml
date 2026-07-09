@@ -1,0 +1,11 @@
+id: warrior_bulwark
+name: "Baluarte"
+archetype: warrior
+branch: siege
+tier: 1
+requires:
+  - warrior_oath
+type: civs-territorial
+stat: damage_reduction
+value: 1.0
+operation: add

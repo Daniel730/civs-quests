@@ -1,10 +1,10 @@
-id: merchant_trader
-name: "Comerciante Mestre"
+id: merchant_auctioneer
+name: "Leiloeiro"
 archetype: merchant
-branch: fortuna
-tier: 1
+branch: leilao
+tier: 2
 requires:
-  - mercador_mestre
+  - merchant_broker
 type: civs-territorial
 stat: shop_discount
 value: 0.05

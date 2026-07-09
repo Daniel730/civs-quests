@@ -1,0 +1,13 @@
+id: warrior_beast_slayer
+name: "Matador de Feras"
+archetype: warrior
+branch: hunter
+tier: 3
+exclusive-group: warrior_capstone
+essence-cost: 25
+requires:
+  - warrior_frost_walker
+type: auraskills-stat
+stat: strength
+value: 4.0
+operation: add

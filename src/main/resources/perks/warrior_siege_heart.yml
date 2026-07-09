@@ -3,6 +3,7 @@ name: "Coração de Cerco"
 archetype: warrior
 branch: siege
 tier: 2
+tier: 2
 exclusive-group: warrior_capstone
 essence-cost: 15
 requires:

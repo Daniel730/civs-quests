@@ -1,11 +1,11 @@
-id: merchant_bazaar
-name: "Feirante Experiente"
+id: merchant_broker
+name: "Corretor"
 archetype: merchant
-branch: bazar
+branch: leilao
 tier: 1
 requires:
-  - mercador_fortuna
+  - merchant_ledger
 type: civs-territorial
 stat: shop_discount
-value: 0.03
+value: 0.02
 operation: add

@@ -1,14 +1,13 @@
-id: builder_skybridge
-name: "Ponte Celeste"
+id: builder_metropolis
+name: "Metrópole"
 archetype: builder
 branch: urbanista
-tier: 2
-tier: 2
+tier: 3
 exclusive-group: builder_capstone
-essence-cost: 15
+essence-cost: 25
 requires:
-  - construtor_mestre
+  - builder_planner
 type: civs-territorial
 stat: build_speed
-value: 0.08
+value: 0.15
 operation: add

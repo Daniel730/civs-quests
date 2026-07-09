@@ -31,6 +31,9 @@ rewards:
   lp-group: rpg-builder
 unlocks-perk: builder_master
 unlocks-perk-choice:
+  - builder_citadel
+  - builder_mine_baron
+  - builder_metropolis
   - builder_stoneheart
   - builder_skybridge
   - builder_quarry_sense

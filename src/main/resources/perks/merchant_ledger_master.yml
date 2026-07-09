@@ -1,7 +1,8 @@
 id: merchant_ledger_master
 name: "Mestre do Livro-Razão"
 archetype: merchant
-branch: finance
+branch: fortuna
+tier: 2
 tier: 2
 exclusive-group: merchant_capstone
 essence-cost: 15

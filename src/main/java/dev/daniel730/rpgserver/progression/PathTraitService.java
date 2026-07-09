@@ -5,6 +5,7 @@ import dev.daniel730.rpgserver.config.PluginConfig;
 import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestManager;
 import org.bukkit.entity.Player;
+import org.redcastlemedia.multitallented.civs.stats.TerritorialStat;
 
 import java.util.Locale;
 
@@ -20,9 +21,6 @@ public final class PathTraitService {
 
     public void applyPathTraits(Player player, String archetype) {
         if (player == null || archetype == null || archetype.isBlank()) {
-            return;
-        }
-        if (!plugin.getAuraSkillsHook().isEnabled()) {
             return;
         }
         PluginConfig.PathTraitConfig trait = plugin.getPluginConfig().getPathTrait(archetype);
@@ -61,6 +59,10 @@ public final class PathTraitService {
             return;
         }
         String modifierId = TRAIT_MODIFIER_PREFIX + archetype.toLowerCase(Locale.ROOT) + "_" + kind;
-        plugin.getAuraSkillsHook().addStatModifier(player, modifierId, stat, value, operation);
+        if (TerritorialStat.fromKey(stat) != null && plugin.getCivsHook().isEnabled()) {
+            plugin.getCivsHook().addPathTraitModifier(player, modifierId, stat, value, operation);
+        } else if (plugin.getAuraSkillsHook().isEnabled()) {
+            plugin.getAuraSkillsHook().addStatModifier(player, modifierId, stat, value, operation);
+        }
     }
 }

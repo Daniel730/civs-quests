@@ -1,7 +1,8 @@
 id: warrior_duel_master
 name: "Mestre do Duelo"
 archetype: warrior
-branch: duel
+branch: fury
+tier: 2
 tier: 2
 exclusive-group: warrior_capstone
 essence-cost: 15

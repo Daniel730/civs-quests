@@ -1,0 +1,13 @@
+id: warrior_berserker_lord
+name: "Senhor Berserker"
+archetype: warrior
+branch: fury
+tier: 3
+exclusive-group: warrior_capstone
+essence-cost: 25
+requires:
+  - warrior_duel_master
+type: civs-territorial
+stat: attack_damage
+value: 3.0
+operation: add

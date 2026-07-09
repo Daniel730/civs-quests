@@ -1,0 +1,11 @@
+id: builder_planner
+name: "Planejador"
+archetype: builder
+branch: urbanista
+tier: 2
+requires:
+  - builder_architect
+type: civs-territorial
+stat: build_speed
+value: 0.08
+operation: add

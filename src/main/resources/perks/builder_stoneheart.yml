@@ -1,7 +1,8 @@
 id: builder_stoneheart
 name: "Coração de Pedra"
 archetype: builder
-branch: fortress
+branch: fortaleza
+tier: 2
 tier: 2
 exclusive-group: builder_capstone
 essence-cost: 15

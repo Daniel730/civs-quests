@@ -1,7 +1,8 @@
 id: builder_quarry_sense
 name: "Farol da Pedreira"
 archetype: builder
-branch: mining
+branch: mineracao
+tier: 1
 tier: 2
 exclusive-group: builder_capstone
 essence-cost: 15

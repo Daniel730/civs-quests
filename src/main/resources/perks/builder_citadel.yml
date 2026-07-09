@@ -1,0 +1,13 @@
+id: builder_citadel
+name: "Cidadela"
+archetype: builder
+branch: fortaleza
+tier: 3
+exclusive-group: builder_capstone
+essence-cost: 25
+requires:
+  - builder_stoneheart
+type: civs-territorial
+stat: damage_reduction
+value: 2.0
+operation: add

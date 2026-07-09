@@ -1,13 +1,12 @@
-id: merchant_guild_seal
-name: "Selo da Guilda"
+id: merchant_monopoly
+name: "Monopólio"
 archetype: merchant
-branch: leilao
-tier: 2
-tier: 2
+branch: bazar
+tier: 3
 exclusive-group: merchant_capstone
-essence-cost: 15
+essence-cost: 25
 requires:
-  - mercador_mestre
+  - merchant_haggler
 type: civs-territorial
 stat: shop_discount
 value: 0.08

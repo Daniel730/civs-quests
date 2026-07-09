@@ -1,14 +1,13 @@
-id: merchant_guild_seal
-name: "Selo da Guilda"
+id: merchant_guildmaster
+name: "Mestre da Guilda"
 archetype: merchant
 branch: leilao
-tier: 2
-tier: 2
+tier: 3
 exclusive-group: merchant_capstone
-essence-cost: 15
+essence-cost: 25
 requires:
-  - mercador_mestre
+  - merchant_auctioneer
 type: civs-territorial
 stat: shop_discount
-value: 0.08
+value: 0.07
 operation: add

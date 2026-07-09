@@ -1,0 +1,13 @@
+id: warrior_siege_breaker
+name: "Quebrador de Cerco"
+archetype: warrior
+branch: siege
+tier: 3
+exclusive-group: warrior_capstone
+essence-cost: 25
+requires:
+  - warrior_siege_heart
+type: civs-territorial
+stat: siege_damage
+value: 0.15
+operation: add

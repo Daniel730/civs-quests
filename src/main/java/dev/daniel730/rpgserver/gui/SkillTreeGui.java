@@ -17,19 +17,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Map;
 
 public final class SkillTreeGui {
 
     private static final int SIZE = 54;
-    private static final int[] TREE_SLOTS = {
-            10, 11, 12, 13, 14, 15, 16,
-            19, 20, 21, 22, 23, 24, 25,
-            28, 29, 30, 31, 32, 33, 34,
-            37, 38, 39, 40, 41, 42, 43
-    };
+    private static final int[] TIER3_SLOTS = {11, 13, 15};
+    private static final int[] TIER2_SLOTS = {20, 22, 24};
+    private static final int[] TIER1_SLOTS = {29, 31, 33};
+
+    private static final Map<String, String[]> BRANCHES_BY_ARCHETYPE = Map.of(
+            "warrior", new String[]{"fury", "siege", "hunter"},
+            "merchant", new String[]{"bazar", "leilao", "fortuna"},
+            "builder", new String[]{"fortaleza", "mineracao", "urbanista"}
+    );
 
     private SkillTreeGui() {
     }
@@ -63,11 +67,95 @@ public final class SkillTreeGui {
                 List.of(messages.parse("<gray>Renascimentos:</gray> <white>" + profile.getRebirthCount() + "</white>"),
                         messages.parse("<gray>Clique em um perk disponível para desbloquear.</gray>"))));
 
-        List<PerkDefinition> perks = skillTree.getPerksForArchetype(profile.getArchetype());
-        if (holder.getBranch() != null && !holder.getBranch().isBlank()) {
-            perks = skillTree.getPerksForBranch(profile.getArchetype(), holder.getBranch());
+        String archetype = profile.getArchetype();
+        if (archetype == null || archetype.isBlank()) {
+            inventory.setItem(22, infoItem(messages,
+                    messages.parse("<red>Escolha um caminho primeiro</red>"),
+                    List.of(messages.parse("<gray>Use a Central → Escolher Caminho.</gray>"))));
+            return;
         }
-        perks = new ArrayList<>(perks);
+
+        String[] branches = BRANCHES_BY_ARCHETYPE.get(archetype.toLowerCase(Locale.ROOT));
+        if (branches == null) {
+            renderLegacyGrid(plugin, player, holder, profile, skillTree, messages, inventory);
+            return;
+        }
+
+        Map<String, Map<Integer, PerkDefinition>> layout = buildBranchLayout(skillTree, archetype, branches);
+        for (int column = 0; column < branches.length; column++) {
+            String branch = branches[column];
+            if (holder.getBranch() != null && !holder.getBranch().isBlank()
+                    && !holder.getBranch().equalsIgnoreCase(branch)) {
+                continue;
+            }
+            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 3, TIER3_SLOTS[column]);
+            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 2, TIER2_SLOTS[column]);
+            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 1, TIER1_SLOTS[column]);
+            inventory.setItem(48 + column, branchLabel(messages, branch, column));
+        }
+    }
+
+    private static void placeTierPerk(Inventory inventory, SkillTreeHolder holder, MessageUtil messages,
+                                      SkillTreeManager skillTree, PlayerProfile profile,
+                                      Map<String, Map<Integer, PerkDefinition>> layout,
+                                      String branch, int tier, int slot) {
+        PerkDefinition perk = layout.getOrDefault(branch, Map.of()).get(tier);
+        if (perk == null) {
+            inventory.setItem(slot, createFiller(ArchetypeUtil.glassPane(profile.getArchetype())));
+            return;
+        }
+        SkillTreeManager.PerkStatus status = skillTree.getPerkStatus(profile, perk);
+        inventory.setItem(slot, createPerkItem(messages, perk, status, profile));
+        if (status == SkillTreeManager.PerkStatus.AVAILABLE) {
+            holder.mapSlot(slot, perk.getId());
+        }
+    }
+
+    private static Map<String, Map<Integer, PerkDefinition>> buildBranchLayout(
+            SkillTreeManager skillTree, String archetype, String[] branches) {
+        Map<String, Map<Integer, PerkDefinition>> layout = new HashMap<>();
+        for (String branch : branches) {
+            layout.put(branch, new HashMap<>());
+        }
+        for (PerkDefinition perk : skillTree.getPerksForArchetype(archetype)) {
+            if (perk.getBranch().isBlank() || perk.getTier() < 1 || perk.getTier() > 3) {
+                continue;
+            }
+            String branchKey = perk.getBranch().toLowerCase(Locale.ROOT);
+            Map<Integer, PerkDefinition> column = layout.get(branchKey);
+            if (column == null) {
+                continue;
+            }
+            PerkDefinition existing = column.get(perk.getTier());
+            if (existing == null || perk.getName().compareToIgnoreCase(existing.getName()) < 0) {
+                column.put(perk.getTier(), perk);
+            }
+        }
+        return layout;
+    }
+
+    private static ItemStack branchLabel(MessageUtil messages, String branch, int column) {
+        Material icon = switch (column) {
+            case 0 -> Material.RED_BANNER;
+            case 1 -> Material.YELLOW_BANNER;
+            default -> Material.LIME_BANNER;
+        };
+        return actionItem(messages, icon,
+                messages.parse("<yellow>" + capitalize(branch) + "</yellow>"),
+                List.of(messages.parse("<gray>Ramo da árvore</gray>")), false);
+    }
+
+    private static String capitalize(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        return value.substring(0, 1).toUpperCase(Locale.ROOT) + value.substring(1);
+    }
+
+    private static void renderLegacyGrid(RpgServerPlugin plugin, Player player, SkillTreeHolder holder,
+                                         PlayerProfile profile, SkillTreeManager skillTree,
+                                         MessageUtil messages, Inventory inventory) {
+        List<PerkDefinition> perks = new ArrayList<>(skillTree.getPerksForArchetype(profile.getArchetype()));
         perks.sort((a, b) -> {
             int tier = Integer.compare(a.getTier(), b.getTier());
             if (tier != 0) {
@@ -75,34 +163,18 @@ public final class SkillTreeGui {
             }
             return a.getName().compareToIgnoreCase(b.getName());
         });
-
+        int[] slots = {29, 31, 33, 20, 22, 24, 11, 13, 15};
         int index = 0;
         for (PerkDefinition perk : perks) {
-            if (index >= TREE_SLOTS.length) {
+            if (index >= slots.length) {
                 break;
             }
-            int slot = TREE_SLOTS[index++];
+            int slot = slots[index++];
             SkillTreeManager.PerkStatus status = skillTree.getPerkStatus(profile, perk);
             inventory.setItem(slot, createPerkItem(messages, perk, status, profile));
             if (status == SkillTreeManager.PerkStatus.AVAILABLE) {
                 holder.mapSlot(slot, perk.getId());
             }
-        }
-
-        Set<String> branches = new LinkedHashSet<>();
-        for (PerkDefinition perk : skillTree.getPerksForArchetype(profile.getArchetype())) {
-            if (!perk.getBranch().isBlank()) {
-                branches.add(perk.getBranch());
-            }
-        }
-        int branchSlot = 48;
-        for (String branch : branches) {
-            if (branchSlot > 50) {
-                break;
-            }
-            inventory.setItem(branchSlot++, actionItem(messages, Material.BOOK,
-                    messages.parse("<yellow>" + branch + "</yellow>"),
-                    List.of(messages.parse("<gray>Filtrar ramo</gray>")), false));
         }
     }
 

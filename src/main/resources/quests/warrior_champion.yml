@@ -22,6 +22,9 @@ rewards:
   lp-group: rpg-warrior
 unlocks-perk: warrior_veteran
 unlocks-perk-choice:
+  - warrior_berserker_lord
+  - warrior_siege_breaker
+  - warrior_beast_slayer
   - warrior_siege_heart
   - warrior_frost_walker
   - warrior_duel_master

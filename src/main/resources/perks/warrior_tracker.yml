@@ -1,0 +1,11 @@
+id: warrior_tracker
+name: "Rastreador"
+archetype: warrior
+branch: hunter
+tier: 1
+requires:
+  - warrior_border_patrol
+type: auraskills-stat
+stat: speed
+value: 1.0
+operation: add

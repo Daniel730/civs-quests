@@ -1,6 +1,8 @@
 id: builder_fortress
 name: "Fortaleza do Construtor"
 archetype: builder
+branch: fortaleza
+tier: 1
 requires:
   - weekly_builder
 type: civs-territorial

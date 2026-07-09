@@ -23,6 +23,7 @@ error-reporting:
     token-file: "/home/daniel/mineserver/secrets/github-pat.txt"
     owner: Daniel730
     repo: civs-quests
+    civs-repo: Civs
     labels:
       - server-error
   webhook:
@@ -75,29 +76,29 @@ progression:
   path-traits:
     warrior:
       buff:
-        stat: strength
+        stat: attack_damage
         value: 2
         operation: add
       debuff:
-        stat: luck
-        value: -1
+        stat: shop_discount
+        value: -0.02
         operation: add
     merchant:
       buff:
-        stat: luck
-        value: 2
+        stat: shop_discount
+        value: 0.03
         operation: add
       debuff:
-        stat: strength
+        stat: toughness
         value: -1
         operation: add
     builder:
       buff:
-        stat: toughness
-        value: 2
+        stat: build_speed
+        value: 0.05
         operation: add
       debuff:
-        stat: wisdom
+        stat: strength
         value: -1
         operation: add
   reward-multipliers:
@@ -117,12 +118,24 @@ quests:
       - daily_boar_hunt
       - daily_duel
       - daily_pillager
+      - daily_mercado
+      - daily_vendas
+      - daily_conselho
+      - daily_patrolha
+      - daily_farm
+      - daily_quarry
+      - daily_miner
     weekly-pool:
       - weekly_explorer
       - weekly_deep_delve
       - weekly_guild_bounty
-    daily-count: 0
-    weekly-count: 0
+      - weekly_warrior
+      - weekly_builder
+      - weekly_merchant
+      - weekly_boss_hunter
+      - weekly_comunidade
+    daily-count: 2
+    weekly-count: 1
 
 # Spectacle & HUD — sounds, particles, boss bar / scoreboard
 feedback:
@@ -307,7 +320,6 @@ messages:
     locked: "<red>Pré-requisitos não atendidos.</red>"
     no-permission: "<red>Você não tem permissão para esta quest.</red>"
     max-active: "<red>Limite de quests ativas atingido (máx. {max}).</red>"
-    archetype-locked: "<red>Você já escolheu outro caminho. Cada arquétipo tem quests únicas.</red>"
     archetype-locked: "<red>Você já escolheu outro caminho. Cada arquétipo tem quests e recompensas únicas.</red>"
   quest-track:
     success: "<yellow>Rastreando:</yellow> <white>{quest}</white>"

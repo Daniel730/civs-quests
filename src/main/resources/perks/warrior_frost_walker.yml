@@ -1,7 +1,8 @@
 id: warrior_frost_walker
 name: "Passo Gelado"
 archetype: warrior
-branch: exploration
+branch: hunter
+tier: 2
 tier: 2
 exclusive-group: warrior_capstone
 essence-cost: 15
