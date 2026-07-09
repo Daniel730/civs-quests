@@ -3,7 +3,6 @@ package dev.daniel730.rpgserver.quest;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypes;
-import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
@@ -34,17 +33,6 @@ public final class QuestProgressSync {
         int questsCompleted = 0;
         boolean changed;
 
-        // #region agent log
-        AgentDebugLog.log(plugin, "H1,H2", "QuestProgressSync.sync",
-                "sync start",
-                Map.of("activeQuestCount", profile.getActiveQuestIds().size(),
-                        "startedQuestCount", profile.getStartedQuestIds().size(),
-                        "completedQuestCount", profile.getCompletedQuestIds().size(),
-                        "trackedQuestId", String.valueOf(profile.getTrackedQuestId()),
-                        "questCount", questManager.getAllQuests().size(),
-                        "grantRewards", grantRewards));
-        // #endregion
-
         do {
             changed = false;
             for (Quest quest : questManager.getAllQuests()) {
@@ -69,15 +57,6 @@ public final class QuestProgressSync {
                     if (!isObjectiveSatisfied(player, profile, quest, objective)) {
                         continue;
                     }
-                    // #region agent log
-                    AgentDebugLog.log(plugin, "H1", "QuestProgressSync.sync",
-                            "sync objective satisfied",
-                            Map.of("questId", quest.getId(),
-                                    "objectiveId", objective.getId(),
-                                    "type", objective.getTypeId(),
-                                    "currentCount", resolveCurrentCount(player, profile, quest, objective),
-                                    "requiredAmount", objective.getAmount()));
-                    // #endregion
                     applyObjectiveProgress(player, profile, quest, objective);
                     questManager.completeObjective(player, profile, quest, objective, grantRewards, notify);
                     objectivesCompleted++;
@@ -87,13 +66,6 @@ public final class QuestProgressSync {
                 if (questManager.isQuestComplete(profile, quest) && !profile.isQuestComplete(quest.getId())) {
                     int completed = questManager.completeQuest(player, profile, quest, grantRewards, notify);
                     if (completed > 0) {
-                        // #region agent log
-                        AgentDebugLog.log(plugin, "H1,H2", "QuestProgressSync.sync",
-                                "sync completed quest",
-                                Map.of("questId", quest.getId(),
-                                        "schedule", quest.getSchedule().name(),
-                                        "grantRewards", grantRewards));
-                        // #endregion
                         questsCompleted += completed;
                         changed = true;
                     }
@@ -104,13 +76,6 @@ public final class QuestProgressSync {
         plugin.getSkillTreeManager().checkAutoUnlocks(player);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
-        // #region agent log
-        AgentDebugLog.log(plugin, "H1", "QuestProgressSync.sync",
-                "sync complete",
-                Map.of("objectivesCompleted", objectivesCompleted,
-                        "questsCompleted", questsCompleted,
-                        "grantRewards", grantRewards));
-        // #endregion
         return new SyncResult(objectivesCompleted, questsCompleted);
     }
 

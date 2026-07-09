@@ -2,7 +2,6 @@ package dev.daniel730.rpgserver.hook;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.listener.ChestShopQuestListener;
-import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.EventPriority;
@@ -12,7 +11,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -64,14 +62,6 @@ public final class ChestShopHook {
                     BigDecimal price = (BigDecimal) getExactPrice.invoke(event);
                     int itemCount = resolveItemCount(getStock.invoke(event));
                     int revenueAmount = price == null ? 0 : (int) Math.floor(price.doubleValue());
-                    // #region agent log
-                    AgentDebugLog.log(plugin, "H4", "ChestShopHook.TransactionEvent",
-                            "chestshop transaction processed",
-                            Map.of("transactionType", String.valueOf(transactionType),
-                                    "itemCount", itemCount,
-                                    "price", String.valueOf(price),
-                                    "revenueAmount", revenueAmount));
-                    // #endregion
 
                     if (buyType.equals(transactionType)) {
                         Object client = getClient.invoke(event);

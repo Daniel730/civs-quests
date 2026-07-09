@@ -4,7 +4,6 @@ import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypeRegistry;
 import dev.daniel730.rpgserver.quest.objective.ObjectiveTypes;
-import dev.daniel730.rpgserver.util.AgentDebugLog;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -180,12 +179,6 @@ public final class QuestManager {
 
         if (changed) {
             plugin.getProfileManager().markDirty(player.getUniqueId());
-            // #region agent log
-            AgentDebugLog.log(plugin, "H3", "QuestManager.resetExpiredScheduledQuests",
-                    "scheduled quests reset",
-                    Map.of("resetCount", resetCount,
-                            "zone", zone.toString()));
-            // #endregion
         }
     }
 
@@ -836,25 +829,11 @@ public final class QuestManager {
         }
         int limit = plugin.getPluginConfig().getMaxActiveQuests();
         if (limit > 0 && countActiveInProgressQuests(player, profile) >= limit) {
-            // #region agent log
-            AgentDebugLog.log(plugin, "H2", "QuestManager.ensureQuestStarted",
-                    "auto-start blocked by active quest limit",
-                    Map.of("questId", quest.getId(),
-                            "limit", limit,
-                            "activeInProgress", countActiveInProgressQuests(player, profile)));
-            // #endregion
             return;
         }
         if (!profile.markQuestStarted(quest.getId())) {
             return;
         }
-        // #region agent log
-        AgentDebugLog.log(plugin, "H2", "QuestManager.ensureQuestStarted",
-                "auto-starting quest from event progress",
-                Map.of("questId", quest.getId(),
-                        "limit", limit,
-                        "activeInProgress", countActiveInProgressQuests(player, profile)));
-        // #endregion
         onQuestStarted(player, profile, quest);
     }
 
@@ -919,14 +898,6 @@ public final class QuestManager {
             return 0;
         }
         profile.markQuestComplete(quest.getId());
-        // #region agent log
-        AgentDebugLog.log(plugin, "H1,H2", "QuestManager.completeQuest",
-                "quest marked complete",
-                Map.of("questId", quest.getId(),
-                        "schedule", quest.getSchedule().name(),
-                        "grantRewards", grantRewards,
-                        "notify", notify));
-        // #endregion
         if (quest.isScheduled()) {
             profile.setQuestCompletedAt(quest.getId(), System.currentTimeMillis());
         }
@@ -1267,15 +1238,6 @@ public final class QuestManager {
 
         if (strippedInvalid > 0 || strippedCompletedActive > 0 || demotedExcess > 0) {
             plugin.getProfileManager().markDirty(player.getUniqueId());
-            // #region agent log
-            AgentDebugLog.log(plugin, "H2,H5", "QuestManager.sanitizeProfile",
-                    "profile sanitized",
-                    Map.of("strippedInvalid", strippedInvalid,
-                            "strippedCompletedActive", strippedCompletedActive,
-                            "demotedExcess", demotedExcess,
-                            "activeAfter", profile.getActiveQuestIds().size(),
-                            "inProgressAfter", countActiveInProgressQuests(player, profile)));
-            // #endregion
         }
         return new SanitizeResult(strippedInvalid, strippedCompletedActive, demotedExcess);
     }
