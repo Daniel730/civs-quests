@@ -23,6 +23,7 @@ public final class PlayerHubHolder implements InventoryHolder {
     private Inventory inventory;
     private HubTab activeTab = HubTab.INICIO;
     private HubScreen screen = HubScreen.TAB;
+    private String selectedPathQuestId;
     private final Deque<HubScreen> screenStack = new ArrayDeque<>();
     private final Map<Integer, HubClick> slotActions = new HashMap<>();
 
@@ -46,6 +47,15 @@ public final class PlayerHubHolder implements InventoryHolder {
         screenStack.clear();
         screen = HubScreen.TAB;
         activeTab = tab;
+        selectedPathQuestId = null;
+    }
+
+    public String getSelectedPathQuestId() {
+        return selectedPathQuestId;
+    }
+
+    public void setSelectedPathQuestId(String selectedPathQuestId) {
+        this.selectedPathQuestId = selectedPathQuestId;
     }
 
     public void pushScreen(HubScreen next) {
@@ -85,6 +95,7 @@ public final class PlayerHubHolder implements InventoryHolder {
     public enum HubScreen {
         TAB,
         PATH_PICKER,
+        PATH_DETAIL,
         QUEST_TREE,
         SKILL_TREE,
         CODEX
@@ -138,7 +149,9 @@ public final class PlayerHubHolder implements InventoryHolder {
         SYNC,
         BACK,
         CLOSE,
-        REFRESH
+        REFRESH,
+        ACCEPT_PATH,
+        OPEN_REBIRTH
     }
 
     public record HubClick(HubAction action, String payload) {
@@ -172,6 +185,14 @@ public final class PlayerHubHolder implements InventoryHolder {
 
         public static HubClick trackQuest(String questId) {
             return new HubClick(HubAction.TRACK_QUEST, questId);
+        }
+
+        public static HubClick acceptPath(String questId) {
+            return new HubClick(HubAction.ACCEPT_PATH, questId);
+        }
+
+        public static HubClick openPathDetail(String questId) {
+            return new HubClick(HubAction.OPEN_SUBVIEW, "PATH_DETAIL:" + questId);
         }
     }
 }

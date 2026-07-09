@@ -60,6 +60,7 @@ public final class PlayerHubGui {
 
         switch (holder.getScreen()) {
             case PATH_PICKER -> renderPathPickerTab(plugin, player, profile, holder, messages, config);
+            case PATH_DETAIL -> renderPathDetailView(plugin, player, profile, holder, messages, config);
             case QUEST_TREE -> renderQuestTreeView(plugin, player, profile, holder, messages, config);
             case TAB -> renderActiveTab(plugin, player, profile, holder, messages, config);
         }
@@ -164,7 +165,7 @@ public final class PlayerHubGui {
         QuestManager questManager = plugin.getQuestManager();
         inventorySet(holder, 4, infoItem(Material.MAP,
                 messages.parse("<gold><bold>Escolha seu Caminho</bold></gold>"),
-                List.of(messages.parse("<gray>Clique para aceitar e começar.</gray>"))));
+                List.of(messages.parse("<gray>Clique para ver detalhes antes de aceitar.</gray>"))));
 
         List<Quest> paths = questManager.getPathQuests(player, profile);
         int[] slots = {20, 22, 24};
@@ -172,7 +173,7 @@ public final class PlayerHubGui {
         for (int i = 0; i < paths.size() && i < slots.length; i++) {
             Quest path = paths.get(i);
             int slot = slots[i];
-            holder.mapAction(slot, PlayerHubHolder.HubClick.trackQuest(path.getId()));
+            holder.mapAction(slot, PlayerHubHolder.HubClick.openPathDetail(path.getId()));
             inventorySet(holder, slot, createPathHead(messages, path, icons[i]));
         }
 
@@ -182,6 +183,68 @@ public final class PlayerHubGui {
                             + ArchetypeUtil.coloredDisplayName(profile.getArchetype())),
                     List.of(messages.parse("<dark_gray>Outros caminhos ficam bloqueados.</dark_gray>"))));
         }
+    }
+
+    private static void renderPathDetailView(RpgServerPlugin plugin, Player player, PlayerProfile profile,
+                                             PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+        QuestManager questManager = plugin.getQuestManager();
+        String questId = holder.getSelectedPathQuestId();
+        Quest path = questId == null ? null : questManager.getQuest(questId);
+        if (path == null) {
+            inventorySet(holder, 22, infoItem(Material.BARRIER,
+                    messages.parse("<red>Caminho inválido</red>"),
+                    List.of(messages.parse("<gray>Volte e escolha novamente.</gray>"))));
+            return;
+        }
+
+        String archetype = path.getArchetype();
+        inventorySet(holder, 4, infoItem(ArchetypeUtil.glassPane(archetype),
+                messages.parse(ArchetypeUtil.coloredDisplayName(archetype) + " — <white>" + path.getName() + "</white>"),
+                List.of(messages.parse("<gray>" + empty(path.getDescription()) + "</gray>"))));
+
+        PluginConfig.PathTraitConfig trait = config.getPathTrait(archetype);
+        List<Component> traitLore = new ArrayList<>();
+        if (trait != null) {
+            traitLore.add(messages.parse("<green>Buff:</green> <white>" + formatTrait(trait.buffStat(), trait.buffValue()) + "</white>"));
+            traitLore.add(messages.parse("<red>Debuff:</red> <white>" + formatTrait(trait.debuffStat(), trait.debuffValue()) + "</white>"));
+        } else {
+            traitLore.add(messages.parse("<gray>Sem traços de caminho configurados.</gray>"));
+        }
+        inventorySet(holder, 20, infoItem(Material.GOLDEN_APPLE,
+                messages.parse("<gold>Traços do Caminho</gold>"), traitLore));
+
+        List<Quest> chain = questManager.getArchetypeStoryQuests(player, profile, archetype);
+        List<Component> chainLore = new ArrayList<>();
+        int shown = 0;
+        for (Quest quest : chain) {
+            if (shown >= QUEST_PREVIEW_LIMIT) {
+                break;
+            }
+            chainLore.add(messages.parse("<gray>•</gray> <white>" + quest.getName() + "</white>"));
+            shown++;
+        }
+        if (chainLore.isEmpty()) {
+            chainLore.add(messages.parse("<gray>• " + path.getName() + "</gray>"));
+        }
+        inventorySet(holder, 24, infoItem(Material.WRITABLE_BOOK,
+                messages.parse("<aqua>Cadeia de Missões</aqua>"), chainLore));
+
+        holder.mapAction(31, PlayerHubHolder.HubClick.acceptPath(path.getId()));
+        inventorySet(holder, 31, actionItem(Material.LIME_CONCRETE,
+                messages.parse("<green><bold>Aceitar Caminho</bold></green>"),
+                List.of(messages.parse("<gray>Inicia a missão de entrada e trava outros caminhos.</gray>")), true));
+    }
+
+    private static String formatTrait(String stat, double value) {
+        if (stat == null || stat.isBlank()) {
+            return "—";
+        }
+        String sign = value >= 0 ? "+" : "";
+        return stat + " " + sign + value;
+    }
+
+    private static String empty(String value) {
+        return value == null || value.isBlank() ? "—" : value;
     }
 
     private static void renderQuestTreeView(RpgServerPlugin plugin, Player player, PlayerProfile profile,
@@ -314,6 +377,15 @@ public final class PlayerHubGui {
         inventorySet(holder, 13, infoItem(Material.OAK_SIGN,
                 messages.parse(config.getHubConfigHintTitle()),
                 List.of(messages.parse(config.getHubConfigHintLore()))));
+
+        if (plugin.getPluginConfig().isRebirthEnabled()
+                && plugin.getRebirthService().canRebirth(profile)) {
+            holder.mapAction(31, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.OPEN_REBIRTH));
+            inventorySet(holder, 31, actionItem(Material.TOTEM_OF_UNDYING,
+                    messages.parse("<gold>Renascimento</gold>"),
+                    List.of(messages.parse("<gray>Reinicie seu caminho mantendo o codex.</gray>"),
+                            messages.parse("<yellow>▶ Confirmar renascimento</yellow>")), true));
+        }
     }
 
     private static void renderQuestsTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,

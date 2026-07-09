@@ -32,6 +32,22 @@ public final class PoiDefinition {
         return name;
     }
 
+    public String getWorldName() {
+        return worldName;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
     public double getRadius() {
         return radius;
     }

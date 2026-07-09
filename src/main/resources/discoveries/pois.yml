@@ -15,6 +15,118 @@ pois:
     y: 68
     z: -2005
     radius: 56
+  market_crossroads:
+    id: market_crossroads
+    name: "Cruzamento do Mercado"
+    world: world
+    x: 2080
+    y: 68
+    z: -1980
+    radius: 44
+  training_yard:
+    id: training_yard
+    name: "Pátio de Treino"
+    world: world
+    x: 2010
+    y: 68
+    z: -1995
+    radius: 40
+  guild_market:
+    id: guild_market
+    name: "Mercado da Guilda"
+    world: world
+    x: 2055
+    y: 68
+    z: -1990
+    radius: 40
+  healers_sanctuary:
+    id: healers_sanctuary
+    name: "Santuário do Curandeiro"
+    world: world
+    x: 2040
+    y: 68
+    z: -1965
+    radius: 36
+  abandoned_port:
+    id: abandoned_port
+    name: "Porto Abandonado"
+    world: world
+    x: 2100
+    y: 64
+    z: -1950
+    radius: 48
+  ancient_forge:
+    id: ancient_forge
+    name: "Forja Ancestral"
+    world: world
+    x: 1980
+    y: 64
+    z: -1900
+    radius: 42
+  whispering_grove:
+    id: whispering_grove
+    name: "Bosque Sussurrante"
+    world: world
+    x: 1920
+    y: 70
+    z: -1950
+    radius: 52
+  elder_oak:
+    id: elder_oak
+    name: "Carvalho Ancião"
+    world: world
+    x: 1900
+    y: 72
+    z: -2050
+    radius: 40
+  windmill_hill:
+    id: windmill_hill
+    name: "Colina do Moinho"
+    world: world
+    x: 2100
+    y: 75
+    z: -2060
+    radius: 44
+  watchmans_post:
+    id: watchmans_post
+    name: "Posto do Vigia"
+    world: world
+    x: 2060
+    y: 72
+    z: -2120
+    radius: 36
+  quarry_depths:
+    id: quarry_depths
+    name: "Profundezas da Pedreira"
+    world: world
+    x: 1960
+    y: 48
+    z: -2080
+    radius: 44
+  iron_mine_entrance:
+    id: iron_mine_entrance
+    name: "Entrada da Mina de Ferro"
+    world: world
+    x: 1850
+    y: 58
+    z: -2020
+    radius: 40
+  crystal_cavern:
+    id: crystal_cavern
+    name: "Caverna de Cristal"
+    world: world
+    x: 1940
+    y: 22
+    z: -2120
+    radius: 48
+  deep_vault:
+    id: deep_vault
+    name: "Cofre Profundo"
+    world: world
+    x: 1880
+    y: 32
+    z: -2180
+    radius: 44
   frost_watchtower:
     id: frost_watchtower
     name: "Torre de Gelo"
@@ -23,13 +135,53 @@ pois:
     y: 72
     z: -1880
     radius: 40
-  quarry_depths:
-    id: quarry_depths
-    name: "Profundezas da Pedreira"
+  siege_ruins:
+    id: siege_ruins
+    name: "Ruínas do Cerco"
     world: world
-    x: 1960
-    y: 48
-    z: -2080
+    x: 2150
+    y: 65
+    z: -1750
+    radius: 52
+  shrouded_spire:
+    id: shrouded_spire
+    name: "Torre Envolta"
+    world: world
+    x: 2280
+    y: 85
+    z: -2100
+    radius: 48
+  shrine_of_dawn:
+    id: shrine_of_dawn
+    name: "Santuário da Aurora"
+    world: world
+    x: 2280
+    y: 70
+    z: -1980
+    radius: 40
+  bandit_camp:
+    id: bandit_camp
+    name: "Acampamento Bandido"
+    world: world
+    x: 2320
+    y: 68
+    z: -1920
+    radius: 48
+  merchant_silk_road:
+    id: merchant_silk_road
+    name: "Rota da Seda"
+    world: world
+    x: 2400
+    y: 68
+    z: -2050
+    radius: 56
+  traders_rest:
+    id: traders_rest
+    name: "Descanso do Mercador"
+    world: world
+    x: 2520
+    y: 68
+    z: -1980
     radius: 44
   sunken_caravan:
     id: sunken_caravan
@@ -39,19 +191,27 @@ pois:
     y: 62
     z: -2150
     radius: 44
-  guild_market:
-    id: guild_market
-    name: "Mercado da Guilda"
+  collapsed_tower:
+    id: collapsed_tower
+    name: "Torre Desmoronada"
     world: world
-    x: 2055
+    x: 2200
+    y: 55
+    z: -2250
+    radius: 44
+  hunters_lodge:
+    id: hunters_lodge
+    name: "Cabana do Caçador"
+    world: world
+    x: 2180
     y: 68
-    z: -1990
+    z: -2200
     radius: 40
-  abandoned_port:
-    id: abandoned_port
-    name: "Porto Abandonado"
+  moonlit_lake:
+    id: moonlit_lake
+    name: "Lago ao Luar"
     world: world
-    x: 2100
-    y: 64
-    z: -1950
-    radius: 48
+    x: 1750
+    y: 62
+    z: -1980
+    radius: 56

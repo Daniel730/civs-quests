@@ -3,6 +3,7 @@ package dev.daniel730.rpgserver.command;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.gui.CodexGui;
 import dev.daniel730.rpgserver.gui.QuestJournalGui;
+import dev.daniel730.rpgserver.gui.RebirthGui;
 import dev.daniel730.rpgserver.gui.SkillTreeGui;
 import dev.daniel730.rpgserver.perk.PerkDefinition;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
@@ -11,6 +12,7 @@ import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestAcceptResult;
 import dev.daniel730.rpgserver.quest.QuestManager;
 import dev.daniel730.rpgserver.quest.QuestProgressSync;
+import dev.daniel730.rpgserver.discovery.PoiDefinition;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -393,14 +395,13 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(player, "<red>Renascimento desativado.</red>");
             return true;
         }
-        return switch (plugin.getRebirthService().tryRebirth(player)) {
-            case SUCCESS -> true;
-            case NOT_ELIGIBLE -> {
-                plugin.getMessageUtil().send(player,
-                        "<red>Conclua um capstone (Guerreiro, Mercador ou Construtor) para renascer.</red>");
-                yield true;
-            }
-        };
+        if (!plugin.getRebirthService().canRebirth(plugin.getProfileManager().getOrCreate(player))) {
+            plugin.getMessageUtil().send(player,
+                    "<red>Conclua um capstone (Guerreiro, Mercador ou Construtor) para renascer.</red>");
+            return true;
+        }
+        RebirthGui.open(plugin, player);
+        return true;
     }
 
     private boolean handlePoi(CommandSender sender, String[] args) {
@@ -408,30 +409,49 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, plugin.getPluginConfig().getNoPermissionMessage());
             return true;
         }
-        if (args.length < 3 || !args[1].equalsIgnoreCase("mark")) {
-            plugin.getMessageUtil().send(sender, "<yellow>Uso:</yellow> /rpg poi mark <poi-id> [jogador]");
+        if (args.length < 2) {
+            plugin.getMessageUtil().send(sender,
+                    "<yellow>Uso:</yellow> /rpg poi mark <poi-id> [jogador] | /rpg poi export");
+            return true;
+        }
+        String action = args[1].toLowerCase(Locale.ROOT);
+        if ("export".equals(action)) {
+            String yaml = plugin.getDiscoveryRegistry().exportYamlSnippet();
+            plugin.getMessageUtil().send(sender, "<green>POIs exportados (" + plugin.getDiscoveryRegistry().getAllPois().size() + "):</green>");
+            for (String line : yaml.split("\n")) {
+                sender.sendMessage(line);
+            }
+            return true;
+        }
+        if (!"mark".equals(action) || args.length < 3) {
+            plugin.getMessageUtil().send(sender,
+                    "<yellow>Uso:</yellow> /rpg poi mark <poi-id> [jogador] | /rpg poi export");
+            return true;
+        }
+        if (!(sender instanceof Player admin)) {
+            sender.sendMessage("Especifique um jogador ou use o comando in-game para marcar coordenadas.");
             return true;
         }
         String poiId = args[2];
-        Player target;
+        PoiDefinition poi = plugin.getDiscoveryRegistry().upsertPoi(poiId, null, admin.getLocation(), 0);
+        if (poi == null || !plugin.getDiscoveryRegistry().savePois()) {
+            plugin.getMessageUtil().send(sender, "<red>Falha ao salvar POI:</red> " + poiId);
+            return true;
+        }
+        plugin.getMessageUtil().send(sender,
+                "<green>POI salvo em pois.yml:</green> <white>" + poi.getId()
+                        + "</white> em <gray>" + Math.round(poi.getX()) + ", "
+                        + Math.round(poi.getY()) + ", " + Math.round(poi.getZ()) + "</gray>");
         if (args.length >= 4) {
-            target = Bukkit.getPlayer(args[3]);
+            Player target = Bukkit.getPlayer(args[3]);
             if (target == null) {
                 plugin.getMessageUtil().send(sender, "<red>Jogador não encontrado.</red>");
                 return true;
             }
-        } else if (sender instanceof Player player) {
-            target = player;
-        } else {
-            sender.sendMessage("Especifique um jogador.");
-            return true;
-        }
-        if (plugin.getDiscoveryService().markPoiDiscovered(target, poiId)) {
-            plugin.getMessageUtil().send(sender,
-                    "<green>POI marcado:</green> <white>" + poiId + "</white> para <white>"
-                            + target.getName() + "</white>");
-        } else {
-            plugin.getMessageUtil().send(sender, "<red>POI desconhecido:</red> " + poiId);
+            if (plugin.getDiscoveryService().markPoiDiscovered(target, poiId)) {
+                plugin.getMessageUtil().send(sender,
+                        "<green>Descoberta concedida a</green> <white>" + target.getName() + "</white>");
+            }
         }
         return true;
     }
@@ -532,7 +552,8 @@ public final class RpgCommand implements CommandExecutor, TabCompleter {
         plugin.getMessageUtil().send(sender, "<gray>/rpg rebirth</gray> — renascimento (capstone)");
         plugin.getMessageUtil().send(sender, "<gray>/rpg profile</gray> — ver perfil");
         if (sender.hasPermission("rpg.admin")) {
-            plugin.getMessageUtil().send(sender, "<gray>/rpg poi mark &lt;id&gt; [jogador]</gray> — marcar POI");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg poi mark &lt;id&gt; [jogador]</gray> — salvar POI na posição atual");
+            plugin.getMessageUtil().send(sender, "<gray>/rpg poi export</gray> — exportar POIs como YAML");
             plugin.getMessageUtil().send(sender, "<gray>/rpg reload</gray> — recarregar config");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync [jogador]</gray> — sincronizar progresso de quests");
             plugin.getMessageUtil().send(sender, "<gray>/rpg sync --rewards [jogador]</gray> — sync e conceder recompensas");
