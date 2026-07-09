@@ -37,7 +37,7 @@ public final class CivsCustomMobHook {
             return;
         }
         Plugin civs = Bukkit.getPluginManager().getPlugin("Civs");
-        if (civs == null) {
+        if (civs == null || !civs.isEnabled()) {
             return;
         }
         try {

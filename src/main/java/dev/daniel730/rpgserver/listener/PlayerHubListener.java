@@ -4,6 +4,7 @@ import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.gui.PlayerHubGui;
 import dev.daniel730.rpgserver.gui.PlayerHubHolder;
 import dev.daniel730.rpgserver.gui.QuestJournalGui;
+import dev.daniel730.rpgserver.gui.RebirthGui;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestManager;
@@ -20,10 +21,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.redcastlemedia.multitallented.civs.civilians.Civilian;
-import org.redcastlemedia.multitallented.civs.civilians.CivilianManager;
-import org.redcastlemedia.multitallented.civs.menus.MenuManager;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -68,7 +65,8 @@ public final class PlayerHubListener implements Listener {
         if (!civsReturnToHub.contains(uuid) || !plugin.getCivsHook().isEnabled()) {
             return;
         }
-        if (!MenuManager.getInstance().hasMenuOpen(uuid) || MenuManager.getHistorySize(uuid) > 1) {
+        if (!plugin.getCivsHook().isCivsMenuOpen(uuid)
+                || plugin.getCivsHook().getCivsMenuHistorySize(uuid) > 1) {
             return;
         }
         if (event.getClickedInventory() == null
@@ -76,10 +74,7 @@ public final class PlayerHubListener implements Listener {
                 || event.getCurrentItem() == null) {
             return;
         }
-        Civilian civilian = CivilianManager.getInstance().getCivilian(uuid);
-        if (civilian == null || !MenuManager.getInstance().getBackButton()
-                .createCVItem(civilian.getLocale(), 0)
-                .equivalentItem(event.getCurrentItem(), true, true)) {
+        if (!plugin.getCivsHook().isCivsBackButtonClick(player, event.getCurrentItem())) {
             return;
         }
         event.setCancelled(true);
@@ -128,8 +123,14 @@ public final class PlayerHubListener implements Listener {
                 PlayerHubGui.render(plugin, player, holder);
             }
             case OPEN_SUBVIEW -> {
-                PlayerHubHolder.HubScreen screen = PlayerHubHolder.HubScreen.valueOf(click.payload());
-                holder.pushScreen(screen);
+                if (click.payload() != null && click.payload().startsWith("PATH_DETAIL:")) {
+                    String questId = click.payload().substring("PATH_DETAIL:".length());
+                    holder.setSelectedPathQuestId(questId);
+                    holder.pushScreen(PlayerHubHolder.HubScreen.PATH_DETAIL);
+                } else {
+                    PlayerHubHolder.HubScreen screen = PlayerHubHolder.HubScreen.valueOf(click.payload());
+                    holder.pushScreen(screen);
+                }
                 PlayerHubGui.render(plugin, player, holder);
             }
             case BACK -> {
@@ -161,6 +162,11 @@ public final class PlayerHubListener implements Listener {
                 player.performCommand("rpg codex");
             }
             case TRACK_NEXT, TRACK_QUEST -> trackQuest(player, holder, click.payload());
+            case ACCEPT_PATH -> trackQuest(player, holder, click.payload());
+            case OPEN_REBIRTH -> {
+                player.closeInventory();
+                RebirthGui.open(plugin, player);
+            }
             case SYNC -> syncQuests(player, holder);
             case CLOSE -> player.closeInventory();
             case REFRESH -> PlayerHubGui.render(plugin, player, holder);
@@ -168,7 +174,7 @@ public final class PlayerHubListener implements Listener {
     }
 
     private void openCivsMenu(Player player, String menuRef) {
-        if (menuRef == null || menuRef.isBlank()) {
+        if (menuRef == null || menuRef.isBlank() || !plugin.getCivsHook().isEnabled()) {
             return;
         }
         boolean opened;
@@ -197,7 +203,11 @@ public final class PlayerHubListener implements Listener {
             return;
         }
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!MenuManager.getInstance().hasMenuOpen(uuid) && !plugin.getPlayerHubService().isHubOpen(player)) {
+            if (!plugin.getCivsHook().isEnabled()) {
+                civsReturnToHub.remove(uuid);
+                return;
+            }
+            if (!plugin.getCivsHook().isCivsMenuOpen(uuid) && !plugin.getPlayerHubService().isHubOpen(player)) {
                 civsReturnToHub.remove(uuid);
             }
         });
