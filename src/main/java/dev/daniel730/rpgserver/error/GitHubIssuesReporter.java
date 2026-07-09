@@ -33,7 +33,7 @@ public final class GitHubIssuesReporter {
             String body = buildBody(report);
             String json = buildIssueJson(title, body, config.getGithubLabels());
             URI uri = URI.create("https://api.github.com/repos/"
-                    + config.getGithubOwner() + "/" + config.getGithubRepo() + "/issues");
+                    + config.getGithubOwner() + "/" + config.resolveGithubRepo(report.getPluginName()) + "/issues");
 
             HttpRequest request = HttpRequest.newBuilder(uri)
                     .timeout(Duration.ofSeconds(30))
@@ -54,6 +54,8 @@ public final class GitHubIssuesReporter {
                         "[error-reporting] GitHub API respondeu " + response.statusCode() + ": "
                                 + StackTraceUtil.redact(response.body()));
             }
+        } catch (java.net.ConnectException | java.net.NoRouteToHostException | java.net.UnknownHostException e) {
+            plugin.getLogger().fine("[error-reporting] GitHub indisponível (rede): " + e.getMessage());
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING,
                     "[error-reporting] Falha ao criar issue no GitHub: " + e.getMessage(), e);

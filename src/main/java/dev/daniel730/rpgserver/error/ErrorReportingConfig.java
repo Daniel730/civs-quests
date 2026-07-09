@@ -19,6 +19,7 @@ public final class ErrorReportingConfig {
     private final String githubToken;
     private final String githubOwner;
     private final String githubRepo;
+    private final String githubCivsRepo;
     private final List<String> githubLabels;
     private final boolean localEnabled;
     private final String localDirectory;
@@ -38,6 +39,7 @@ public final class ErrorReportingConfig {
         this.githubToken = resolveGithubToken(config);
         this.githubOwner = config.getString("error-reporting.github.owner", "Daniel730");
         this.githubRepo = config.getString("error-reporting.github.repo", "civs-quests");
+        this.githubCivsRepo = config.getString("error-reporting.github.civs-repo", "Civs");
         this.githubLabels = config.getStringList("error-reporting.github.labels");
         this.localEnabled = config.getBoolean("error-reporting.local.enabled", true);
         this.localDirectory = config.getString("error-reporting.local.directory", "error-reports");
@@ -125,6 +127,17 @@ public final class ErrorReportingConfig {
     }
 
     public String getGithubRepo() {
+        return githubRepo;
+    }
+
+    public String getGithubCivsRepo() {
+        return githubCivsRepo;
+    }
+
+    public String resolveGithubRepo(String pluginName) {
+        if (pluginName != null && pluginName.equalsIgnoreCase("Civs")) {
+            return githubCivsRepo;
+        }
         return githubRepo;
     }
 

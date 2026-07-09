@@ -59,6 +59,9 @@ public final class ErrorReportService {
         if (!isActive()) {
             return;
         }
+        if (shouldIgnore(throwable, message)) {
+            return;
+        }
         if (!config.acceptsPlugin(pluginName)) {
             return;
         }
@@ -93,6 +96,90 @@ public final class ErrorReportService {
             pluginName = inferPluginFromLogger(loggerName);
         }
         report("log4j", pluginName, threadName, throwable, message);
+    }
+
+    private static boolean shouldIgnore(Throwable throwable, String message) {
+        if (message != null && message.contains("Command exception: /stop")) {
+            return true;
+        }
+        if (isBenignNetworkError(throwable, message)) {
+            return true;
+        }
+        Throwable current = throwable;
+        while (current != null) {
+            for (StackTraceElement element : current.getStackTrace()) {
+                String className = element.getClassName();
+                if (className.startsWith("net.minecraft.commands.Commands.")
+                        && element.getMethodName().contains("performCommand")) {
+                    if (message != null && message.toLowerCase().contains("/stop")) {
+                        return true;
+                    }
+                }
+                if (className.contains("CommandSourceStack") && current instanceof NullPointerException) {
+                    String npeMessage = current.getMessage();
+                    if (npeMessage != null && npeMessage.contains("getLevel()")) {
+                        return true;
+                    }
+                }
+            }
+            Throwable cause = current.getCause();
+            if (cause == current) {
+                break;
+            }
+            current = cause;
+        }
+        return false;
+    }
+
+    private static boolean isBenignNetworkError(Throwable throwable, String message) {
+        if (message != null) {
+            String lower = message.toLowerCase();
+            if (lower.contains("failed to request yggdrasil public key")
+                    || lower.contains("checking for updates")
+                    || lower.contains("issue attempting to check for the latest version")
+                    || lower.contains("could not check for an update")
+                    || lower.contains("could not get modrinth remote version")
+                    || lower.contains("failed to download anti malware hash check list")
+                    || lower.contains("error retrieving version from")
+                    || lower.contains("error while parsing version")
+                    || lower.contains("error obtaining version information")
+                    || lower.contains("cannot fetch version info")
+                    || lower.contains("failed to check for latest release")) {
+                return true;
+            }
+        }
+        Throwable current = throwable;
+        while (current != null) {
+            if (isBenignNetworkException(current)) {
+                return true;
+            }
+            String className = current.getClass().getName();
+            if (className.contains("YggdrasilServicesKeyInfo")
+                    || className.contains("PaperVersionFetcher")
+                    || className.contains("VersionFetcher")) {
+                return true;
+            }
+            Throwable cause = current.getCause();
+            if (cause == current) {
+                break;
+            }
+            current = cause;
+        }
+        return false;
+    }
+
+    private static boolean isBenignNetworkException(Throwable throwable) {
+        if (throwable instanceof java.net.NoRouteToHostException
+                || throwable instanceof java.net.UnknownHostException) {
+            return true;
+        }
+        if (throwable instanceof java.net.ConnectException) {
+            String msg = throwable.getMessage();
+            return msg == null
+                    || msg.toLowerCase().contains("no route")
+                    || msg.toLowerCase().contains("sem caminho");
+        }
+        return false;
     }
 
     private void dispatch(ErrorReport report) {
@@ -198,6 +285,9 @@ public final class ErrorReportService {
                     return "RPGServer";
                 }
                 if (className.startsWith("org.redcastlemedia.multitallented.civs.")) {
+                    return "Civs";
+                }
+                if (className.contains("civs") && className.contains("multitallented")) {
                     return "Civs";
                 }
             }
