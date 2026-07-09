@@ -23,14 +23,18 @@ import dev.daniel730.rpgserver.discovery.DiscoveryService;
 import dev.daniel730.rpgserver.listener.CombatQuestListener;
 import dev.daniel730.rpgserver.listener.CodexListener;
 import dev.daniel730.rpgserver.listener.DiscoveryListener;
+import dev.daniel730.rpgserver.listener.GuideNpcQuestListener;
+import dev.daniel730.rpgserver.listener.RpgTutorialBridgeListener;
 import dev.daniel730.rpgserver.listener.SkillTreeListener;
 import dev.daniel730.rpgserver.progression.PathTraitService;
 import dev.daniel730.rpgserver.progression.RebirthService;
 import dev.daniel730.rpgserver.quest.HuntSpawnService;
 import dev.daniel730.rpgserver.quest.LootTableService;
+import dev.daniel730.rpgserver.listener.CivsIntegrationLifecycleListener;
 import dev.daniel730.rpgserver.listener.PlayerHubListener;
 import dev.daniel730.rpgserver.listener.PlayerProfileListener;
 import dev.daniel730.rpgserver.listener.QuestJournalListener;
+import dev.daniel730.rpgserver.listener.RebirthListener;
 import dev.daniel730.rpgserver.profile.ProfileManager;
 import dev.daniel730.rpgserver.progression.SkillTreeManager;
 import dev.daniel730.rpgserver.quest.PlayerHubService;
@@ -79,6 +83,8 @@ public final class RpgServerPlugin extends JavaPlugin {
     private AuraSkillsQuestListener auraSkillsQuestListener;
     private EconomyQuestListener economyQuestListener;
     private CombatQuestListener combatQuestListener;
+    private GuideNpcQuestListener guideNpcQuestListener;
+    private RpgTutorialBridgeListener rpgTutorialBridgeListener;
 
     @Override
     public void onEnable() {
@@ -135,11 +141,13 @@ public final class RpgServerPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerProfileListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerHubListener(this), this);
+        getServer().getPluginManager().registerEvents(new CivsIntegrationLifecycleListener(this), this);
         getServer().getPluginManager().registerEvents(new QuestJournalListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitQuestListener(this), this);
         getServer().getPluginManager().registerEvents(new DiscoveryListener(this), this);
         getServer().getPluginManager().registerEvents(new SkillTreeListener(this), this);
         getServer().getPluginManager().registerEvents(new CodexListener(this), this);
+        getServer().getPluginManager().registerEvents(new RebirthListener(this), this);
         registerIntegrationListeners();
 
         errorReportingManager = new ErrorReportingManager(this);
@@ -231,11 +239,19 @@ public final class RpgServerPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(civsSpellQuestListener, this);
             combatQuestListener = new CombatQuestListener(this);
             getServer().getPluginManager().registerEvents(combatQuestListener, this);
+            guideNpcQuestListener = new GuideNpcQuestListener(this);
+            getServer().getPluginManager().registerEvents(guideNpcQuestListener, this);
+            rpgTutorialBridgeListener = new RpgTutorialBridgeListener(this);
+            getServer().getPluginManager().registerEvents(rpgTutorialBridgeListener, this);
         }
         if (auraSkillsHook.isEnabled()) {
             auraSkillsQuestListener = new AuraSkillsQuestListener(this);
             getServer().getPluginManager().registerEvents(auraSkillsQuestListener, this);
         }
+    }
+
+    public void reregisterCivsIntegrationListeners() {
+        reregisterIntegrationListeners();
     }
 
     private void reregisterIntegrationListeners() {
@@ -257,6 +273,8 @@ public final class RpgServerPlugin extends JavaPlugin {
         unregisterListener(auctionQuestListener);
         unregisterListener(civsSpellQuestListener);
         unregisterListener(combatQuestListener);
+        unregisterListener(guideNpcQuestListener);
+        unregisterListener(rpgTutorialBridgeListener);
         unregisterListener(auraSkillsQuestListener);
         economyQuestListener = null;
         civsQuestListener = null;
@@ -264,6 +282,8 @@ public final class RpgServerPlugin extends JavaPlugin {
         auctionQuestListener = null;
         civsSpellQuestListener = null;
         combatQuestListener = null;
+        guideNpcQuestListener = null;
+        rpgTutorialBridgeListener = null;
         auraSkillsQuestListener = null;
         registerIntegrationListeners();
     }
@@ -344,6 +364,10 @@ public final class RpgServerPlugin extends JavaPlugin {
 
     public DiscoveryService getDiscoveryService() {
         return discoveryService;
+    }
+
+    public DiscoveryRegistry getDiscoveryRegistry() {
+        return discoveryRegistry;
     }
 
     public HuntSpawnService getHuntSpawnService() {
