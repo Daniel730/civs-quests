@@ -15,11 +15,16 @@ apply on the cloud VM — use the Linux locations below.
 ### The Civs dependency JAR (most important gotcha)
 `pom.xml` has a **`system`-scoped** dependency on `../Civs-1.11.6/target/civs-1.11.6.jar`
 (resolved on the VM as `/Civs-1.11.6/target/civs-1.11.6.jar`). Nothing compiles without it.
-- The Civs source is the `Daniel730/Civs` fork, cloned at `/Civs-1.11.6`.
+- Always use the **custom `Daniel730/Civs` fork** (cloned at `/Civs-1.11.6`, remote `origin`
+  = `https://github.com/Daniel730/Civs.git`) — **never** the upstream `Multitallented/Civs`
+  (kept only as the `upstream` remote). This fork is actively maintained by another agent, so
+  the startup update script re-fetches `origin/paper-26.1.2-migration` and rebuilds the jar on
+  every run to stay in sync with their fixes.
 - Build it from the **`paper-26.1.2-migration`** branch — **not** `master` and **not** the
   stale `v1.11.6` GitHub release. Only the migration branch has the events this plugin
   imports (`GuideNpcInteractEvent`, `TutorialChooseCompleteEvent`); using the release jar
-  fails `mvn compile` with "cannot find symbol".
+  fails `mvn compile` with "cannot find symbol". If the fork's target branch ever changes,
+  update the branch name in both the startup update script and the rebuild command below.
 - Two Civs build deps are **not resolvable from public Maven repos** and are pre-installed
   into `~/.m2` (both satisfied by the `NoCheatPlus.jar` from the
   `Updated-NoCheatPlus/NoCheatPlus` `v1.5` GitHub release):
