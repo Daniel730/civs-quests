@@ -22,6 +22,7 @@ public final class PluginConfig {
     private final int autosaveMinutes;
     private final boolean syncOnJoinFromCivs;
     private final int maxActiveQuests;
+    private final String starterQuestId;
     private final boolean allowAbandon;
     private final String questResetTimezone;
     private final String messagePrefix;
@@ -217,6 +218,7 @@ public final class PluginConfig {
         this.maxActiveQuests = config.getInt("quests.max-active", 3);
         this.allowAbandon = config.getBoolean("quests.allow-abandon", true);
         this.questResetTimezone = config.getString("quests.reset-timezone", "UTC");
+        this.starterQuestId = config.getString("quests.starter-quest-id", "welcome");
         this.messagePrefix = config.getString("messages.prefix", "<gray>[<gold>RPG</gold>]</gray> ");
         this.noPermissionMessage = config.getString("messages.no-permission", "<red>Sem permissão.</red>");
         this.reloadSuccessMessage = config.getString("messages.reload-success", "<green>Configuração recarregada.</green>");
@@ -593,6 +595,11 @@ public final class PluginConfig {
 
     public int getMaxActiveQuests() {
         return maxActiveQuests;
+    }
+
+    /** Id of the neutral onboarding quest offered to new players (config {@code quests.starter-quest-id}). */
+    public String getStarterQuestId() {
+        return starterQuestId;
     }
 
     public boolean isAllowAbandon() {

@@ -839,6 +839,11 @@ public final class QuestManager {
 
     private void onQuestStarted(Player player, PlayerProfile profile, Quest quest) {
         profile.addActiveQuest(quest.getId());
+        // Lock in the archetype as soon as a path quest starts. isConflictingPath() already
+        // treats a started path quest as committing the player to that path, so the profile
+        // archetype must match — otherwise getMiscQuests()/findNextAvailableQuest() hide the
+        // player's own path quests and /rpg profile shows "Nenhum" while the path is locked.
+        maybeSetArchetype(profile, quest);
         if (profile.getTrackedQuestId() == null) {
             profile.setTrackedQuestId(quest.getId());
         }

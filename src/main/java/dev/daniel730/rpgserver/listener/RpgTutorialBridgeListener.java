@@ -2,6 +2,7 @@ package dev.daniel730.rpgserver.listener;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
+import dev.daniel730.rpgserver.quest.Quest;
 import dev.daniel730.rpgserver.quest.QuestManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,7 +42,8 @@ public final class RpgTutorialBridgeListener implements Listener {
             if (profile.getArchetype() != null && !profile.getArchetype().isBlank()) {
                 return;
             }
-            if (profile.isQuestComplete("welcome") || profile.getStartedQuestIds().contains("welcome")) {
+            String starterId = plugin.getPluginConfig().getStarterQuestId();
+            if (profile.isQuestComplete(starterId) || profile.getStartedQuestIds().contains(starterId)) {
                 return;
             }
             offerWelcomeAndHub(player);
@@ -54,12 +56,15 @@ public final class RpgTutorialBridgeListener implements Listener {
             return;
         }
         QuestManager questManager = plugin.getQuestManager();
-        if (!profile.getStartedQuestIds().contains("welcome") && !profile.isQuestComplete("welcome")) {
-            QuestManager.StartResult result = questManager.startQuest(
-                    player, profile, questManager.getQuest("welcome"));
-            if (result == QuestManager.StartResult.STARTED) {
-                plugin.getMessageUtil().send(player,
-                        "<gold>★</gold> <white>Missão de boas-vindas disponível:</white> <yellow>O Chamado do Reino</yellow>");
+        String starterId = plugin.getPluginConfig().getStarterQuestId();
+        if (!profile.getStartedQuestIds().contains(starterId) && !profile.isQuestComplete(starterId)) {
+            Quest starter = questManager.getQuest(starterId);
+            if (starter != null) {
+                QuestManager.StartResult result = questManager.startQuest(player, profile, starter);
+                if (result == QuestManager.StartResult.STARTED) {
+                    plugin.getMessageUtil().send(player,
+                            "<gold>★</gold> <white>Missão de boas-vindas disponível:</white> <yellow>O Chamado do Reino</yellow>");
+                }
             }
         }
         if (!profile.isHubOpened()) {

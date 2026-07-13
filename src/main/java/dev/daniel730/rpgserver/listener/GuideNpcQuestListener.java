@@ -39,8 +39,9 @@ public final class GuideNpcQuestListener implements Listener {
     private void offerStarterQuests(Player player) {
         PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
         QuestManager questManager = plugin.getQuestManager();
-        if (!profile.getStartedQuestIds().contains("welcome") && !profile.isQuestComplete("welcome")) {
-            Quest welcome = questManager.getQuest("welcome");
+        String starterId = plugin.getPluginConfig().getStarterQuestId();
+        if (!profile.getStartedQuestIds().contains(starterId) && !profile.isQuestComplete(starterId)) {
+            Quest welcome = questManager.getQuest(starterId);
             if (welcome != null) {
                 questManager.startQuest(player, profile, welcome);
             }
