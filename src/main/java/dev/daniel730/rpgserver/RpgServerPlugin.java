@@ -164,8 +164,15 @@ public final class RpgServerPlugin extends JavaPlugin {
     }
 
     private void resetScheduledQuestsForOnlinePlayers() {
+        // Re-check economy objectives here too: earn_money/balance_min otherwise only advance on
+        // join and after ChestShop transactions, so money earned during a session would not count
+        // toward those objectives until relog.
+        boolean checkEconomy = vaultHook != null && vaultHook.isEnabled();
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
             questManager.resetExpiredScheduledQuests(online);
+            if (checkEconomy) {
+                questManager.checkEconomyObjectives(online);
+            }
         }
     }
 
