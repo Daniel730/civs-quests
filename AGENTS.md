@@ -57,6 +57,16 @@ so exercise the plugin with console commands such as `rpg reload` and `rpg help`
 - Start: `cd /home/ubuntu/mc-test && java -Xms1G -Xmx2G -jar paper.jar --nogui`. A healthy
   boot logs `Civs detectado — ... habilitados` and `RPGServer habilitado`.
 
+### Interactive client testing (real player)
+For player-driven testing, **TLauncher** is installed at `/home/ubuntu/tlauncher/TLauncher.jar`
+and a matching Minecraft **26.1.2** client is already downloaded. Launch it on the virtual
+desktop and drive it with the `computerUse` subagent:
+`DISPLAY=:1 LIBGL_ALWAYS_SOFTWARE=1 java -jar /home/ubuntu/tlauncher/TLauncher.jar`
+(software OpenGL via Mesa/llvmpipe — rendering works but is slow). Use an offline account,
+select version 26.1.2, and Multiplayer → Direct Connect to `localhost` (server is
+`online-mode=false`). Op the joining player from the server console (`op <name>`) to bypass
+LuckPerms quest gating, then exercise `/rpg quest list|accept|status`, `/rpg hub` (GUI), etc.
+
 ### Notes
 - Standard commands/placeholders/quest layout are documented in `README.md` and
   `docs/ARCHITECTURE.md`; the quest YAMLs live under `src/main/resources/quests/`.
