@@ -119,6 +119,18 @@ public class QuestManagerLogicTest {
     }
 
     @Test
+    public void bundledQuestResourceMatchesTopLevelYmlOnly() {
+        assertTrue(QuestManager.isBundledQuestResource("quests/rescue_treasurer.yml"));
+        assertTrue(QuestManager.isBundledQuestResource("quests/welcome.yml"));
+        // Sub-folders (e.g. reference/dev quests) must be excluded.
+        assertFalse(QuestManager.isBundledQuestResource("quests/dev/sprint1_examples.yml"));
+        assertFalse(QuestManager.isBundledQuestResource("quests/"));
+        assertFalse(QuestManager.isBundledQuestResource("quests/readme.txt"));
+        assertFalse(QuestManager.isBundledQuestResource("perks/warrior.yml"));
+        assertFalse(QuestManager.isBundledQuestResource(null));
+    }
+
+    @Test
     public void questCompleteRequiresAllObjectives() {
         Quest quest = QuestTestFactory.quest("welcome", "neutral", "open_hub");
         assertFalse(questManager.isQuestComplete(profile, quest));
