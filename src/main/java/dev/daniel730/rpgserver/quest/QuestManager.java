@@ -59,43 +59,9 @@ public final class QuestManager {
         File questsFolder = new File(plugin.getDataFolder(), "quests");
         if (!questsFolder.exists()) {
             questsFolder.mkdirs();
-            plugin.saveResource("quests/warrior_path.yml", false);
-            plugin.saveResource("quests/builder_path.yml", false);
-            plugin.saveResource("quests/merchant_path.yml", false);
-            plugin.saveResource("quests/welcome.yml", false);
-            plugin.saveResource("quests/first_steps.yml", false);
-            plugin.saveResource("quests/hunt_frost_watchtower.yml", false);
-            plugin.saveResource("quests/hunt_quarry_depths.yml", false);
-            plugin.saveResource("quests/hunt_sunken_caravan.yml", false);
-            plugin.saveResource("quests/daily_scout.yml", false);
-            plugin.saveResource("quests/daily_boar_hunt.yml", false);
-            plugin.saveResource("quests/daily_duel.yml", false);
-            plugin.saveResource("quests/daily_pillager.yml", false);
-            plugin.saveResource("quests/weekly_explorer.yml", false);
-            plugin.saveResource("quests/weekly_deep_delve.yml", false);
-            plugin.saveResource("quests/weekly_guild_bounty.yml", false);
-            plugin.saveResource("quests/sprint2_civs_skills.yml", false);
-            plugin.saveResource("quests/sprint2_auction.yml", false);
-            plugin.saveResource("quests/sprint3_daily.yml", false);
-            plugin.saveResource("quests/sprint3_boss.yml", false);
-            plugin.saveResource("quests/warrior_champion.yml", false);
-            plugin.saveResource("quests/daily_quarry.yml", false);
-            plugin.saveResource("quests/weekly_warrior.yml", false);
-            plugin.saveResource("quests/weekly_merchant.yml", false);
-            plugin.saveResource("quests/weekly_builder.yml", false);
-            plugin.saveResource("quests/sprint2_spells.yml", false);
-            plugin.saveResource("quests/mercador_fortuna.yml", false);
-            plugin.saveResource("quests/mercador_mestre.yml", false);
-            plugin.saveResource("quests/construtor_armazem.yml", false);
-            plugin.saveResource("quests/construtor_mestre.yml", false);
-            plugin.saveResource("quests/daily_mercado.yml", false);
-            plugin.saveResource("quests/daily_miner.yml", false);
-            plugin.saveResource("quests/daily_vendas.yml", false);
-            plugin.saveResource("quests/daily_farm.yml", false);
-            plugin.saveResource("quests/weekly_boss_hunter.yml", false);
-            plugin.saveResource("quests/warrior_siege_prep.yml", false);
-            plugin.saveResource("quests/merchant_shop_front.yml", false);
-            plugin.saveResource("quests/builder_town_hall.yml", false);
+            for (String resource : bundledQuestResources()) {
+                plugin.saveResource(resource, false);
+            }
         }
 
         File[] files = questsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -114,6 +80,65 @@ public final class QuestManager {
         rebuildObjectiveTypeIndex();
         plugin.getLogger().info("Carregadas " + quests.size() + " quests.");
     }
+
+    /**
+     * Lists the {@code quests/*.yml} resources bundled in the plugin jar so that <em>all</em> shipped
+     * quests are extracted to a fresh data folder — previously a hardcoded subset was copied, which
+     * silently dropped any quest not on the list. Sub-folders (e.g. {@code quests/dev/}) are excluded.
+     * Falls back to {@link #FALLBACK_BUNDLED_QUESTS} if the jar cannot be enumerated.
+     */
+    List<String> bundledQuestResources() {
+        List<String> found = new ArrayList<>();
+        try {
+            java.security.CodeSource codeSource = QuestManager.class.getProtectionDomain().getCodeSource();
+            java.net.URL location = codeSource == null ? null : codeSource.getLocation();
+            if (location != null) {
+                File jarFile = new File(location.toURI());
+                if (jarFile.isFile()) {
+                    try (java.util.jar.JarFile jar = new java.util.jar.JarFile(jarFile)) {
+                        var entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            String name = entries.nextElement().getName();
+                            if (isBundledQuestResource(name)) {
+                                found.add(name);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.WARNING,
+                    "Não foi possível enumerar as quests empacotadas; usando a lista padrão.", ex);
+        }
+        if (found.isEmpty()) {
+            return FALLBACK_BUNDLED_QUESTS;
+        }
+        java.util.Collections.sort(found);
+        return found;
+    }
+
+    /** True only for top-level {@code quests/<file>.yml} entries (not sub-directories like quests/dev/). */
+    static boolean isBundledQuestResource(String entryName) {
+        if (entryName == null || !entryName.startsWith("quests/") || !entryName.endsWith(".yml")) {
+            return false;
+        }
+        return entryName.indexOf('/', "quests/".length()) < 0;
+    }
+
+    private static final List<String> FALLBACK_BUNDLED_QUESTS = List.of(
+            "quests/builder_path.yml", "quests/builder_town_hall.yml", "quests/construtor_armazem.yml",
+            "quests/construtor_mestre.yml", "quests/daily_boar_hunt.yml", "quests/daily_duel.yml",
+            "quests/daily_farm.yml", "quests/daily_mercado.yml", "quests/daily_miner.yml",
+            "quests/daily_pillager.yml", "quests/daily_quarry.yml", "quests/daily_scout.yml",
+            "quests/daily_vendas.yml", "quests/first_steps.yml", "quests/hunt_frost_watchtower.yml",
+            "quests/hunt_quarry_depths.yml", "quests/hunt_sunken_caravan.yml", "quests/mercador_fortuna.yml",
+            "quests/mercador_mestre.yml", "quests/merchant_path.yml", "quests/merchant_shop_front.yml",
+            "quests/sprint2_auction.yml", "quests/sprint2_civs_skills.yml", "quests/sprint2_spells.yml",
+            "quests/sprint3_boss.yml", "quests/sprint3_daily.yml", "quests/warrior_champion.yml",
+            "quests/warrior_path.yml", "quests/warrior_siege_prep.yml", "quests/weekly_boss_hunter.yml",
+            "quests/weekly_builder.yml", "quests/weekly_deep_delve.yml", "quests/weekly_explorer.yml",
+            "quests/weekly_guild_bounty.yml", "quests/weekly_merchant.yml", "quests/weekly_warrior.yml",
+            "quests/welcome.yml");
 
     private void rebuildObjectiveTypeIndex() {
         questsByObjectiveType.clear();
