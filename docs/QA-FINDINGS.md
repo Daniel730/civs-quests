@@ -17,22 +17,29 @@ Tracks bugs, gaps, and planned work. Updated as items land.
 Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change now)
 
 ### Bugs / correctness
+- ✅ **Only 37 of 56 bundled quests were extracted on first run.** `loadQuests()` copied a
+  hardcoded list of 37 quest resources to a fresh data folder, silently dropping 19 shipped
+  quests (`rescue_treasurer`, `merchant_ledger`, `warrior_oath`, `builder_fundador`, …) so they
+  never loaded. Now enumerates `quests/*.yml` from the plugin jar (excluding `quests/dev/`), with
+  the old list as fallback. **Live-verified: "Carregadas 56 quests"** (was 37). Unit test on the
+  `isBundledQuestResource` predicate.
 - ✅ **Archetype not locked when a path quest auto-starts.** `processInstantObjectives`/
   `backfillCivsState` call `ensureQuestStarted` for every workable quest, so a path quest can
   start (and path-lock via `isConflictingPath`) without any objective completing, leaving
   `archetype == null`: `/rpg profile` showed "Nenhum" and `getMiscQuests()`/
-  `findNextAvailableQuest()` hid the player's own path quests. Fixed in `onQuestStarted`
-  (commit "Fix: lock archetype when a path quest auto-starts"). ⬜ add regression tests.
+  `findNextAvailableQuest()` hid the player's own path quests. Fixed in `onQuestStarted`;
+  ✅ regression tests added (`QuestManagerLogicTest`).
 - 📝 **`enter_combat` has two registered handlers** (`CivsQuestListener` + `CombatQuestListener`),
   both calling `handleEnterCombat`. Benign today (instant/idempotent completion) but redundant.
   ⬜ remove the duplicate to avoid a future double-count if it ever becomes count-based.
-- ⬜ **`earn_money` / `balance_min` only re-checked on join + ChestShop transactions.** Money
-  earned during a session doesn't progress these objectives until relog. Add a lightweight
-  periodic re-check for online players.
+- ✅ **`earn_money` / `balance_min` only re-checked on join + ChestShop transactions.** Money
+  earned during a session didn't progress these objectives until relog. Added a per-minute
+  re-check for online players (gated on Vault economy). **Live-verified**: money given to an
+  online player completed a `balance_min` objective on the next tick (no relog/sync).
 
 ### Config drift (defined in config.yml, not wired)
-- ⬜ `quests.starter-quest-id` — hardcoded `"welcome"` in `GuideNpcQuestListener` /
-  `RpgTutorialBridgeListener`. Wire to config (default `welcome`, so behavior is unchanged).
+- ✅ `quests.starter-quest-id` — was hardcoded `"welcome"`; now read from config (default
+  `welcome`, behavior unchanged) in both onboarding listeners, with a null-quest guard.
 - ⬜ `settings.debug` — `isDebug()` exists but has no callers. Wire to gate debug logging.
 - 📝 `integrations.civs.require-town-for-quests` — not implemented. Behavior-changing; needs a
   product decision before wiring.
@@ -47,8 +54,9 @@ Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change 
   `paper-26.1.2-migration` Civs build (hook logs "ativo").
 
 ### Test coverage
-- ⬜ Core is ~2.4% covered. Add unit tests around `QuestManager` archetype/conflict logic and
-  `RewardDefinition` parsing first (highest value, lowest Bukkit coupling).
+- ✅ Added first core unit tests: `QuestManagerLogicTest` (archetype/conflict/status + quest
+  resource predicate), `RewardDefinitionTest` (reward parsing), `PluginConfigTest` (typed config).
+  Suite grew from 5 → 24 tests. ⬜ still lots of surface left (sync, rewards execution, GUIs).
 
 ## Execution order this pass (test-first)
 1. Regression + logic tests: archetype/conflict (`QuestManager`), `RewardDefinition` parsing.
