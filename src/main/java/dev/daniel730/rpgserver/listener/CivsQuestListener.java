@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.redcastlemedia.multitallented.civs.events.EnterCombatEvent;
 import org.redcastlemedia.multitallented.civs.events.PlayerAcceptsTownInviteEvent;
 import org.redcastlemedia.multitallented.civs.events.RegionCreatedEvent;
 import org.redcastlemedia.multitallented.civs.events.TownCreatedEvent;
@@ -64,16 +63,5 @@ public final class CivsQuestListener implements Listener {
             return;
         }
         plugin.getQuestManager().handleRegionBuilt(player, regionType.getKey());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onEnterCombat(EnterCombatEvent event) {
-        if (event.UUID == null) {
-            return;
-        }
-        Player player = plugin.getServer().getPlayer(event.UUID);
-        if (player != null) {
-            plugin.getQuestManager().handleEnterCombat(player);
-        }
     }
 }
