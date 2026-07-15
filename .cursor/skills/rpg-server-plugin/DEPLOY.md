@@ -21,21 +21,21 @@ If `tmux -L mc list-sessions` is empty but `pgrep matching ``^/opt/java25/bin/ja
 
 | Repo | Path | Branch | Command |
 |------|------|--------|---------|
-| Civs Custom | `C:\Users\Danie\Downloads\Civs-1.11.6\Civs-1.11.6` | `sprint-2/civs-polish` (or current dev) | `mvn package` |
-| RPG Server | `C:\Users\Danie\Downloads\Civs-1.11.6\rpg-server-plugin` | `master` | `mvn package` |
+| Civs Custom | `C:\Users\Danie\Downloads\Civs-1.11.6\Civs-1.11.6` | `master` (or release tag) | `mvn package` → `target/civs-1.11.7.jar` |
+| RPG Server | `C:\Users\Danie\Downloads\Civs-1.11.6\rpg-server-plugin` | `master` | `mvn package` → `target/rpg-server-0.1.2.jar` |
 
 Maven: `C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd`
 
 **JARs to deploy:**
 
-| Plugin | Local path (WSL) |
-|--------|------------------|
-| Civs | `/mnt/c/Users/Danie/Downloads/Civs-1.11.6/Civs-1.11.6/target/civs-1.11.6.jar` |
-| RPG | `/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/target/rpg-server-0.1.0-SNAPSHOT.jar` |
+| Plugin | Local path (WSL) | Remote filename |
+|--------|------------------|-----------------|
+| Civs | `/mnt/c/Users/Danie/Downloads/Civs-1.11.6/Civs-1.11.6/target/civs-1.11.7.jar` | `civs-1.11.7.jar` |
+| RPG | `/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/target/rpg-server-0.1.2.jar` | `rpg-server-0.1.2.jar` |
 
 **Remote plugins dir:** `/home/daniel/mineserver/plugins/`
 
-Filenames on server: `civs-1.11.6.jar`, `rpg-server-0.1.0-SNAPSHOT.jar`
+Always remove older `civs-*.jar` / `rpg-server-*.jar` before copying so Paper does not double-load. Git tags: Civs `v1.11.7`, RPG `v0.1.2` (see Civs `docs/VERSIONING.md`).
 
 ## Runtime on server
 

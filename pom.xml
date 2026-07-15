@@ -6,7 +6,7 @@
 
     <groupId>dev.daniel730</groupId>
     <artifactId>rpg-server</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2</version>
     <packaging>jar</packaging>
 
     <name>RPGServer</name>
@@ -73,9 +73,9 @@
         <dependency>
             <groupId>org.redcastlemedia.multitallented</groupId>
             <artifactId>civs</artifactId>
-            <version>1.11.6</version>
+            <version>1.11.7</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../Civs-1.11.6/target/civs-1.11.6.jar</systemPath>
+            <systemPath>${project.basedir}/../Civs-1.11.6/target/civs-1.11.7.jar</systemPath>
         </dependency>
 
         <dependency>

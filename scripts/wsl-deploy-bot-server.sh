@@ -5,8 +5,8 @@ HOST="${MINESERVER_HOST:-daniel@bot-server}"
 SERVER=/home/daniel/mineserver
 PLUGINS="$SERVER/plugins"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CIVS=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/Civs-1.11.6/target/civs-1.11.6.jar
-RPG=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/target/rpg-server-0.1.0-SNAPSHOT.jar
+CIVS=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/Civs-1.11.6/target/civs-1.11.7.jar
+RPG=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/target/rpg-server-0.1.2.jar
 QUESTS=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/src/main/resources/quests
 BOOKS=/mnt/c/Users/Danie/Downloads/Civs-1.11.6/rpg-server-plugin/src/main/resources/books
 IB_BOOKS="$PLUGINS/InteractiveBooks/books"
@@ -24,8 +24,10 @@ ssh -o BatchMode=yes "$HOST" "cp -a '$PLUGINS' '$BACKUP'"
 echo "BACKUP=$BACKUP"
 
 echo "== deploy JARs =="
-scp -o BatchMode=yes "$CIVS" "${HOST}:${PLUGINS}/civs-1.11.6.jar"
-scp -o BatchMode=yes "$RPG" "${HOST}:${PLUGINS}/rpg-server-0.1.0-SNAPSHOT.jar"
+# Remove older versioned jars so Paper does not double-load
+ssh -o BatchMode=yes "$HOST" "rm -f '$PLUGINS'/civs-*.jar '$PLUGINS'/rpg-server-*.jar"
+scp -o BatchMode=yes "$CIVS" "${HOST}:${PLUGINS}/civs-1.11.7.jar"
+scp -o BatchMode=yes "$RPG" "${HOST}:${PLUGINS}/rpg-server-0.1.2.jar"
 
 echo "== deploy quests + books =="
 ssh -o BatchMode=yes "$HOST" "mkdir -p '$PLUGINS/RPGServer/quests' '$IB_BOOKS'"
