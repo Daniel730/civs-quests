@@ -146,6 +146,12 @@ public final class PluginConfig {
     private final boolean composedHudEnabled;
     private final int composedHudIntervalTicks;
     private final String composedHudFormat;
+    private final boolean hideVanillaHeartsEnabled;
+    private final int hideVanillaHeartsHttpPort;
+    private final String hideVanillaHeartsHost;
+    private final String hideVanillaHeartsUrl;
+    private final boolean hideVanillaHeartsForce;
+    private final String hideVanillaHeartsPrompt;
     private final boolean questProgressPulse;
     private final String questProgressSound;
     private final float questProgressSoundVolume;
@@ -448,6 +454,13 @@ public final class PluginConfig {
                 "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> "
                         + "<aqua>✦ %civs_mana_pair%</aqua> <dark_gray>|</dark_gray> "
                         + "<gold>{quest}</gold>");
+        this.hideVanillaHeartsEnabled = config.getBoolean("hud.hide-vanilla-hearts.enabled", false);
+        this.hideVanillaHeartsHttpPort = Math.max(1, config.getInt("hud.hide-vanilla-hearts.http-port", 8765));
+        this.hideVanillaHeartsHost = config.getString("hud.hide-vanilla-hearts.host", "");
+        this.hideVanillaHeartsUrl = config.getString("hud.hide-vanilla-hearts.url", "");
+        this.hideVanillaHeartsForce = config.getBoolean("hud.hide-vanilla-hearts.force", true);
+        this.hideVanillaHeartsPrompt = config.getString("hud.hide-vanilla-hearts.prompt",
+                "<yellow>Pacote HUD</yellow><gray> — esconde corações vanilla (vida/mana no ActionBar)</gray>");
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1117,6 +1130,30 @@ public final class PluginConfig {
 
     public String getComposedHudFormat() {
         return composedHudFormat;
+    }
+
+    public boolean isHideVanillaHeartsEnabled() {
+        return hideVanillaHeartsEnabled;
+    }
+
+    public int getHideVanillaHeartsHttpPort() {
+        return hideVanillaHeartsHttpPort;
+    }
+
+    public String getHideVanillaHeartsHost() {
+        return hideVanillaHeartsHost;
+    }
+
+    public String getHideVanillaHeartsUrl() {
+        return hideVanillaHeartsUrl;
+    }
+
+    public boolean isHideVanillaHeartsForce() {
+        return hideVanillaHeartsForce;
+    }
+
+    public String getHideVanillaHeartsPrompt() {
+        return hideVanillaHeartsPrompt;
     }
 
     public boolean isQuestProgressPulse() {

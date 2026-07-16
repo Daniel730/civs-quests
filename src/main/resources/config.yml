@@ -190,7 +190,17 @@ hud:
     enabled: true
     interval-ticks: 10
     # MiniMessage + PAPI. Local tokens: {hp} {hp_max} {hp_bar} {food} {quest} {quest_name} {archetype}
-    format: "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> <aqua>✦ %civs_mana_pair%</aqua> <dark_gray>|</dark_gray> <gold>{quest}</gold>"
+    format: "<red><bold>❤</bold> %auraskills_hp%<gray>/</gray>%auraskills_hp_max%</red> <dark_gray>│</dark_gray> <aqua><bold>✦</bold> %civs_mana_pair%</aqua> <dark_gray>│</dark_gray> <gold>{quest}</gold>"
+  # Hides vanilla hearts via a tiny resource pack (hunger stays). Requires clients to accept the pack.
+  hide-vanilla-hearts:
+    enabled: true
+    http-port: 8765
+    # Host clients can reach (Tailscale IP / public IP). Empty = Bukkit IP or 127.0.0.1
+    host: ""
+    # Full URL overrides host+port (use if pack is hosted elsewhere)
+    url: ""
+    force: true
+    prompt: "<yellow>Pacote HUD</yellow><gray> — esconde corações vanilla (vida/mana no ActionBar)</gray>"
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "
