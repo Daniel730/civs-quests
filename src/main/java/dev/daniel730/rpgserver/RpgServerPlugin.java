@@ -9,10 +9,10 @@ import dev.daniel730.rpgserver.hook.CivsHook;
 import dev.daniel730.rpgserver.hook.EssentialsHook;
 import dev.daniel730.rpgserver.hook.LuckPermsHook;
 import dev.daniel730.rpgserver.hook.PlaceholderHook;
+import dev.daniel730.rpgserver.hook.SoftHookFactory;
 import dev.daniel730.rpgserver.hook.VaultHook;
 import dev.daniel730.rpgserver.hook.VeinMinerHook;
 import dev.daniel730.rpgserver.listener.AuctionQuestListener;
-import dev.daniel730.rpgserver.listener.AuraSkillsQuestListener;
 import dev.daniel730.rpgserver.listener.BukkitQuestListener;
 import dev.daniel730.rpgserver.listener.CivsInternalSkillListener;
 import dev.daniel730.rpgserver.listener.CivsQuestListener;
@@ -80,7 +80,7 @@ public final class RpgServerPlugin extends JavaPlugin {
     private CivsInternalSkillListener civsInternalSkillListener;
     private AuctionQuestListener auctionQuestListener;
     private CivsSpellQuestListener civsSpellQuestListener;
-    private AuraSkillsQuestListener auraSkillsQuestListener;
+    private Listener auraSkillsQuestListener;
     private EconomyQuestListener economyQuestListener;
     private CombatQuestListener combatQuestListener;
     private GuideNpcQuestListener guideNpcQuestListener;
@@ -95,12 +95,14 @@ public final class RpgServerPlugin extends JavaPlugin {
 
         vaultHook = new VaultHook(this);
         civsHook = new CivsHook(this);
-        auraSkillsHook = new AuraSkillsHook(this);
+        // Soft-depend hooks with hard API imports must be loaded via SoftHookFactory
+        // (classlinkage to LuckPerms/AuraSkills aborts onEnable when those plugins are absent).
+        auraSkillsHook = SoftHookFactory.auraSkills(this);
         chestShopHook = new ChestShopHook(this);
         civsCustomMobHook = new CivsCustomMobHook(this);
         essentialsHook = new EssentialsHook(this);
         placeholderHook = new PlaceholderHook(this);
-        luckPermsHook = new LuckPermsHook(this);
+        luckPermsHook = SoftHookFactory.luckPerms(this);
         veinMinerHook = new VeinMinerHook(this);
 
         vaultHook.enable();
@@ -252,8 +254,17 @@ public final class RpgServerPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(rpgTutorialBridgeListener, this);
         }
         if (auraSkillsHook.isEnabled()) {
-            auraSkillsQuestListener = new AuraSkillsQuestListener(this);
-            getServer().getPluginManager().registerEvents(auraSkillsQuestListener, this);
+            // Listener hard-imports AuraSkills event types — only construct when API is live.
+            try {
+                Class<?> listenerClass = Class.forName(
+                        "dev.daniel730.rpgserver.listener.AuraSkillsQuestListener");
+                auraSkillsQuestListener = (Listener) listenerClass
+                        .getConstructor(RpgServerPlugin.class)
+                        .newInstance(this);
+                getServer().getPluginManager().registerEvents(auraSkillsQuestListener, this);
+            } catch (ReflectiveOperationException ex) {
+                getLogger().warning("AuraSkills listener indisponível: " + ex.getMessage());
+            }
         }
     }
 
