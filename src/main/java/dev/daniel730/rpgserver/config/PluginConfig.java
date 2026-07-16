@@ -3,6 +3,8 @@ package dev.daniel730.rpgserver.config;
 import dev.daniel730.rpgserver.quest.QuestAcceptResult;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Locale;
+
 public final class PluginConfig {
 
     private final boolean debug;
@@ -145,7 +147,11 @@ public final class PluginConfig {
     private final TransientHudChannel transientHudChannel;
     private final boolean composedHudEnabled;
     private final int composedHudIntervalTicks;
+    private final String composedHudLayout;
     private final String composedHudFormat;
+    private final int heartsSlotShiftLeft;
+    private final int heartsSlotGap;
+    private final int heartsSlotSegments;
     private final boolean hideVanillaHeartsEnabled;
     private final int hideVanillaHeartsHttpPort;
     private final String hideVanillaHeartsHost;
@@ -450,17 +456,20 @@ public final class PluginConfig {
                 config.getString("feedback.transient-channel", "auto"));
         this.composedHudEnabled = config.getBoolean("hud.composed.enabled", false);
         this.composedHudIntervalTicks = Math.max(5, config.getInt("hud.composed.interval-ticks", 10));
+        this.composedHudLayout = config.getString("hud.composed.layout", "hearts-slot");
         this.composedHudFormat = config.getString("hud.composed.format",
                 "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> "
-                        + "<aqua>✦ %civs_mana_pair%</aqua> <dark_gray>|</dark_gray> "
-                        + "<gold>{quest}</gold>");
+                        + "<aqua>✦ %civs_mana_pair%</aqua>");
+        this.heartsSlotShiftLeft = Math.max(0, config.getInt("hud.composed.hearts-slot.shift-left", 82));
+        this.heartsSlotGap = Math.max(0, config.getInt("hud.composed.hearts-slot.gap", 4));
+        this.heartsSlotSegments = Math.max(1, Math.min(20, config.getInt("hud.composed.hearts-slot.segments", 10)));
         this.hideVanillaHeartsEnabled = config.getBoolean("hud.hide-vanilla-hearts.enabled", false);
         this.hideVanillaHeartsHttpPort = Math.max(1, config.getInt("hud.hide-vanilla-hearts.http-port", 8765));
         this.hideVanillaHeartsHost = config.getString("hud.hide-vanilla-hearts.host", "");
         this.hideVanillaHeartsUrl = config.getString("hud.hide-vanilla-hearts.url", "");
         this.hideVanillaHeartsForce = config.getBoolean("hud.hide-vanilla-hearts.force", true);
         this.hideVanillaHeartsPrompt = config.getString("hud.hide-vanilla-hearts.prompt",
-                "<yellow>Pacote HUD</yellow><gray> — esconde corações vanilla (vida/mana no ActionBar)</gray>");
+                "<yellow>Pacote HUD</yellow><gray> — vida/mana no lugar dos corações (fome fica)</gray>");
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1128,8 +1137,29 @@ public final class PluginConfig {
         return composedHudIntervalTicks;
     }
 
+    public String getComposedHudLayout() {
+        return composedHudLayout == null ? "hearts-slot" : composedHudLayout;
+    }
+
+    public boolean isHeartsSlotHudLayout() {
+        String layout = getComposedHudLayout().trim().toLowerCase(Locale.ROOT);
+        return layout.equals("hearts-slot") || layout.equals("hearts") || layout.equals("slot");
+    }
+
     public String getComposedHudFormat() {
         return composedHudFormat;
+    }
+
+    public int getHeartsSlotShiftLeft() {
+        return heartsSlotShiftLeft;
+    }
+
+    public int getHeartsSlotGap() {
+        return heartsSlotGap;
+    }
+
+    public int getHeartsSlotSegments() {
+        return heartsSlotSegments;
     }
 
     public boolean isHideVanillaHeartsEnabled() {

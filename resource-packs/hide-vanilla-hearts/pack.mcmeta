@@ -1,6 +1,6 @@
 {
   "pack": {
     "pack_format": 84,
-    "description": "Civs/RPG \u2014 hide vanilla hearts (HP on ActionBar)"
+    "description": "Civs/RPG \u2014 hearts hidden; HP/mana bars in hearts slot"
   }
 }

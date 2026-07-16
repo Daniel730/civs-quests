@@ -41,4 +41,19 @@ public class PluginConfigTest {
         assertTrue(config.isCivsEnabled());
         assertTrue(config.isAllowAbandon());
     }
+
+    @Test
+    public void heartsSlotHudLayoutDefaults() throws Exception {
+        PluginConfig config = config("");
+        assertTrue(config.isHeartsSlotHudLayout());
+        assertEquals(82, config.getHeartsSlotShiftLeft());
+        assertEquals(10, config.getHeartsSlotSegments());
+    }
+
+    @Test
+    public void legacyLayoutSelectable() throws Exception {
+        PluginConfig config = config("hud:\n  composed:\n    layout: legacy");
+        assertEquals("legacy", config.getComposedHudLayout());
+        assertTrue(!config.isHeartsSlotHudLayout());
+    }
 }

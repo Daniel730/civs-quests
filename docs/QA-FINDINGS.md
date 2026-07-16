@@ -81,11 +81,13 @@ Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change 
   ⬜ still lots of surface left (sync, rewards execution, GUIs).
 
 ### HUD / resource pack
-- ✅ **Composed ActionBar** owns HP + Civs mana + quest snippet (`hud.composed`).
+- ✅ **Composed ActionBar** owns HP + Civs mana (`hud.composed`).
 - ✅ **Hide vanilla hearts** — server cannot blank hearts without a client resource pack.
-  Ship minimal pack (`resource-packs/hide-vanilla-hearts.zip`) + `HideHeartsPackService`
-  (HTTP on `hud.hide-vanilla-hearts.http-port`, join `setResourcePack`). Hunger untouched;
-  quest BossBar stays. Set `host`/`url` to a client-reachable address (Tailscale IP).
+- ✅ **Hearts-slot layout (fix)** — prior miss: hearts were blanked but HP/mana stayed as
+  center ActionBar text. Now `layout: hearts-slot` sends bitmap HP/mana bars via font
+  `rpg:hud` with negative-space shift onto the vacated hearts row. Hunger stays vanilla;
+  quest stays on BossBar. Tune `hud.composed.hearts-slot.shift-left` if GUI scale drifts.
+  Pack: `resource-packs/hide-vanilla-hearts.zip` + `HideHeartsPackService` HTTP.
 
 ## Execution order this pass (test-first)
 1. ✅ Remove duplicate `enter_combat` handler.

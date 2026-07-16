@@ -1,0 +1,265 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -1,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -2,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -3,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -4,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -5,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -6,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -7,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -8,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -16,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -32,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -64,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": -128,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 1,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 2,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 3,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 4,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 5,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 6,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 7,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 8,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 16,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 32,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 64,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/space.png",
+      "ascent": -32768,
+      "height": 128,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/hp_full.png",
+      "ascent": -4,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/hp_empty.png",
+      "ascent": -4,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/mana_full.png",
+      "ascent": -4,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/mana_empty.png",
+      "ascent": -4,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "rpg:font/sep.png",
+      "ascent": -4,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    }
+  ]
+}

@@ -184,14 +184,22 @@ feedback:
     title-stay: 80
     title-fade-out: 25
 
-# Unified ActionBar (RPG owns it). Pair with Civs mana-hud: composed and AuraSkills action_bar.idle: false.
+# Unified HUD. Pair with Civs mana-hud: composed and AuraSkills action_bar.idle: false.
+# hearts-slot = HP/mana bitmap bars in the vacated hearts row (requires resource pack).
+# legacy = plain ActionBar text (old behavior).
 hud:
   composed:
     enabled: true
+    layout: hearts-slot
     interval-ticks: 10
-    # MiniMessage + PAPI. Local tokens: {hp} {hp_max} {hp_bar} {food} {quest} {quest_name} {archetype}
-    format: "<red><bold>❤</bold> %auraskills_hp%<gray>/</gray>%auraskills_hp_max%</red> <dark_gray>│</dark_gray> <aqua><bold>✦</bold> %civs_mana_pair%</aqua> <dark_gray>│</dark_gray> <gold>{quest}</gold>"
-  # Hides vanilla hearts via a tiny resource pack (hunger stays). Requires clients to accept the pack.
+    # Used only when layout: legacy. Quest stays on BossBar — do not put {quest} here for hearts-slot.
+    format: "<red>❤ %auraskills_hp%<gray>/</gray>%auraskills_hp_max%</red> <dark_gray>│</dark_gray> <aqua>✦ %civs_mana_pair%</aqua>"
+    hearts-slot:
+      # Pull bars left from ActionBar center toward the hearts column (GUI scale dependent).
+      shift-left: 82
+      gap: 4
+      segments: 10
+  # Hides vanilla hearts + ships rpg:hud font. Hunger untouched. Clients must accept the pack.
   hide-vanilla-hearts:
     enabled: true
     http-port: 8765
@@ -200,7 +208,7 @@ hud:
     # Full URL overrides host+port (use if pack is hosted elsewhere)
     url: ""
     force: true
-    prompt: "<yellow>Pacote HUD</yellow><gray> — esconde corações vanilla (vida/mana no ActionBar)</gray>"
+    prompt: "<yellow>Pacote HUD</yellow><gray> — vida/mana no lugar dos corações (fome fica)</gray>"
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "

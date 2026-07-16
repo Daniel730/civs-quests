@@ -31,7 +31,8 @@ import java.util.logging.Level;
 public final class HideHeartsPackService implements Listener {
 
     private static final String PACK_RESOURCE = "resource-packs/hide-vanilla-hearts.zip";
-    private static final UUID PACK_UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+    /** Bump when pack bytes change so clients re-download (hearts-slot fonts). */
+    private static final UUID PACK_UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567891");
 
     private final RpgServerPlugin plugin;
     private HttpServer httpServer;

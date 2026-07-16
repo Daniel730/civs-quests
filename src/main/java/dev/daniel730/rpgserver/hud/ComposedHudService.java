@@ -2,7 +2,6 @@ package dev.daniel730.rpgserver.hud;
 
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.config.PluginConfig;
-import dev.daniel730.rpgserver.profile.PlayerProfile;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
@@ -10,16 +9,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Owns the ActionBar when composed HUD is enabled: merges HP, Civs mana, AuraSkills,
- * and tracked quest into one line via PlaceholderAPI + local tokens.
+ * Owns the ActionBar when composed HUD is enabled.
+ * Default layout {@code hearts-slot}: bitmap HP/mana bars (resource pack font
+ * {@code rpg:hud}) shifted onto the vacated hearts row. Hunger stays vanilla;
+ * quest tracking stays on BossBar/scoreboard — not in this ActionBar line.
  */
 public final class ComposedHudService {
+
+    private static final Pattern INT = Pattern.compile("(-?\\d+)");
 
     private final RpgServerPlugin plugin;
     private final Map<UUID, Long> suppressUntilMs = new ConcurrentHashMap<>();
@@ -38,7 +42,8 @@ public final class ComposedHudService {
         }
         long interval = Math.max(5L, config.getComposedHudIntervalTicks());
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::tickOnlinePlayers, 40L, interval);
-        plugin.getLogger().info("HUD composto ativo (ActionBar unificada, intervalo=" + interval + " ticks).");
+        String layout = config.isHeartsSlotHudLayout() ? "hearts-slot" : "legacy";
+        plugin.getLogger().info("HUD composto ativo (layout=" + layout + ", intervalo=" + interval + " ticks).");
     }
 
     public void stop() {
@@ -87,6 +92,58 @@ public final class ComposedHudService {
 
     String buildLine(Player player) {
         PluginConfig config = plugin.getPluginConfig();
+        if (config.isHeartsSlotHudLayout()) {
+            return buildHeartsSlotLine(player, config);
+        }
+        return buildLegacyLine(player, config);
+    }
+
+    private String buildHeartsSlotLine(Player player, PluginConfig config) {
+        int hp = (int) Math.ceil(player.getHealth());
+        int hpMax = 20;
+        if (player.getAttribute(Attribute.MAX_HEALTH) != null) {
+            hpMax = (int) Math.ceil(player.getAttribute(Attribute.MAX_HEALTH).getValue());
+        }
+        // Prefer AuraSkills HP when PAPI is available (matches displayed max HP).
+        String asHp = papi(player, "%auraskills_hp%");
+        String asMax = papi(player, "%auraskills_hp_max%");
+        Integer parsedHp = parseInt(asHp);
+        Integer parsedMax = parseInt(asMax);
+        if (parsedHp != null) {
+            hp = parsedHp;
+        }
+        if (parsedMax != null && parsedMax > 0) {
+            hpMax = parsedMax;
+        }
+
+        int mana = 0;
+        int manaMax = 0;
+        Integer m = parseInt(papi(player, "%civs_mana%"));
+        Integer mm = parseInt(papi(player, "%civs_max_mana%"));
+        if (m != null) {
+            mana = m;
+        }
+        if (mm != null) {
+            manaMax = mm;
+        }
+        if (manaMax <= 0) {
+            String pair = papi(player, "%civs_mana_pair%");
+            int[] pairVals = parsePair(pair);
+            if (pairVals != null) {
+                mana = pairVals[0];
+                manaMax = pairVals[1];
+            }
+        }
+
+        String glyphs = HeartsSlotHudComposer.build(
+                hp, hpMax, mana, Math.max(1, manaMax),
+                config.getHeartsSlotSegments(),
+                config.getHeartsSlotShiftLeft(),
+                config.getHeartsSlotGap());
+        return HeartsSlotHudComposer.wrapMiniMessage(glyphs);
+    }
+
+    private String buildLegacyLine(Player player, PluginConfig config) {
         String template = config.getComposedHudFormat();
         Map<String, String> values = buildLocalTokens(player);
         String composed = ComposedHudComposer.compose(template, values);
@@ -113,36 +170,55 @@ public final class ComposedHudService {
         values.put("hp_max", String.valueOf(hpMax));
         values.put("hp_bar", ComposedHudComposer.compactBar(hp, hpMax, 8));
         values.put("food", String.valueOf(player.getFoodLevel()));
-
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
-        String tracked = plugin.getQuestManager().formatTrackedQuestProgress(profile);
-        if (tracked == null || tracked.isBlank() || "—".equals(tracked) || "-".equals(tracked)) {
-            tracked = "";
-        }
-        values.put("quest", tracked);
-        values.put("quest_name", nullToEmpty(plugin.getQuestManager().formatTrackedQuestName(profile)));
-        values.put("archetype", formatArchetypeShort(profile.getArchetype()));
-
-        // Fallbacks if PAPI/Civs expansions missing — filled by %civs_*% when present.
+        values.put("quest", "");
+        values.put("quest_name", "");
+        values.put("archetype", "");
         values.put("mana", "");
         values.put("mana_max", "");
         values.put("mana_pair", "");
         return values;
     }
 
-    private static String nullToEmpty(String value) {
-        return value == null || "—".equals(value) || "-".equals(value) ? "" : value;
-    }
-
-    private static String formatArchetypeShort(String archetype) {
-        if (archetype == null || archetype.isBlank()) {
+    private String papi(Player player, String placeholder) {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") == null) {
             return "";
         }
-        return switch (archetype.toLowerCase(Locale.ROOT)) {
-            case "warrior" -> "⚔";
-            case "builder" -> "⛏";
-            case "merchant" -> "⚜";
-            default -> "";
-        };
+        try {
+            String out = PlaceholderAPI.setPlaceholders(player, placeholder);
+            if (out == null || out.equals(placeholder)) {
+                return "";
+            }
+            return out.trim();
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    private static Integer parseInt(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        Matcher m = INT.matcher(raw.replace(",", "").replace(" ", ""));
+        if (!m.find()) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(m.group(1));
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private static int[] parsePair(String raw) {
+        if (raw == null || raw.isBlank() || !raw.contains("/")) {
+            return null;
+        }
+        String[] parts = raw.split("/", 2);
+        Integer a = parseInt(parts[0]);
+        Integer b = parseInt(parts[1]);
+        if (a == null || b == null) {
+            return null;
+        }
+        return new int[]{a, b};
     }
 }
