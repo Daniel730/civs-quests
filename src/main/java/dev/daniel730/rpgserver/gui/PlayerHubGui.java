@@ -291,7 +291,7 @@ public final class PlayerHubGui {
             placeCivsMenuAction(holder, 19, Material.GOLD_INGOT, config.getHubCivsAuctionTitle(),
                     config.getHubCivsAuctionLore(), "auction-browse");
             placeCivsMenuAction(holder, 21, Material.ENCHANTING_TABLE, config.getHubCivsSpellsTitle(),
-                    config.getHubCivsSpellsLore(), "spell-list");
+                    config.getHubCivsSpellsLore(), "class");
             placeCivsMenuAction(holder, 23, Material.MAP, config.getHubCivsFarmsTitle(),
                     config.getHubCivsFarmsLore(), "blueprints");
             placeCivsMenuAction(holder, 25, Material.IRON_SWORD, config.getHubCivsCombatTitle(),

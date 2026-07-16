@@ -27,7 +27,7 @@ public class CivsIntegrationIntegrityTest {
     private static final File CIVS_ROOT = new File("../Civs-1.11.6");
     private static final List<String> HUB_CIVS_MENUS = Arrays.asList(
             "main", "port", "select-town", "region-list", "auction-browse",
-            "spell-list", "blueprints", "class-list");
+            "class", "blueprints", "class-list");
 
     private static Set<String> civsMobIds;
     private static Set<String> civsMenuNames;
