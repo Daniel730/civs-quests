@@ -140,9 +140,9 @@ quests:
 # Spectacle & HUD — sounds, particles, boss bar / scoreboard
 feedback:
   tracked-hud: both          # bossbar | scoreboard | both | none
-  # Short quest pulses: auto = chat when AuraSkills present (avoids ActionBar fight), else actionbar
+  # Short quest pulses: prefer chat so ActionBar stays with composed HUD
   # Options: auto | chat | actionbar | none
-  transient-channel: auto
+  transient-channel: chat
   quest-progress:
     pulse: true
     sound: BLOCK_NOTE_BLOCK_PLING
@@ -183,6 +183,14 @@ feedback:
     title-fade-in: 15
     title-stay: 80
     title-fade-out: 25
+
+# Unified ActionBar (RPG owns it). Pair with Civs mana-hud: composed and AuraSkills action_bar.idle: false.
+hud:
+  composed:
+    enabled: true
+    interval-ticks: 10
+    # MiniMessage + PAPI. Local tokens: {hp} {hp_max} {hp_bar} {food} {quest} {quest_name} {archetype}
+    format: "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> <aqua>✦ %civs_mana_pair%</aqua> <dark_gray>|</dark_gray> <gold>{quest}</gold>"
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "

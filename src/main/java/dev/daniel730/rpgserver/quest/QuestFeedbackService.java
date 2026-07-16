@@ -424,6 +424,12 @@ public final class QuestFeedbackService {
     private void sendTransientFeedback(Player player, String message, boolean pulse) {
         TransientHudChannel channel = plugin.getPluginConfig().getTransientHudChannel();
         boolean aura = plugin.getAuraSkillsHook() != null && plugin.getAuraSkillsHook().isEnabled();
+        // Composed ActionBar owns the bar — keep pulses on chat unless explicitly actionbar.
+        if (plugin.getComposedHudService() != null && plugin.getComposedHudService().isEnabled()
+                && channel != TransientHudChannel.ACTIONBAR) {
+            plugin.getMessageUtil().send(player, message);
+            return;
+        }
         if (channel == TransientHudChannel.NONE) {
             return;
         }
@@ -436,7 +442,7 @@ public final class QuestFeedbackService {
                 pulseActionBar(player, message);
             } else {
                 plugin.getMessageUtil().sendActionBar(player, message);
-                restoreCivsManaBarLater(player);
+                restoreComposedOrManaBarLater(player);
             }
         }
     }
@@ -448,11 +454,20 @@ public final class QuestFeedbackService {
                 plugin.getMessageUtil().sendActionBar(player, message);
             }
         }, 3L);
-        restoreCivsManaBarLater(player);
+        restoreComposedOrManaBarLater(player);
     }
 
-    /** After quest ActionBar pulses, restore Civs mana HUD (BossBar or ActionBar). */
-    private void restoreCivsManaBarLater(Player player) {
+    /** After a quest ActionBar pulse, restore composed HUD or Civs mana display. */
+    private void restoreComposedOrManaBarLater(Player player) {
+        if (plugin.getComposedHudService() != null && plugin.getComposedHudService().isEnabled()) {
+            plugin.getComposedHudService().suppress(player, 40L);
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    plugin.getComposedHudService().refresh(player);
+                }
+            }, 40L);
+            return;
+        }
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline() && plugin.getCivsHook().isEnabled()) {
                 plugin.getCivsHook().refreshManaBar(player);

@@ -22,6 +22,10 @@ Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change 
   quest pulses go to chat; titles + tracked boss bar unchanged. Tests:
   `TransientHudChannelTest`.
 - ✅ Journal copy: clearer track/accept/next-step hints (pt_BR).
+- ✅ **Composed ActionBar HUD** — `hud.composed.enabled` merges AuraSkills HP +
+  Civs mana (`%civs_mana_pair%`) + tracked quest into one ActionBar via PAPI.
+  Pair with Civs `mana-hud: composed` and AuraSkills `action_bar.idle: false`.
+  Tests: `ComposedHudComposerTest`.
 
 ### Bugs / correctness
 - ✅ **Only 37 of 56 bundled quests were extracted on first run.** `loadQuests()` copied a

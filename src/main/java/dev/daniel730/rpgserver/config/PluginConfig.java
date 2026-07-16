@@ -143,6 +143,9 @@ public final class PluginConfig {
     private final String dailyCtaSubtitle;
     private final TrackedHudMode trackedHudMode;
     private final TransientHudChannel transientHudChannel;
+    private final boolean composedHudEnabled;
+    private final int composedHudIntervalTicks;
+    private final String composedHudFormat;
     private final boolean questProgressPulse;
     private final String questProgressSound;
     private final float questProgressSoundVolume;
@@ -439,6 +442,12 @@ public final class PluginConfig {
         this.trackedHudMode = TrackedHudMode.fromConfig(config.getString("feedback.tracked-hud", "both"));
         this.transientHudChannel = TransientHudChannel.fromConfig(
                 config.getString("feedback.transient-channel", "auto"));
+        this.composedHudEnabled = config.getBoolean("hud.composed.enabled", false);
+        this.composedHudIntervalTicks = Math.max(5, config.getInt("hud.composed.interval-ticks", 10));
+        this.composedHudFormat = config.getString("hud.composed.format",
+                "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> "
+                        + "<aqua>✦ %civs_mana_pair%</aqua> <dark_gray>|</dark_gray> "
+                        + "<gold>{quest}</gold>");
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1096,6 +1105,18 @@ public final class PluginConfig {
 
     public TransientHudChannel getTransientHudChannel() {
         return transientHudChannel;
+    }
+
+    public boolean isComposedHudEnabled() {
+        return composedHudEnabled;
+    }
+
+    public int getComposedHudIntervalTicks() {
+        return composedHudIntervalTicks;
+    }
+
+    public String getComposedHudFormat() {
+        return composedHudFormat;
     }
 
     public boolean isQuestProgressPulse() {
