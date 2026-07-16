@@ -59,6 +59,7 @@ public final class QuestFeedbackService {
             pulseActionBar(player, message);
         } else {
             plugin.getMessageUtil().sendActionBar(player, message);
+            restoreCivsManaBarLater(player);
         }
         playSound(player, config.getQuestProgressSound(), config.getQuestProgressSoundVolume(),
                 config.getQuestProgressSoundPitch());
@@ -75,6 +76,7 @@ public final class QuestFeedbackService {
         if (!config.getQuestObjectiveActionBar().isBlank()) {
             plugin.getMessageUtil().sendActionBar(player,
                     replace(config.getQuestObjectiveActionBar(), questName, description));
+            restoreCivsManaBarLater(player);
         }
         if (!config.getQuestObjectiveTitle().isBlank() || !config.getQuestObjectiveSubtitle().isBlank()) {
             plugin.getMessageUtil().sendTitle(player,
@@ -101,6 +103,7 @@ public final class QuestFeedbackService {
         if (!config.getQuestCompleteActionBar().isBlank()) {
             plugin.getMessageUtil().sendActionBar(player,
                     replace(config.getQuestCompleteActionBar(), questName, null));
+            restoreCivsManaBarLater(player);
         }
         if (!config.getQuestCompleteTitle().isBlank() || !config.getQuestCompleteSubtitle().isBlank()) {
             plugin.getMessageUtil().sendTitle(player,
@@ -431,6 +434,16 @@ public final class QuestFeedbackService {
                 plugin.getMessageUtil().sendActionBar(player, message);
             }
         }, 3L);
+        restoreCivsManaBarLater(player);
+    }
+
+    /** After quest ActionBar pulses, restore Civs mana HUD so combat mana stays visible. */
+    private void restoreCivsManaBarLater(Player player) {
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline() && plugin.getCivsHook().isEnabled()) {
+                plugin.getCivsHook().refreshManaBar(player);
+            }
+        }, 40L);
     }
 
     private void spawnCelebrationFirework(Player player) {

@@ -195,6 +195,23 @@ public final class CivsHook {
     }
 
     /**
+     * Re-shows the Civs mana ActionBar after a temporary quest HUD pulse so combat
+     * mana display is not permanently overwritten.
+     */
+    public void refreshManaBar(Player player) {
+        if (!ensureCivsReady() || player == null || !player.isOnline()) {
+            return;
+        }
+        withCivs(() -> {
+            Civilian civilian = CivilianManager.getInstance().getCivilian(player.getUniqueId());
+            if (civilian != null) {
+                civilian.setMana(civilian.getMana(), true);
+            }
+            return null;
+        }, null);
+    }
+
+    /**
      * Opens a Civs menu from a menu string (e.g. {@code select-town?prevMenu=town&uuid=...}).
      */
     public boolean openMenuFromString(Player player, String menuString) {
