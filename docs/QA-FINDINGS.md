@@ -16,6 +16,13 @@ Tracks bugs, gaps, and planned work. Updated as items land.
 
 Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change now)
 
+### UX / HUD coexistence (AuraSkills)
+- ✅ **Quest ActionBar no longer fights AuraSkills/Civs** — `feedback.transient-channel`
+  (`auto|chat|actionbar|none`, default `auto`): when AuraSkills is enabled, short
+  quest pulses go to chat; titles + tracked boss bar unchanged. Tests:
+  `TransientHudChannelTest`.
+- ✅ Journal copy: clearer track/accept/next-step hints (pt_BR).
+
 ### Bugs / correctness
 - ✅ **Only 37 of 56 bundled quests were extracted on first run.** `loadQuests()` copied a
   hardcoded list of 37 quest resources to a fresh data folder, silently dropping 19 shipped

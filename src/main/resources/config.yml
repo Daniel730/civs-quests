@@ -140,6 +140,9 @@ quests:
 # Spectacle & HUD — sounds, particles, boss bar / scoreboard
 feedback:
   tracked-hud: both          # bossbar | scoreboard | both | none
+  # Short quest pulses: auto = chat when AuraSkills present (avoids ActionBar fight), else actionbar
+  # Options: auto | chat | actionbar | none
+  transient-channel: auto
   quest-progress:
     pulse: true
     sound: BLOCK_NOTE_BLOCK_PLING
@@ -213,18 +216,18 @@ messages:
     locked-permission: "<red>Requer desbloqueio (permissão).</red>"
     locked-generic: "<red>Esta quest está bloqueada.</red> <gray>Cumpra os requisitos acima.</gray>"
     tracked-badge: "<gold>★ Quest rastreada</gold>"
-    track-hint: "<gold>▶ Clique para rastrear</gold> <gray>(boss bar + notificações)</gray>"
+    track-hint: "<gold>▶ Clique para rastrear</gold> <gray>(boss bar + chat; não usa ActionBar do AuraSkills)</gray>"
     already-tracked: "<gray>{quest} já está sendo rastreada.</gray>"
-    accept-hint: "<yellow>▶ Clique para aceitar a quest.</yellow>"
+    accept-hint: "<yellow>▶ Clique para aceitar.</yellow> <gray>Depois rastreie para ver o próximo passo.</gray>"
     abandon-hint: "<red>▶ Shift-clique para abandonar.</red>"
-    completed-hint: "<aqua>✔ Quest concluída.</aqua>"
-    chain-next: "<aqua>Próximo:</aqua> <white>{quest}</white>"
+    completed-hint: "<aqua>✔ Quest concluída.</aqua> <gray>Abra o diário para a próxima.</gray>"
+    chain-next: "<aqua>Próximo passo:</aqua> <white>{quest}</white>"
     chain-requires: "<red>Requer:</red> <white>{quests}</white>"
     page-indicator: "<dark_gray>Página {page}/{total}</dark_gray>"
   daily-cta:
     enabled: true
     title: "<gold><bold>Missão Diária disponível!</bold></gold>"
-    subtitle: "<gray>Abra o diário com /rpg journal</gray>"
+    subtitle: "<gray>Abra /rpg journal — aba Diário — e aceite</gray>"
   quest-sync:
     success-all: "<green>Sync concluído</green> para <white>{players}</white> jogador(es): <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."
     success-one: "<green>Sync concluído</green> para <white>{player}</white>: <yellow>{objectives}</yellow> objetivo(s) e <yellow>{quests}</yellow> quest(s) backfilled."

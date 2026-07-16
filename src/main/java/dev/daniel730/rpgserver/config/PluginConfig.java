@@ -142,6 +142,7 @@ public final class PluginConfig {
     private final String dailyCtaTitle;
     private final String dailyCtaSubtitle;
     private final TrackedHudMode trackedHudMode;
+    private final TransientHudChannel transientHudChannel;
     private final boolean questProgressPulse;
     private final String questProgressSound;
     private final float questProgressSoundVolume;
@@ -436,6 +437,8 @@ public final class PluginConfig {
         this.dailyCtaSubtitle = config.getString("messages.daily-cta.subtitle",
                 "<gray>Abra o diário com /rpg journal</gray>");
         this.trackedHudMode = TrackedHudMode.fromConfig(config.getString("feedback.tracked-hud", "both"));
+        this.transientHudChannel = TransientHudChannel.fromConfig(
+                config.getString("feedback.transient-channel", "auto"));
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1089,6 +1092,10 @@ public final class PluginConfig {
 
     public TrackedHudMode getTrackedHudMode() {
         return trackedHudMode;
+    }
+
+    public TransientHudChannel getTransientHudChannel() {
+        return transientHudChannel;
     }
 
     public boolean isQuestProgressPulse() {

@@ -195,8 +195,8 @@ public final class CivsHook {
     }
 
     /**
-     * Re-shows the Civs mana ActionBar after a temporary quest HUD pulse so combat
-     * mana display is not permanently overwritten.
+     * Re-shows the Civs mana HUD (BossBar or ActionBar per Civs mana-hud config)
+     * after a temporary quest ActionBar pulse.
      */
     public void refreshManaBar(Player player) {
         if (!ensureCivsReady() || player == null || !player.isOnline()) {
