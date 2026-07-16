@@ -129,11 +129,18 @@ public final class HideHeartsPackService implements Listener {
     }
 
     private void servePack(HttpExchange exchange) throws IOException {
-        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+        String method = exchange.getRequestMethod();
+        if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
             exchange.sendResponseHeaders(405, -1);
             return;
         }
         exchange.getResponseHeaders().add("Content-Type", "application/zip");
+        exchange.getResponseHeaders().add("Content-Length", String.valueOf(packBytes.length));
+        if ("HEAD".equalsIgnoreCase(method)) {
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+            return;
+        }
         exchange.sendResponseHeaders(200, packBytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(packBytes);
