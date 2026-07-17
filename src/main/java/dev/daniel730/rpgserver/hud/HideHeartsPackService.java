@@ -25,13 +25,13 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 /**
- * Serves a minimal resource pack that blanks vanilla heart sprites so the composed
- * ActionBar can own HP/mana display. Hunger is untouched.
+ * Optional resource pack that blanks vanilla heart sprites for composed HUD experiments.
+ * When disabled (default), clears any previously forced pack so vanilla hearts return.
  */
 public final class HideHeartsPackService implements Listener {
 
     private static final String PACK_RESOURCE = "resource-packs/hide-vanilla-hearts.zip";
-    /** Bump when pack bytes change so clients re-download (hearts-slot fonts). */
+    /** Known UUID of the hide-hearts pack previously forced on clients. */
     private static final UUID PACK_UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567891");
 
     private final RpgServerPlugin plugin;
@@ -40,24 +40,27 @@ public final class HideHeartsPackService implements Listener {
     private byte[] packHash;
     private String packUrl;
     private boolean listenerRegistered;
+    private boolean clearOnJoin;
 
     public HideHeartsPackService(RpgServerPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void start() {
-        stop();
+        stopHttp();
+        clearOnJoin = false;
         if (!plugin.getPluginConfig().isHideVanillaHeartsEnabled()) {
+            ensureListener();
+            clearOnJoin = true;
+            clearPackFromOnlinePlayers();
+            plugin.getLogger().info("Pacote hide-hearts desligado — corações vanilla restaurados.");
             return;
         }
         try {
             preparePackFile();
             startHttpIfNeeded();
             resolveUrl();
-            if (!listenerRegistered) {
-                Bukkit.getPluginManager().registerEvents(this, plugin);
-                listenerRegistered = true;
-            }
+            ensureListener();
             plugin.getLogger().info("Pacote hide-hearts ativo: " + packUrl);
         } catch (Exception ex) {
             plugin.getLogger().log(Level.WARNING, "Falha ao ativar pacote hide-hearts: " + ex.getMessage(), ex);
@@ -65,18 +68,36 @@ public final class HideHeartsPackService implements Listener {
     }
 
     public void stop() {
+        stopHttp();
+    }
+
+    private void stopHttp() {
         if (httpServer != null) {
             httpServer.stop(0);
             httpServer = null;
+        }
+        packUrl = null;
+        packBytes = null;
+        packHash = null;
+    }
+
+    private void ensureListener() {
+        if (!listenerRegistered) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+            listenerRegistered = true;
         }
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (clearOnJoin) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> clearPack(player), 20L);
+            return;
+        }
         if (packUrl == null || packBytes == null) {
             return;
         }
-        Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskLater(plugin, () -> sendPack(player), 40L);
     }
 
@@ -88,6 +109,23 @@ public final class HideHeartsPackService implements Listener {
                 plugin.getPluginConfig().getHideVanillaHeartsPrompt());
         boolean force = plugin.getPluginConfig().isHideVanillaHeartsForce();
         player.setResourcePack(PACK_UUID, packUrl, packHash, prompt, force);
+    }
+
+    public void clearPack(Player player) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        try {
+            player.removeResourcePack(PACK_UUID);
+        } catch (NoSuchMethodError | UnsupportedOperationException ex) {
+            plugin.getLogger().fine("removeResourcePack unavailable: " + ex.getMessage());
+        }
+    }
+
+    private void clearPackFromOnlinePlayers() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            clearPack(player);
+        }
     }
 
     private void preparePackFile() throws Exception {

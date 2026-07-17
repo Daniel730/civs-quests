@@ -81,13 +81,11 @@ Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change 
   ⬜ still lots of surface left (sync, rewards execution, GUIs).
 
 ### HUD / resource pack
-- ✅ **Composed ActionBar** owns HP + Civs mana (`hud.composed`).
-- ✅ **Hide vanilla hearts** — server cannot blank hearts without a client resource pack.
-- ✅ **Hearts-slot layout (fix)** — prior miss: hearts were blanked but HP/mana stayed as
-  center ActionBar text. Now `layout: hearts-slot` sends bitmap HP/mana bars via font
-  `rpg:hud` with negative-space shift onto the vacated hearts row. Hunger stays vanilla;
-  quest stays on BossBar. Tune `hud.composed.hearts-slot.shift-left` if GUI scale drifts.
-  Pack: `resource-packs/hide-vanilla-hearts.zip` + `HideHeartsPackService` HTTP.
+- ✅ **Hearts-slot experiment REVERTED (UX)** — players found bitmap bars + hide-hearts pack
+  “horrenda”. Defaults now: `hud.composed.enabled: false`, `layout: legacy`,
+  `hide-vanilla-hearts.enabled: false`. Civs `mana-hud: bossbar`. Vanilla hearts + hunger.
+  Quest BossBar stays. Pack service clears previously forced pack on join when disabled.
+  Hearts-slot code kept but opt-in only — readable > clever.
 
 ## Execution order this pass (test-first)
 1. ✅ Remove duplicate `enter_combat` handler.

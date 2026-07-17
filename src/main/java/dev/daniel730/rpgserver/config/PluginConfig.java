@@ -456,10 +456,9 @@ public final class PluginConfig {
                 config.getString("feedback.transient-channel", "auto"));
         this.composedHudEnabled = config.getBoolean("hud.composed.enabled", false);
         this.composedHudIntervalTicks = Math.max(5, config.getInt("hud.composed.interval-ticks", 10));
-        this.composedHudLayout = config.getString("hud.composed.layout", "hearts-slot");
+        this.composedHudLayout = config.getString("hud.composed.layout", "legacy");
         this.composedHudFormat = config.getString("hud.composed.format",
-                "<red>❤ %auraskills_hp%/%auraskills_hp_max%</red> <dark_gray>|</dark_gray> "
-                        + "<aqua>✦ %civs_mana_pair%</aqua>");
+                "<aqua>✦ %civs_mana_pair%</aqua>");
         this.heartsSlotShiftLeft = Math.max(0, config.getInt("hud.composed.hearts-slot.shift-left", 82));
         this.heartsSlotGap = Math.max(0, config.getInt("hud.composed.hearts-slot.gap", 4));
         this.heartsSlotSegments = Math.max(1, Math.min(20, config.getInt("hud.composed.hearts-slot.segments", 10)));
@@ -467,9 +466,9 @@ public final class PluginConfig {
         this.hideVanillaHeartsHttpPort = Math.max(1, config.getInt("hud.hide-vanilla-hearts.http-port", 8765));
         this.hideVanillaHeartsHost = config.getString("hud.hide-vanilla-hearts.host", "");
         this.hideVanillaHeartsUrl = config.getString("hud.hide-vanilla-hearts.url", "");
-        this.hideVanillaHeartsForce = config.getBoolean("hud.hide-vanilla-hearts.force", true);
+        this.hideVanillaHeartsForce = config.getBoolean("hud.hide-vanilla-hearts.force", false);
         this.hideVanillaHeartsPrompt = config.getString("hud.hide-vanilla-hearts.prompt",
-                "<yellow>Pacote HUD</yellow><gray> — vida/mana no lugar dos corações (fome fica)</gray>");
+                "<yellow>Pacote HUD</yellow><gray> — opcional</gray>");
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1138,7 +1137,7 @@ public final class PluginConfig {
     }
 
     public String getComposedHudLayout() {
-        return composedHudLayout == null ? "hearts-slot" : composedHudLayout;
+        return composedHudLayout == null ? "legacy" : composedHudLayout;
     }
 
     public boolean isHeartsSlotHudLayout() {

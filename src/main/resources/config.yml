@@ -184,31 +184,31 @@ feedback:
     title-stay: 80
     title-fade-out: 25
 
-# Unified HUD. Pair with Civs mana-hud: composed and AuraSkills action_bar.idle: false.
-# hearts-slot = HP/mana bitmap bars in the vacated hearts row (requires resource pack).
-# legacy = plain ActionBar text (old behavior).
+# Unified HUD (optional). Prefer OFF: vanilla hearts + Civs mana BossBar + quest BossBar.
+# hearts-slot = bitmap bars in vacated hearts row (UX rejected — keep disabled).
+# legacy = plain MiniMessage ActionBar (only if enabled=true).
 hud:
   composed:
-    enabled: true
-    layout: hearts-slot
+    enabled: false
+    layout: legacy
     interval-ticks: 10
-    # Used only when layout: legacy. Quest stays on BossBar — do not put {quest} here for hearts-slot.
-    format: "<red>❤ %auraskills_hp%<gray>/</gray>%auraskills_hp_max%</red> <dark_gray>│</dark_gray> <aqua>✦ %civs_mana_pair%</aqua>"
+    # Mana-only if composed is re-enabled; do not duplicate vanilla hearts as HP text.
+    format: "<aqua>✦ %civs_mana_pair%</aqua>"
     hearts-slot:
-      # Pull bars left from ActionBar center toward the hearts column (GUI scale dependent).
+      # Kept for experiments; unused while layout=legacy / enabled=false.
       shift-left: 82
       gap: 4
       segments: 10
-  # Hides vanilla hearts + ships rpg:hud font. Hunger untouched. Clients must accept the pack.
+  # Blanked hearts + bitmap font. Leave OFF — restore vanilla hearts (comfort > custom art).
   hide-vanilla-hearts:
-    enabled: true
+    enabled: false
     http-port: 8765
     # Host clients can reach (Tailscale IP / public IP). Empty = Bukkit IP or 127.0.0.1
     host: ""
     # Full URL overrides host+port (use if pack is hosted elsewhere)
     url: ""
-    force: true
-    prompt: "<yellow>Pacote HUD</yellow><gray> — vida/mana no lugar dos corações (fome fica)</gray>"
+    force: false
+    prompt: "<yellow>Pacote HUD</yellow><gray> — opcional</gray>"
 
 messages:
   prefix: "<gray>[<gold>RPG</gold>]</gray> "

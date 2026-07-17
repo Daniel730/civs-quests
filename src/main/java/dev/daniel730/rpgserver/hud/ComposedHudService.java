@@ -16,10 +16,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Owns the ActionBar when composed HUD is enabled.
- * Default layout {@code hearts-slot}: bitmap HP/mana bars (resource pack font
- * {@code rpg:hud}) shifted onto the vacated hearts row. Hunger stays vanilla;
- * quest tracking stays on BossBar/scoreboard — not in this ActionBar line.
+ * Owns the ActionBar when composed HUD is enabled (default: off).
+ * Prefer vanilla hearts + Civs mana BossBar. Optional {@code legacy} layout is
+ * clean MiniMessage text; {@code hearts-slot} bitmap bars are an opt-in experiment.
+ * Quest tracking stays on BossBar/scoreboard.
  */
 public final class ComposedHudService {
 
