@@ -3,6 +3,7 @@ package dev.daniel730.rpgserver.quest;
 import dev.daniel730.rpgserver.RpgServerPlugin;
 import dev.daniel730.rpgserver.config.PluginConfig;
 import dev.daniel730.rpgserver.config.TrackedHudMode;
+import dev.daniel730.rpgserver.config.TransientHudChannel;
 import dev.daniel730.rpgserver.profile.PlayerProfile;
 import dev.daniel730.rpgserver.util.ArchetypeUtil;
 import dev.daniel730.rpgserver.util.ProgressBarUtil;
@@ -55,11 +56,7 @@ public final class QuestFeedbackService {
             return;
         }
         String message = replaceProgress(template, quest.getName(), objective.getDescription(), current, total);
-        if (config.isQuestProgressPulse()) {
-            pulseActionBar(player, message);
-        } else {
-            plugin.getMessageUtil().sendActionBar(player, message);
-        }
+        sendTransientFeedback(player, message, config.isQuestProgressPulse());
         playSound(player, config.getQuestProgressSound(), config.getQuestProgressSoundVolume(),
                 config.getQuestProgressSoundPitch());
     }
@@ -73,8 +70,8 @@ public final class QuestFeedbackService {
         String questName = quest.getName();
         String description = objective.getDescription();
         if (!config.getQuestObjectiveActionBar().isBlank()) {
-            plugin.getMessageUtil().sendActionBar(player,
-                    replace(config.getQuestObjectiveActionBar(), questName, description));
+            sendTransientFeedback(player,
+                    replace(config.getQuestObjectiveActionBar(), questName, description), false);
         }
         if (!config.getQuestObjectiveTitle().isBlank() || !config.getQuestObjectiveSubtitle().isBlank()) {
             plugin.getMessageUtil().sendTitle(player,
@@ -99,8 +96,8 @@ public final class QuestFeedbackService {
         }
         String questName = quest.getName();
         if (!config.getQuestCompleteActionBar().isBlank()) {
-            plugin.getMessageUtil().sendActionBar(player,
-                    replace(config.getQuestCompleteActionBar(), questName, null));
+            sendTransientFeedback(player,
+                    replace(config.getQuestCompleteActionBar(), questName, null), false);
         }
         if (!config.getQuestCompleteTitle().isBlank() || !config.getQuestCompleteSubtitle().isBlank()) {
             plugin.getMessageUtil().sendTitle(player,
@@ -424,6 +421,32 @@ public final class QuestFeedbackService {
         return template.replace("{quest}", questName);
     }
 
+    private void sendTransientFeedback(Player player, String message, boolean pulse) {
+        TransientHudChannel channel = plugin.getPluginConfig().getTransientHudChannel();
+        boolean aura = plugin.getAuraSkillsHook() != null && plugin.getAuraSkillsHook().isEnabled();
+        // Composed ActionBar owns the bar — keep pulses on chat unless explicitly actionbar.
+        if (plugin.getComposedHudService() != null && plugin.getComposedHudService().isEnabled()
+                && channel != TransientHudChannel.ACTIONBAR) {
+            plugin.getMessageUtil().send(player, message);
+            return;
+        }
+        if (channel == TransientHudChannel.NONE) {
+            return;
+        }
+        if (channel.usesChat(aura)) {
+            plugin.getMessageUtil().send(player, message);
+            return;
+        }
+        if (channel.usesActionBar(aura)) {
+            if (pulse) {
+                pulseActionBar(player, message);
+            } else {
+                plugin.getMessageUtil().sendActionBar(player, message);
+                restoreComposedOrManaBarLater(player);
+            }
+        }
+    }
+
     private void pulseActionBar(Player player, String message) {
         plugin.getMessageUtil().sendActionBar(player, "<gold>▶</gold> " + message);
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -431,6 +454,25 @@ public final class QuestFeedbackService {
                 plugin.getMessageUtil().sendActionBar(player, message);
             }
         }, 3L);
+        restoreComposedOrManaBarLater(player);
+    }
+
+    /** After a quest ActionBar pulse, restore composed HUD or Civs mana display. */
+    private void restoreComposedOrManaBarLater(Player player) {
+        if (plugin.getComposedHudService() != null && plugin.getComposedHudService().isEnabled()) {
+            plugin.getComposedHudService().suppress(player, 40L);
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    plugin.getComposedHudService().refresh(player);
+                }
+            }, 40L);
+            return;
+        }
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline() && plugin.getCivsHook().isEnabled()) {
+                plugin.getCivsHook().refreshManaBar(player);
+            }
+        }, 40L);
     }
 
     private void spawnCelebrationFirework(Player player) {

@@ -104,6 +104,18 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>resource-packs/**</exclude>
+                    <exclude>**/*.zip</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>resource-packs/**</include>
+                    <include>**/*.zip</include>
+                </includes>
             </resource>
         </resources>
         <plugins>

@@ -16,6 +16,20 @@ Tracks bugs, gaps, and planned work. Updated as items land.
 
 Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change now)
 
+### UX / HUD coexistence (AuraSkills)
+- ✅ **Quest ActionBar no longer fights AuraSkills/Civs** — `feedback.transient-channel`
+  (`auto|chat|actionbar|none`, default `auto`): when AuraSkills is enabled, short
+  quest pulses go to chat; titles + tracked boss bar unchanged. Tests:
+  `TransientHudChannelTest`.
+- ✅ Journal copy: clearer track/accept/next-step hints (pt_BR).
+- ✅ **Composed ActionBar HUD** — `hud.composed.enabled` merges AuraSkills HP +
+  Civs mana (`%civs_mana_pair%`) + tracked quest into one ActionBar via PAPI.
+  Pair with Civs `mana-hud: composed` and AuraSkills `action_bar.idle: false`.
+  Tests: `ComposedHudComposerTest`.
+- ✅ **Hide vanilla hearts** — optional mini resource pack
+  (`hud.hide-vanilla-hearts`) blanks heart sprites; hunger stays; HP/mana stay
+  on composed ActionBar. Clients must accept the pack (force + prompt).
+
 ### Bugs / correctness
 - ✅ **Only 37 of 56 bundled quests were extracted on first run.** `loadQuests()` copied a
   hardcoded list of 37 quest resources to a fresh data folder, silently dropping 19 shipped
@@ -65,6 +79,13 @@ Legend: ✅ done · 🔨 in progress · ⬜ planned · 📝 noted (won't change 
 ### Test coverage
 - ✅ Core unit tests + content integrity + Civs pack alignment tests + soft-hook factory.
   ⬜ still lots of surface left (sync, rewards execution, GUIs).
+
+### HUD / resource pack
+- ✅ **Hearts-slot experiment REVERTED (UX)** — players found bitmap bars + hide-hearts pack
+  “horrenda”. Defaults now: `hud.composed.enabled: false`, `layout: legacy`,
+  `hide-vanilla-hearts.enabled: false`. Civs `mana-hud: bossbar`. Vanilla hearts + hunger.
+  Quest BossBar stays. Pack service clears previously forced pack on join when disabled.
+  Hearts-slot code kept but opt-in only — readable > clever.
 
 ## Execution order this pass (test-first)
 1. ✅ Remove duplicate `enter_combat` handler.

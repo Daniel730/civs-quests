@@ -53,16 +53,15 @@ Plugin Paper para adicionar uma camada RPG ao servidor Civs, com quests iniciais
 | **Paper 26.1.2** + **Java 25** | — | Obrigatório |
 | **Vault** | `depend` | Obrigatório (JAR presente) |
 | **Plugin de economia** (EssentialsX, etc.) | — | Recomendado — Vault precisa de provider; senão só aviso no log |
-| **Civs 1.11.6** | `softdepend` | **Obrigatório** — objetivos `build_region` |
-| **AuraSkills** | `softdepend` | **Obrigatório** — objetivos `skill_level` |
-| **PlaceholderAPI** | `softdepend` | **Obrigatório** — classes carregadas no startup |
-| **LuckPerms** | `softdepend` | **Obrigatório** — classes carregadas no startup |
-| **ChestShop** | `softdepend` | Opcional — quests merchant (`TransactionEvent`); Sprint 1+ |
+| **Civs 1.11.7** | `softdepend` | Recomendado — objetivos `build_region` / mana HUD |
+| **AuraSkills** | `softdepend` | Soft — carregado via `SoftHookFactory` se presente |
+| **PlaceholderAPI** | `softdepend` | Soft — placeholders de HUD/quests |
+| **LuckPerms** | `softdepend` | Soft — gate de permissões de quest via SoftHook |
+| **ChestShop** | `softdepend` | Opcional — quests merchant (`TransactionEvent`) |
 | **Essentials** | `softdepend` | Opcional — provider Vault, kits/warps como recompensa |
-| **InteractiveBooks** | `softdepend` | Opcional — lore de quest em livros |
 | **VeinMiner** | `softdepend` | Opcional — objetivo `vein_mine` (desligado no config por padrão) |
 
-Civs, AuraSkills, PlaceholderAPI e LuckPerms são **hard runtime deps** do MVP v0.1 (imports directos). ChestShop, Essentials e InteractiveBooks degradam graciosamente quando ausentes ou `integrations.*.enabled: false`.
+Vault é hard-depend. **AuraSkills** e **LuckPerms** são soft-deps (PR #64 SoftHookFactory) — o plugin sobe sem eles. **InteractiveBooks** foi removido do código (Player Hub substituiu lore books); o JAR no servidor é legado e não é usado pelo RPGServer.
 
 Stack completo e backlog: `.cursor/skills/rpg-server-plugin/FEATURE-EXTRACTION.md`.
 

@@ -1,0 +1,205 @@
+package dev.daniel730.rpgserver.hud;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+import dev.daniel730.rpgserver.RpgServerPlugin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+
+/**
+ * Optional resource pack that blanks vanilla heart sprites for composed HUD experiments.
+ * When disabled (default), clears any previously forced pack so vanilla hearts return.
+ */
+public final class HideHeartsPackService implements Listener {
+
+    private static final String PACK_RESOURCE = "resource-packs/hide-vanilla-hearts.zip";
+    /** Known UUID of the hide-hearts pack previously forced on clients. */
+    private static final UUID PACK_UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567891");
+
+    private final RpgServerPlugin plugin;
+    private HttpServer httpServer;
+    private byte[] packBytes;
+    private byte[] packHash;
+    private String packUrl;
+    private boolean listenerRegistered;
+    private boolean clearOnJoin;
+
+    public HideHeartsPackService(RpgServerPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void start() {
+        stopHttp();
+        clearOnJoin = false;
+        if (!plugin.getPluginConfig().isHideVanillaHeartsEnabled()) {
+            ensureListener();
+            clearOnJoin = true;
+            clearPackFromOnlinePlayers();
+            plugin.getLogger().info("Pacote hide-hearts desligado — corações vanilla restaurados.");
+            return;
+        }
+        try {
+            preparePackFile();
+            startHttpIfNeeded();
+            resolveUrl();
+            ensureListener();
+            plugin.getLogger().info("Pacote hide-hearts ativo: " + packUrl);
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.WARNING, "Falha ao ativar pacote hide-hearts: " + ex.getMessage(), ex);
+        }
+    }
+
+    public void stop() {
+        stopHttp();
+    }
+
+    private void stopHttp() {
+        if (httpServer != null) {
+            httpServer.stop(0);
+            httpServer = null;
+        }
+        packUrl = null;
+        packBytes = null;
+        packHash = null;
+    }
+
+    private void ensureListener() {
+        if (!listenerRegistered) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+            listenerRegistered = true;
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (clearOnJoin) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> clearPack(player), 20L);
+            return;
+        }
+        if (packUrl == null || packBytes == null) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(plugin, () -> sendPack(player), 40L);
+    }
+
+    public void sendPack(Player player) {
+        if (player == null || !player.isOnline() || packUrl == null || packHash == null) {
+            return;
+        }
+        Component prompt = MiniMessage.miniMessage().deserialize(
+                plugin.getPluginConfig().getHideVanillaHeartsPrompt());
+        boolean force = plugin.getPluginConfig().isHideVanillaHeartsForce();
+        player.setResourcePack(PACK_UUID, packUrl, packHash, prompt, force);
+    }
+
+    public void clearPack(Player player) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        try {
+            player.removeResourcePack(PACK_UUID);
+        } catch (NoSuchMethodError | UnsupportedOperationException ex) {
+            plugin.getLogger().fine("removeResourcePack unavailable: " + ex.getMessage());
+        }
+    }
+
+    private void clearPackFromOnlinePlayers() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            clearPack(player);
+        }
+    }
+
+    private void preparePackFile() throws Exception {
+        Path dir = plugin.getDataFolder().toPath().resolve("resource-packs");
+        Files.createDirectories(dir);
+        Path zip = dir.resolve("hide-vanilla-hearts.zip");
+        try (InputStream in = plugin.getResource(PACK_RESOURCE)) {
+            if (in != null) {
+                Files.copy(in, zip, StandardCopyOption.REPLACE_EXISTING);
+            } else if (!Files.exists(zip)) {
+                // Fall back to sibling checkout / deploy path if jar resource missing.
+                Path external = Path.of("resource-packs", "hide-vanilla-hearts.zip");
+                if (Files.exists(external)) {
+                    Files.copy(external, zip, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    throw new IOException("hide-vanilla-hearts.zip not found in jar or " + external);
+                }
+            }
+        }
+        packBytes = Files.readAllBytes(zip);
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        packHash = sha1.digest(packBytes);
+        plugin.getLogger().info("hide-hearts sha1=" + HexFormat.of().formatHex(packHash));
+    }
+
+    private void startHttpIfNeeded() throws IOException {
+        String configured = plugin.getPluginConfig().getHideVanillaHeartsUrl();
+        if (configured != null && !configured.isBlank()) {
+            return;
+        }
+        int port = plugin.getPluginConfig().getHideVanillaHeartsHttpPort();
+        httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+        httpServer.createContext("/hide-vanilla-hearts.zip", this::servePack);
+        httpServer.setExecutor(Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "rpg-hide-hearts-http");
+            t.setDaemon(true);
+            return t;
+        }));
+        httpServer.start();
+    }
+
+    private void servePack(HttpExchange exchange) throws IOException {
+        String method = exchange.getRequestMethod();
+        if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+        exchange.getResponseHeaders().add("Content-Type", "application/zip");
+        exchange.getResponseHeaders().add("Content-Length", String.valueOf(packBytes.length));
+        if ("HEAD".equalsIgnoreCase(method)) {
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+            return;
+        }
+        exchange.sendResponseHeaders(200, packBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(packBytes);
+        }
+    }
+
+    private void resolveUrl() {
+        String configured = plugin.getPluginConfig().getHideVanillaHeartsUrl();
+        if (configured != null && !configured.isBlank()) {
+            packUrl = configured.trim();
+            return;
+        }
+        String host = plugin.getPluginConfig().getHideVanillaHeartsHost();
+        if (host == null || host.isBlank()) {
+            host = Bukkit.getIp();
+            if (host == null || host.isBlank() || "0.0.0.0".equals(host)) {
+                host = "127.0.0.1";
+            }
+        }
+        int port = plugin.getPluginConfig().getHideVanillaHeartsHttpPort();
+        packUrl = "http://" + host + ":" + port + "/hide-vanilla-hearts.zip";
+    }
+}

@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /** Tests for typed config reads, including the newly-wired {@code quests.starter-quest-id}. */
@@ -40,5 +41,31 @@ public class PluginConfigTest {
         PluginConfig config = config("");
         assertTrue(config.isCivsEnabled());
         assertTrue(config.isAllowAbandon());
+    }
+
+    @Test
+    public void composedHudDefaultsAreReadable() throws Exception {
+        PluginConfig config = config("");
+        assertFalse(config.isComposedHudEnabled());
+        assertEquals("legacy", config.getComposedHudLayout());
+        assertFalse(config.isHeartsSlotHudLayout());
+        assertFalse(config.isHideVanillaHeartsEnabled());
+        assertFalse(config.isHideVanillaHeartsForce());
+    }
+
+    @Test
+    public void heartsSlotLayoutSelectable() throws Exception {
+        PluginConfig config = config("hud:\n  composed:\n    layout: hearts-slot\n    hearts-slot:\n      shift-left: 82\n      segments: 10");
+        assertEquals("hearts-slot", config.getComposedHudLayout());
+        assertTrue(config.isHeartsSlotHudLayout());
+        assertEquals(82, config.getHeartsSlotShiftLeft());
+        assertEquals(10, config.getHeartsSlotSegments());
+    }
+
+    @Test
+    public void legacyLayoutSelectable() throws Exception {
+        PluginConfig config = config("hud:\n  composed:\n    layout: legacy");
+        assertEquals("legacy", config.getComposedHudLayout());
+        assertTrue(!config.isHeartsSlotHudLayout());
     }
 }

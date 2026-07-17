@@ -41,7 +41,7 @@ Production deploy is **WSL SSH** to `daniel@bot-server`, instance `/home/daniel/
 | Civs | `CivsHook` + listeners — regions, towns, `GainExpEvent`, **`openMenu`/`openLocationsMenu` for hub** |
 | ChestShop | `ChestShopHook` — merchant objectives |
 | Essentials | `EssentialsHook` — balance, kits, warps |
-| InteractiveBooks | `InteractiveBooksHook` — lore books |
+| ~~InteractiveBooks~~ | Removed — Player Hub replaced lore books (no `InteractiveBooksHook`) |
 | Vault / LuckPerms / PAPI | existing hooks |
 
 ## Package layout
@@ -62,14 +62,14 @@ dev.daniel730.rpgserver/
 
 1. Vault, LuckPerms, config
 2. Wait `SkillsLoadEvent` before AuraSkills API
-3. Civs + ChestShop + Essentials + InteractiveBooks hooks
+3. Civs + ChestShop + Essentials hooks (AuraSkills/LuckPerms via SoftHook)
 4. Register listeners + PAPI expansion
 
 ## plugin.yml
 
 ```yaml
 depend: [Vault]
-softdepend: [Civs, AuraSkills, ChestShop, Essentials, InteractiveBooks, PlaceholderAPI, LuckPerms, VeinMiner]
+softdepend: [Civs, AuraSkills, ChestShop, Essentials, PlaceholderAPI, LuckPerms, VeinMiner]
 loadafter: [Vault, Civs, AuraSkills, ChestShop, Essentials, PlaceholderAPI, LuckPerms]
 ```
 

@@ -12,6 +12,8 @@ import dev.daniel730.rpgserver.hook.PlaceholderHook;
 import dev.daniel730.rpgserver.hook.SoftHookFactory;
 import dev.daniel730.rpgserver.hook.VaultHook;
 import dev.daniel730.rpgserver.hook.VeinMinerHook;
+import dev.daniel730.rpgserver.hud.ComposedHudService;
+import dev.daniel730.rpgserver.hud.HideHeartsPackService;
 import dev.daniel730.rpgserver.listener.AuctionQuestListener;
 import dev.daniel730.rpgserver.listener.BukkitQuestListener;
 import dev.daniel730.rpgserver.listener.CivsInternalSkillListener;
@@ -66,6 +68,8 @@ public final class RpgServerPlugin extends JavaPlugin {
     private QuestManager questManager;
     private PlayerHubService playerHubService;
     private QuestFeedbackService questFeedbackService;
+    private ComposedHudService composedHudService;
+    private HideHeartsPackService hideHeartsPackService;
     private SkillTreeManager skillTreeManager;
     private DiscoveryRegistry discoveryRegistry;
     private DiscoveryService discoveryService;
@@ -116,6 +120,8 @@ public final class RpgServerPlugin extends JavaPlugin {
         questManager = new QuestManager(this);
         playerHubService = new PlayerHubService(this);
         questFeedbackService = new QuestFeedbackService(this);
+        composedHudService = new ComposedHudService(this);
+        hideHeartsPackService = new HideHeartsPackService(this);
         skillTreeManager = new SkillTreeManager(this);
         discoveryRegistry = new DiscoveryRegistry(this);
         discoveryService = new DiscoveryService(this, discoveryRegistry);
@@ -132,6 +138,9 @@ public final class RpgServerPlugin extends JavaPlugin {
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
             questFeedbackService.refreshTrackedHud(online);
         }
+
+        composedHudService.start();
+        hideHeartsPackService.start();
 
         chestShopHook.enable();
         civsCustomMobHook.enable();
@@ -186,6 +195,12 @@ public final class RpgServerPlugin extends JavaPlugin {
         if (questFeedbackService != null) {
             questFeedbackService.clearAll();
         }
+        if (composedHudService != null) {
+            composedHudService.stop();
+        }
+        if (hideHeartsPackService != null) {
+            hideHeartsPackService.stop();
+        }
         if (profileManager != null) {
             profileManager.saveAllSync();
         }
@@ -216,6 +231,12 @@ public final class RpgServerPlugin extends JavaPlugin {
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
             questManager.ensureProfileSanitized(online);
             questFeedbackService.refreshTrackedHud(online);
+        }
+        if (composedHudService != null) {
+            composedHudService.start();
+        }
+        if (hideHeartsPackService != null) {
+            hideHeartsPackService.start();
         }
         reregisterIntegrationListeners();
         if (errorReportingManager != null) {
@@ -370,6 +391,10 @@ public final class RpgServerPlugin extends JavaPlugin {
 
     public QuestFeedbackService getQuestFeedbackService() {
         return questFeedbackService;
+    }
+
+    public ComposedHudService getComposedHudService() {
+        return composedHudService;
     }
 
     public SkillTreeManager getSkillTreeManager() {

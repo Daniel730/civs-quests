@@ -3,6 +3,8 @@ package dev.daniel730.rpgserver.config;
 import dev.daniel730.rpgserver.quest.QuestAcceptResult;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Locale;
+
 public final class PluginConfig {
 
     private final boolean debug;
@@ -142,6 +144,20 @@ public final class PluginConfig {
     private final String dailyCtaTitle;
     private final String dailyCtaSubtitle;
     private final TrackedHudMode trackedHudMode;
+    private final TransientHudChannel transientHudChannel;
+    private final boolean composedHudEnabled;
+    private final int composedHudIntervalTicks;
+    private final String composedHudLayout;
+    private final String composedHudFormat;
+    private final int heartsSlotShiftLeft;
+    private final int heartsSlotGap;
+    private final int heartsSlotSegments;
+    private final boolean hideVanillaHeartsEnabled;
+    private final int hideVanillaHeartsHttpPort;
+    private final String hideVanillaHeartsHost;
+    private final String hideVanillaHeartsUrl;
+    private final boolean hideVanillaHeartsForce;
+    private final String hideVanillaHeartsPrompt;
     private final boolean questProgressPulse;
     private final String questProgressSound;
     private final float questProgressSoundVolume;
@@ -436,6 +452,23 @@ public final class PluginConfig {
         this.dailyCtaSubtitle = config.getString("messages.daily-cta.subtitle",
                 "<gray>Abra o diário com /rpg journal</gray>");
         this.trackedHudMode = TrackedHudMode.fromConfig(config.getString("feedback.tracked-hud", "both"));
+        this.transientHudChannel = TransientHudChannel.fromConfig(
+                config.getString("feedback.transient-channel", "auto"));
+        this.composedHudEnabled = config.getBoolean("hud.composed.enabled", false);
+        this.composedHudIntervalTicks = Math.max(5, config.getInt("hud.composed.interval-ticks", 10));
+        this.composedHudLayout = config.getString("hud.composed.layout", "legacy");
+        this.composedHudFormat = config.getString("hud.composed.format",
+                "<aqua>✦ %civs_mana_pair%</aqua>");
+        this.heartsSlotShiftLeft = Math.max(0, config.getInt("hud.composed.hearts-slot.shift-left", 82));
+        this.heartsSlotGap = Math.max(0, config.getInt("hud.composed.hearts-slot.gap", 4));
+        this.heartsSlotSegments = Math.max(1, Math.min(20, config.getInt("hud.composed.hearts-slot.segments", 10)));
+        this.hideVanillaHeartsEnabled = config.getBoolean("hud.hide-vanilla-hearts.enabled", false);
+        this.hideVanillaHeartsHttpPort = Math.max(1, config.getInt("hud.hide-vanilla-hearts.http-port", 8765));
+        this.hideVanillaHeartsHost = config.getString("hud.hide-vanilla-hearts.host", "");
+        this.hideVanillaHeartsUrl = config.getString("hud.hide-vanilla-hearts.url", "");
+        this.hideVanillaHeartsForce = config.getBoolean("hud.hide-vanilla-hearts.force", false);
+        this.hideVanillaHeartsPrompt = config.getString("hud.hide-vanilla-hearts.prompt",
+                "<yellow>Pacote HUD</yellow><gray> — opcional</gray>");
         this.questProgressPulse = config.getBoolean("feedback.quest-progress.pulse", true);
         this.questProgressSound = config.getString("feedback.quest-progress.sound", "BLOCK_NOTE_BLOCK_PLING");
         this.questProgressSoundVolume = (float) config.getDouble("feedback.quest-progress.sound-volume", 0.35);
@@ -1089,6 +1122,67 @@ public final class PluginConfig {
 
     public TrackedHudMode getTrackedHudMode() {
         return trackedHudMode;
+    }
+
+    public TransientHudChannel getTransientHudChannel() {
+        return transientHudChannel;
+    }
+
+    public boolean isComposedHudEnabled() {
+        return composedHudEnabled;
+    }
+
+    public int getComposedHudIntervalTicks() {
+        return composedHudIntervalTicks;
+    }
+
+    public String getComposedHudLayout() {
+        return composedHudLayout == null ? "legacy" : composedHudLayout;
+    }
+
+    public boolean isHeartsSlotHudLayout() {
+        String layout = getComposedHudLayout().trim().toLowerCase(Locale.ROOT);
+        return layout.equals("hearts-slot") || layout.equals("hearts") || layout.equals("slot");
+    }
+
+    public String getComposedHudFormat() {
+        return composedHudFormat;
+    }
+
+    public int getHeartsSlotShiftLeft() {
+        return heartsSlotShiftLeft;
+    }
+
+    public int getHeartsSlotGap() {
+        return heartsSlotGap;
+    }
+
+    public int getHeartsSlotSegments() {
+        return heartsSlotSegments;
+    }
+
+    public boolean isHideVanillaHeartsEnabled() {
+        return hideVanillaHeartsEnabled;
+    }
+
+    public int getHideVanillaHeartsHttpPort() {
+        return hideVanillaHeartsHttpPort;
+    }
+
+    public String getHideVanillaHeartsHost() {
+        return hideVanillaHeartsHost;
+    }
+
+    public String getHideVanillaHeartsUrl() {
+        return hideVanillaHeartsUrl;
+    }
+
+    public boolean isHideVanillaHeartsForce() {
+        return hideVanillaHeartsForce;
+    }
+
+    public String getHideVanillaHeartsPrompt() {
+        return hideVanillaHeartsPrompt;
     }
 
     public boolean isQuestProgressPulse() {
