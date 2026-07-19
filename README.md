@@ -119,7 +119,21 @@ Para compilar este plugin, é necessário ter o código de ambos os repositório
    - Adicione o executável do Maven (`mvn` ou `mvn.cmd`) ao `PATH` do sistema.
 
 #### Passo 1: Resolver Dependências do Civs (Bug do JitPack)
-O plugin Civs possui uma dependência externa (`NoCheatPlus`) que falha ao baixar do JitPack. É preciso instalá-la manualmente no repositório Maven local antes de compilar o Civs. Siga o guia abaixo:
+O plugin Civs possui uma dependência externa (`NoCheatPlus`) que falha ao baixar do JitPack. É preciso instalá-la manualmente no repositório Maven local antes de compilar o Civs.
+
+##### Método Manual Recomendado (Qualquer OS / Windows CMD):
+1. Baixe o arquivo JAR oficial do NoCheatPlus pelo seu navegador clicando no link:
+   👉 [NoCheatPlus.jar (v1.5)](https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar)
+2. Salve o arquivo com o nome `NoCheatPlus.jar` na pasta raiz do projeto `Civs-1.11.6`.
+3. Abra o **Prompt de Comando (CMD)** ou terminal na pasta raiz do `Civs-1.11.6` e execute:
+   ```cmd
+   mvn install:install-file -Dfile=NoCheatPlus.jar -DgroupId=com.github.Updated-NoCheatPlus.NoCheatPlus -DartifactId=nocheatplus -Dversion=1.5 -Dpackaging=jar
+   ```
+*(O Maven gerará o arquivo POM necessário de forma automática).*
+
+---
+
+##### Métodos Alternativos via Scripts:
 
 - **Windows (PowerShell)**:
   ```powershell
@@ -140,7 +154,7 @@ O plugin Civs possui uma dependência externa (`NoCheatPlus`) que falha ao baixa
   # Instalar no repositório local
   mvn install:install-file -Dfile="$env:TEMP\ncp\NoCheatPlus.jar" -DpomFile="$env:TEMP\ncp\ncp-clean-pom.xml"
   ```
-- **Windows (CMD / Prompt de Comando)**:
+- **Windows (CMD / Prompt de Comando automatizado)**:
   ```cmd
   mkdir %TEMP%\ncp
   curl -sL -o %TEMP%\ncp\NoCheatPlus.jar https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar
@@ -153,6 +167,7 @@ O plugin Civs possui uma dependência externa (`NoCheatPlus`) que falha ao baixa
   printf '<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>com.github.Updated-NoCheatPlus.NoCheatPlus</groupId><artifactId>nocheatplus</artifactId><version>1.5</version><packaging>jar</packaging></project>' > /tmp/ncp-clean-pom.xml
   mvn install:install-file -Dfile=/tmp/NoCheatPlus.jar -DpomFile=/tmp/ncp-clean-pom.xml
   ```
+
 
 #### Passo 2: Compilar o Civs
 Compile primeiro o plugin Civs para gerar o arquivo `.jar` exigido pelo RPG Server:
