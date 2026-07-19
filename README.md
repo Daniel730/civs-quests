@@ -2,7 +2,7 @@
 
 Plugin Paper para adicionar uma camada RPG ao servidor Civs, com quests iniciais por arquétipo, progresso persistente por jogador e integrações com Vault, Civs, AuraSkills, PlaceholderAPI e LuckPerms.
 
-**Versão atual:** `0.1.0-SNAPSHOT` (MVP v0.1)
+**Versão atual:** `0.1.2` (MVP v0.1)
 
 ---
 
@@ -109,29 +109,78 @@ Com LP desativado no config, todas as quests ficam abertas (sem filtro por permi
 
 ### 1. Compilar
 
-O `pom.xml` usa o JAR do Civs com `system` scope:
+Para compilar este plugin, é necessário ter o código de ambos os repositórios (`Civs-1.11.6` e `rpg-server-plugin`) no mesmo diretório pai (pastas lado a lado), pois o RPG Server possui uma dependência direta (em escopo `system`) ao JAR gerado do Civs.
 
-```text
-../Civs-1.11.6/target/civs-1.11.6.jar
+#### Pré-requisitos
+1. **Java JDK 25**: O projeto utiliza recursos do Java 25. Recomendamos instalar o **Eclipse Temurin JDK 25**.
+   - Garanta que a variável de ambiente `JAVA_HOME` aponte para o JDK 25.
+   - Adicione o JDK ao `PATH` do sistema.
+2. **Apache Maven 3.9.x**: O projeto gerencia as dependências com Maven.
+   - Adicione o executável do Maven (`mvn` ou `mvn.cmd`) ao `PATH` do sistema.
+
+#### Passo 1: Resolver Dependências do Civs (Bug do JitPack)
+O plugin Civs possui uma dependência externa (`NoCheatPlus`) que falha ao baixar do JitPack. É preciso instalá-la manualmente no repositório Maven local antes de compilar o Civs. Siga o guia abaixo:
+
+- **Windows (PowerShell)**:
+  ```powershell
+  # Criar pasta temporária
+  New-Item -ItemType Directory -Force -Path "$env:TEMP\ncp"
+  # Baixar o JAR oficial do NoCheatPlus
+  Invoke-WebRequest -Uri "https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar" -OutFile "$env:TEMP\ncp\NoCheatPlus.jar"
+  # Criar o arquivo POM mínimo
+  @'
+  <project xmlns="http://maven.apache.org/POM/4.0.0">
+      <modelVersion>4.0.0</modelVersion>
+      <groupId>com.github.Updated-NoCheatPlus.NoCheatPlus</groupId>
+      <artifactId>nocheatplus</artifactId>
+      <version>1.5</version>
+      <packaging>jar</packaging>
+  </project>
+  '@ | Out-File -FilePath "$env:TEMP\ncp\ncp-clean-pom.xml" -Encoding utf8
+  # Instalar no repositório local
+  mvn install:install-file -Dfile="$env:TEMP\ncp\NoCheatPlus.jar" -DpomFile="$env:TEMP\ncp\ncp-clean-pom.xml"
+  ```
+- **Windows (CMD / Prompt de Comando)**:
+  ```cmd
+  mkdir %TEMP%\ncp
+  curl -sL -o %TEMP%\ncp\NoCheatPlus.jar https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar
+  echo ^<project xmlns="http://maven.apache.org/POM/4.0.0"^>^<modelVersion^>4.0.0^</modelVersion^>^<groupId^>com.github.Updated-NoCheatPlus.NoCheatPlus^</groupId^>^<artifactId^>nocheatplus^</artifactId^>^<version^>1.5^</version^>^<packaging^>jar^</packaging^>^</project^> > %TEMP%\ncp\ncp-clean-pom.xml
+  mvn install:install-file -Dfile=%TEMP%\ncp\NoCheatPlus.jar -DpomFile=%TEMP%\ncp\ncp-clean-pom.xml
+  ```
+- **Linux / macOS / WSL**:
+  ```bash
+  curl -sL -o /tmp/NoCheatPlus.jar https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar
+  printf '<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>com.github.Updated-NoCheatPlus.NoCheatPlus</groupId><artifactId>nocheatplus</artifactId><version>1.5</version><packaging>jar</packaging></project>' > /tmp/ncp-clean-pom.xml
+  mvn install:install-file -Dfile=/tmp/NoCheatPlus.jar -DpomFile=/tmp/ncp-clean-pom.xml
+  ```
+
+#### Passo 2: Compilar o Civs
+Compile primeiro o plugin Civs para gerar o arquivo `.jar` exigido pelo RPG Server:
+```bash
+cd ../Civs-1.11.6
+mvn clean package -DskipTests
 ```
+Isso gerará o arquivo `target/civs-1.11.7.jar`.
 
-```powershell
-cd C:\Users\Danie\Downloads\Civs-1.11.6\rpg-server-plugin
-& "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" package
+#### Passo 3: Compilar o RPG Server
+Volte ao diretório do RPG Server e execute o empacotamento:
+```bash
+cd ../rpg-server-plugin
+mvn clean package -DskipTests
 ```
 
 Artefato gerado:
-
 ```text
-target/rpg-server-0.1.0-SNAPSHOT.jar
+target/rpg-server-0.1.2.jar
 ```
 
 ### 2. Copiar para o servidor
 
 1. Pare o servidor ou use uma janela de manutenção.
-2. Copie `target/rpg-server-0.1.0-SNAPSHOT.jar` para a pasta `plugins/` do Paper.
-3. Confirme que **Vault**, **Civs**, **AuraSkills**, **PlaceholderAPI** e **LuckPerms** estão na mesma pasta `plugins/` (ver secção de dependências acima).
-4. Inicie o servidor.
+2. Copie `target/rpg-server-0.1.2.jar` para a pasta `plugins/` do Paper.
+3. Copie o JAR gerado no passo 2 (`../Civs-1.11.6/target/civs-1.11.7.jar`) também para a pasta `plugins/` do Paper.
+4. Confirme que **Vault**, **Civs**, **AuraSkills**, **PlaceholderAPI** e **LuckPerms** estão na mesma pasta `plugins/` do servidor.
+5. Inicie o servidor.
 
 ### 3. Primeira execução
 
@@ -203,8 +252,13 @@ Permissão LuckPerms correspondente: `rpg.quest.<id>` (ex.: `rpg.quest.warrior_p
 ## Build local (referência rápida)
 
 ```powershell
-& "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" compile
-& "C:\Users\Danie\tools\apache-maven-3.9.10\bin\mvn.cmd" package
+# 1. Compilar Civs
+cd ../Civs-1.11.6
+mvn clean package -DskipTests
+
+# 2. Compilar RPG Server
+cd ../rpg-server-plugin
+mvn clean package -DskipTests
 ```
 
 Documentação técnica adicional: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
