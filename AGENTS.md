@@ -1,5 +1,19 @@
 # AGENTS.md
 
+## Engineering standards (all agents / models)
+
+**Source of truth:** [docs/AGENT-ENGINEERING-STANDARDS.md](docs/AGENT-ENGINEERING-STANDARDS.md)
+
+1. **Issue → branch → PR → merge → deploy.** Every bugfix, improvement, or feature needs a GitHub issue; PRs must mention `Fixes #N`.
+2. **Observability / quality / tests** use the **Java map** in that doc (OTel/Sentry, Spotless/ArchUnit/PIT, JaCoCo/Codecov). Do **not** add Biome, Knip, Stryker, or Playwright to this Paper plugin.
+3. **GUI motion:** global skill `design-motion-principles` + [docs/bukkit-gui-motion.md](docs/bukkit-gui-motion.md) + `GuiMotion`. Emil-primary; skeleton/lazy/enter/exit/progress; honor `ui.motion.reduced`.
+4. Prefer **Hermes** (`daniel-hermes-forge` scripts) for surveys and drafts; parent Cursor reviews before apply.
+5. Sync issues per [.cursor/skills/rpg-server-plugin/GITHUB-SYNC.md](.cursor/skills/rpg-server-plugin/GITHUB-SYNC.md).
+
+Milestone: [Engineering Standards](https://github.com/Daniel730/civs-quests/milestone/5) (issues #67–#72).
+
+---
+
 ## Cursor Cloud specific instructions
 
 This repo (`civs-quests`) is the **RPG Server** Paper plugin. It is built with Maven

@@ -6,6 +6,16 @@
 
 ---
 
+## Issue → PR → deploy (required)
+
+See [docs/AGENT-ENGINEERING-STANDARDS.md](../../../docs/AGENT-ENGINEERING-STANDARDS.md).
+
+1. Create/find a GitHub **issue** before coding (labels: `bug` / `enhancement` / `documentation` + `engineering` / domain labels).
+2. Branch from default: `rpg/<n>-short-slug` or `civs/<n>-short-slug`.
+3. Open a **PR**; description must include `Fixes #N` (or `Closes Daniel730/Civs#N`).
+4. CI must pass (`.github/workflows/ci.yml`); merge then deploy JARs.
+5. Do not treat local-only commits as production-ready when an issue exists — prefer merged PR.
+
 ## When to sync
 
 Run this workflow **after every sprint ticket batch**, **after production deploy**, and **before FINAL-HANDOFF** / session end:
@@ -15,6 +25,7 @@ Run this workflow **after every sprint ticket batch**, **after production deploy
 3. Close completed issues with a comment linking branch + key files + brain doc.
 4. Comment on partial tickets (e.g. CIVS-009 turrets done, shields open).
 5. Close sprint milestones when the sprint is done; keep Sprint 3+ open and update description if scope shifted.
+6. Keep **Engineering Standards** milestone (#5) updated when platform/CI/motion work lands.
 
 Agents: add **“Sync GitHub issues (both repos)”** as the last step of sprint work — see `project-stack/SKILL.md` and `DEPLOY.md` post-deploy checklist.
 
@@ -69,11 +80,13 @@ $gh = "C:\Users\Danie\tools\gh\bin\gh.exe"
 In PR description or commit message:
 
 ```
-Closes #16
+Fixes #16
 Closes Daniel730/Civs#9
 ```
 
 Cross-repo: use full `owner/repo#N` when one PR only closes issues in the other repo.
+
+**PR title:** conventional commits style (`feat:`, `fix:`, `docs:`, `ci:`, …) — enforced by CI `conventional-title` job.
 
 ---
 

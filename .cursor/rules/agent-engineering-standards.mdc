@@ -1,0 +1,14 @@
+---
+description: Enforce issue→PR workflow and engineering standards for all agents
+alwaysApply: true
+---
+
+# Agent engineering workflow
+
+Before substantive work, read `docs/AGENT-ENGINEERING-STANDARDS.md`.
+
+- Create/find a GitHub issue; work on a branch; open a PR that mentions `Fixes #N`.
+- Map web tools to Java (OTel/Spotless/ArchUnit/JaCoCo/PIT) — never Biome/Knip/Stryker/Playwright in this Paper repo.
+- GUI changes: `design-motion-principles` + `docs/bukkit-gui-motion.md` + `GuiMotion`.
+- Prefer Hermes for cheap surveys/drafts; parent reviews before apply.
+- Sync issues: `.cursor/skills/rpg-server-plugin/GITHUB-SYNC.md`.

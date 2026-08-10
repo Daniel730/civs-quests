@@ -58,6 +58,12 @@ integrations:
 player-hub:
   on-join: true
 
+# Bukkit inventory motion (design-motion-principles → docs/bukkit-gui-motion.md)
+ui:
+  motion:
+    # true = skip stagger / skeleton delay (Emil: high-frequency = instant)
+    reduced: false
+
 progression:
   autosave-minutes: 5
   default-track: main
