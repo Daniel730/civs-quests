@@ -41,40 +41,55 @@ public final class QuestJournalGui {
         Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE,
                 plugin.getMessageUtil().parse("<gold>Diário de Quests</gold>"));
         holder.setInventory(inventory);
-        render(plugin, player, holder, 0);
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        if (!reduced) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
+        }
         player.openInventory(inventory);
+        render(plugin, player, holder, 0, GuiMotion.MotionProfile.HUB);
     }
 
     public static void render(RpgServerPlugin plugin, Player player, QuestJournalHolder holder, int page) {
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        // Page flips / refresh — INSTANT (Emil frequency).
+        render(plugin, player, holder, page, GuiMotion.MotionProfile.INSTANT);
+    }
+
+    public static void render(RpgServerPlugin plugin, Player player, QuestJournalHolder holder, int page,
+                              GuiMotion.MotionProfile profile) {
+        GuiMotion.cancel(holder);
+        PlayerProfile profileData = plugin.getProfileManager().getOrCreate(player);
         QuestManager questManager = plugin.getQuestManager();
         MessageUtil messages = plugin.getMessageUtil();
         PluginConfig config = plugin.getPluginConfig();
         Inventory inventory = holder.getInventory();
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        GuiMotion.MotionProfile effective = GuiMotion.effectiveProfile(profile, reduced);
 
         inventory.clear();
         holder.clearSlotMappings();
 
-        List<JournalEntry> entries = buildJournalEntries(plugin, player, profile, questManager);
+        List<JournalEntry> entries = buildJournalEntries(plugin, player, profileData, questManager);
         int totalPages = Math.max(1, (entries.size() + QUESTS_PER_PAGE - 1) / QUESTS_PER_PAGE);
         int clampedPage = Math.max(0, Math.min(page, totalPages - 1));
         holder.setPage(clampedPage);
         holder.setTotalPages(totalPages);
 
-        fillBorder(inventory, profile.getArchetype());
-        inventory.setItem(4, createHeaderItem(messages, config, profile, clampedPage, totalPages));
+        fillBorder(inventory, profileData.getArchetype());
+        inventory.setItem(4, createHeaderItem(messages, config, profileData, clampedPage, totalPages));
 
+        List<GuiMotion.SlotItem> content = new ArrayList<>();
         int startIndex = clampedPage * QUESTS_PER_PAGE;
         int slot = CONTENT_START;
         for (int i = startIndex; i < entries.size() && slot <= CONTENT_END; i++, slot++) {
             JournalEntry entry = entries.get(i);
             if (entry instanceof SectionHeader section) {
-                inventory.setItem(slot, createSectionHeader(messages, section));
+                content.add(new GuiMotion.SlotItem(slot, createSectionHeader(messages, section)));
             } else if (entry instanceof QuestSlot questSlot) {
                 Quest quest = questSlot.quest();
-                QuestManager.QuestStatus status = questManager.getQuestStatus(player, profile, quest);
-                boolean tracked = quest.getId().equals(profile.getTrackedQuestId());
-                inventory.setItem(slot, createQuestItem(plugin, player, profile, quest, status, tracked));
+                QuestManager.QuestStatus status = questManager.getQuestStatus(player, profileData, quest);
+                boolean tracked = quest.getId().equals(profileData.getTrackedQuestId());
+                content.add(new GuiMotion.SlotItem(slot,
+                        createQuestItem(plugin, player, profileData, quest, status, tracked)));
                 holder.mapSlot(slot, quest.getId());
             }
         }
@@ -90,6 +105,11 @@ public final class QuestJournalGui {
         if (clampedPage < totalPages - 1) {
             inventory.setItem(QuestJournalHolder.NAV_NEXT_SLOT, createNavItem(messages, true, clampedPage, totalPages));
         }
+
+        if (effective != GuiMotion.MotionProfile.INSTANT && !content.isEmpty()) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
+        }
+        GuiMotion.enter(plugin, holder, inventory, content, effective, false);
     }
 
     private static List<JournalEntry> buildJournalEntries(RpgServerPlugin plugin, Player player,

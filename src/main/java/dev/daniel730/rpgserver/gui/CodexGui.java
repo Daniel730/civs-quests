@@ -15,7 +15,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public final class CodexGui {
 
@@ -32,30 +31,49 @@ public final class CodexGui {
         Inventory inventory = Bukkit.createInventory(holder, SIZE,
                 plugin.getMessageUtil().parse("<aqua><bold>Codex de Exploração</bold></aqua>"));
         holder.setInventory(inventory);
-        render(plugin, player, holder, 0);
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        if (!reduced) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
+        }
         player.openInventory(inventory);
+        render(plugin, player, holder, 0, GuiMotion.MotionProfile.RARE);
     }
 
     public static void render(RpgServerPlugin plugin, Player player, CodexHolder holder, int page) {
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        render(plugin, player, holder, page, GuiMotion.MotionProfile.INSTANT);
+    }
+
+    public static void render(RpgServerPlugin plugin, Player player, CodexHolder holder, int page,
+                              GuiMotion.MotionProfile profile) {
+        GuiMotion.cancel(holder);
+        PlayerProfile profileData = plugin.getProfileManager().getOrCreate(player);
         MessageUtil messages = plugin.getMessageUtil();
         Inventory inventory = holder.getInventory();
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        GuiMotion.MotionProfile effective = GuiMotion.effectiveProfile(profile, reduced);
+
         inventory.clear();
 
-        fillBorder(inventory, profile.getArchetype());
-        List<CodexEntry> entries = buildEntries(plugin, profile);
+        fillBorder(inventory, profileData.getArchetype());
+        List<CodexEntry> entries = buildEntries(plugin, profileData);
         int totalPages = Math.max(1, (entries.size() + ENTRIES_PER_PAGE - 1) / ENTRIES_PER_PAGE);
         int clampedPage = Math.max(0, Math.min(page, totalPages - 1));
         holder.setPage(clampedPage);
 
-        inventory.setItem(4, headerItem(messages, profile, clampedPage, totalPages));
+        inventory.setItem(4, headerItem(messages, profileData, clampedPage, totalPages));
 
+        List<GuiMotion.SlotItem> content = new ArrayList<>();
         int start = clampedPage * ENTRIES_PER_PAGE;
         int slot = CONTENT_START;
         for (int i = start; i < entries.size() && slot <= CONTENT_END; i++, slot++) {
             CodexEntry entry = entries.get(i);
-            inventory.setItem(slot, entryItem(messages, entry));
+            content.add(new GuiMotion.SlotItem(slot, entryItem(messages, entry)));
         }
+
+        if (effective != GuiMotion.MotionProfile.INSTANT && !content.isEmpty()) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
+        }
+        GuiMotion.enter(plugin, holder, inventory, content, effective, false);
     }
 
     private static List<CodexEntry> buildEntries(RpgServerPlugin plugin, PlayerProfile profile) {

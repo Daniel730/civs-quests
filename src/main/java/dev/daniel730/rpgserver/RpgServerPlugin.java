@@ -25,6 +25,7 @@ import dev.daniel730.rpgserver.discovery.DiscoveryService;
 import dev.daniel730.rpgserver.listener.CombatQuestListener;
 import dev.daniel730.rpgserver.listener.CodexListener;
 import dev.daniel730.rpgserver.listener.DiscoveryListener;
+import dev.daniel730.rpgserver.listener.GuiMotionListener;
 import dev.daniel730.rpgserver.listener.GuideNpcQuestListener;
 import dev.daniel730.rpgserver.listener.RpgTutorialBridgeListener;
 import dev.daniel730.rpgserver.listener.SkillTreeListener;
@@ -152,6 +153,7 @@ public final class RpgServerPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerProfileListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerHubListener(this), this);
+        getServer().getPluginManager().registerEvents(new GuiMotionListener(), this);
         getServer().getPluginManager().registerEvents(new CivsIntegrationLifecycleListener(this), this);
         getServer().getPluginManager().registerEvents(new QuestJournalListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitQuestListener(this), this);

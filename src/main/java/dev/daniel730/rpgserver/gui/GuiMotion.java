@@ -45,6 +45,28 @@ public final class GuiMotion {
     private GuiMotion() {
     }
 
+    /** Reads {@code ui.motion.reduced} from plugin config (default false). */
+    public static boolean reducedMotion(JavaPlugin plugin) {
+        return plugin.getConfig().getBoolean("ui.motion.reduced", false);
+    }
+
+    /** Inclusive slot range helper for content panes. */
+    public static int[] slotRange(int startInclusive, int endInclusive) {
+        if (endInclusive < startInclusive) {
+            return new int[0];
+        }
+        int[] slots = new int[endInclusive - startInclusive + 1];
+        for (int i = 0; i < slots.length; i++) {
+            slots[i] = startInclusive + i;
+        }
+        return slots;
+    }
+
+    /** Resolve profile after reduced-motion gate (for tests / callers). */
+    public static MotionProfile effectiveProfile(MotionProfile profile, boolean reducedMotion) {
+        return reducedMotion ? MotionProfile.INSTANT : profile;
+    }
+
     public static ItemStack skeletonPane() {
         ItemStack stack = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = stack.getItemMeta();
@@ -83,7 +105,7 @@ public final class GuiMotion {
         cancel(holderKey);
 
         List<SlotItem> copy = new ArrayList<>(items);
-        MotionProfile effective = reducedMotion ? MotionProfile.INSTANT : profile;
+        MotionProfile effective = effectiveProfile(profile, reducedMotion);
 
         if (effective == MotionProfile.INSTANT || copy.isEmpty()) {
             for (SlotItem si : copy) {
