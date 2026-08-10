@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Sibling Civs checkout for system-scoped JAR (optional until CI builds Civs)
+          path: rpg-server-plugin
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Checkout Civs dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Daniel730/Civs
+          ref: paper-26.1.2-migration
+          path: Civs-1.11.6
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Civs JAR
+        working-directory: Civs-1.11.6
+        run: |
+          mvn -B -q -DskipTests package
+          test -f target/civs-1.11.7.jar || test -f target/civs-1.11.6.jar
+          if [ ! -f target/civs-1.11.7.jar ] && [ -f target/civs-1.11.6.jar ]; then
+            cp target/civs-1.11.6.jar target/civs-1.11.7.jar
+          fi
+
+      - name: Test RPG
+        working-directory: rpg-server-plugin
+        run: mvn -B test
+
+      - name: JaCoCo (when plugin configured)
+        working-directory: rpg-server-plugin
+        continue-on-error: true
+        run: mvn -B jacoco:report
+
+      - name: Upload coverage to Codecov
+        if: hashFiles('rpg-server-plugin/target/site/jacoco/jacoco.xml') != ''
+        uses: codecov/codecov-action@v4
+        with:
+          files: rpg-server-plugin/target/site/jacoco/jacoco.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  conventional-title:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+          requireScope: false

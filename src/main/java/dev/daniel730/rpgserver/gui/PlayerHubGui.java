@@ -38,14 +38,24 @@ public final class PlayerHubGui {
     }
 
     public static void open(RpgServerPlugin plugin, Player player, PlayerHubHolder holder) {
+        GuiMotion.cancel(holder);
         Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE,
                 plugin.getMessageUtil().parse(plugin.getPluginConfig().getHubTitle()));
         holder.setInventory(inventory);
-        render(plugin, player, holder);
+        // Skeleton flash before first paint when motion not reduced (full stagger → issue #70).
+        if (!plugin.getConfig().getBoolean("ui.motion.reduced", false)) {
+            int[] contentSlots = new int[CONTENT_END - CONTENT_START + 1];
+            for (int i = 0; i < contentSlots.length; i++) {
+                contentSlots[i] = CONTENT_START + i;
+            }
+            GuiMotion.skeleton(inventory, contentSlots);
+        }
         player.openInventory(inventory);
+        render(plugin, player, holder);
     }
 
     public static void render(RpgServerPlugin plugin, Player player, PlayerHubHolder holder) {
+        GuiMotion.cancel(holder);
         PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
         MessageUtil messages = plugin.getMessageUtil();
         PluginConfig config = plugin.getPluginConfig();
