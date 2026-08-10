@@ -26,9 +26,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Daniel730/Civs
-          ref: paper-26.1.2-migration
+          # Fork migration branch (paper-26.1.2-migration does not exist)
+          ref: paper-26.1.2-phase0-migration
           path: Civs-1.11.6
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Civs JAR
         working-directory: Civs-1.11.6
