@@ -48,64 +48,89 @@ public final class SkillTreeGui {
         Inventory inventory = Bukkit.createInventory(holder, SIZE,
                 plugin.getMessageUtil().parse("<light_purple><bold>Árvore de Perks</bold></light_purple>"));
         holder.setInventory(inventory);
-        render(plugin, player, holder);
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        if (!reduced) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(10, 43));
+        }
         player.openInventory(inventory);
+        render(plugin, player, holder, GuiMotion.MotionProfile.RARE);
     }
 
     public static void render(RpgServerPlugin plugin, Player player, SkillTreeHolder holder) {
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        render(plugin, player, holder, GuiMotion.MotionProfile.INSTANT);
+    }
+
+    public static void render(RpgServerPlugin plugin, Player player, SkillTreeHolder holder,
+                              GuiMotion.MotionProfile profile) {
+        GuiMotion.cancel(holder);
+        PlayerProfile profileData = plugin.getProfileManager().getOrCreate(player);
         SkillTreeManager skillTree = plugin.getSkillTreeManager();
         MessageUtil messages = plugin.getMessageUtil();
         Inventory inventory = holder.getInventory();
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        GuiMotion.MotionProfile effective = GuiMotion.effectiveProfile(profile, reduced);
+
         inventory.clear();
         holder.clearMappings();
 
-        fillBorder(inventory, profile.getArchetype());
+        fillBorder(inventory, profileData.getArchetype());
 
         inventory.setItem(4, infoItem(messages,
-                messages.parse("<gold>Essência:</gold> <white>" + profile.getPathEssence() + "</white>"),
-                List.of(messages.parse("<gray>Renascimentos:</gray> <white>" + profile.getRebirthCount() + "</white>"),
+                messages.parse("<gold>Essência:</gold> <white>" + profileData.getPathEssence() + "</white>"),
+                List.of(messages.parse("<gray>Renascimentos:</gray> <white>" + profileData.getRebirthCount() + "</white>"),
                         messages.parse("<gray>Clique em um perk disponível para desbloquear.</gray>"))));
 
-        String archetype = profile.getArchetype();
+        List<GuiMotion.SlotItem> content = new ArrayList<>();
+        String archetype = profileData.getArchetype();
         if (archetype == null || archetype.isBlank()) {
-            inventory.setItem(22, infoItem(messages,
+            content.add(new GuiMotion.SlotItem(22, infoItem(messages,
                     messages.parse("<red>Escolha um caminho primeiro</red>"),
-                    List.of(messages.parse("<gray>Use a Central → Escolher Caminho.</gray>"))));
+                    List.of(messages.parse("<gray>Use a Central → Escolher Caminho.</gray>")))));
+            finishEnter(plugin, holder, inventory, content, effective);
             return;
         }
 
         String[] branches = BRANCHES_BY_ARCHETYPE.get(archetype.toLowerCase(Locale.ROOT));
         if (branches == null) {
-            renderLegacyGrid(plugin, player, holder, profile, skillTree, messages, inventory);
+            renderLegacyGrid(plugin, player, holder, profileData, skillTree, messages, content);
+            finishEnter(plugin, holder, inventory, content, effective);
             return;
         }
 
         Map<String, Map<Integer, PerkDefinition>> layout = buildBranchLayout(skillTree, archetype, branches);
         for (int column = 0; column < branches.length; column++) {
-            String branch = branches[column];
+            String branchKey = branches[column];
             if (holder.getBranch() != null && !holder.getBranch().isBlank()
-                    && !holder.getBranch().equalsIgnoreCase(branch)) {
+                    && !holder.getBranch().equalsIgnoreCase(branchKey)) {
                 continue;
             }
-            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 3, TIER3_SLOTS[column]);
-            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 2, TIER2_SLOTS[column]);
-            placeTierPerk(inventory, holder, messages, skillTree, profile, layout, branch, 1, TIER1_SLOTS[column]);
-            inventory.setItem(48 + column, branchLabel(messages, branch, column));
+            placeTierPerk(content, holder, messages, skillTree, profileData, layout, branchKey, 3, TIER3_SLOTS[column]);
+            placeTierPerk(content, holder, messages, skillTree, profileData, layout, branchKey, 2, TIER2_SLOTS[column]);
+            placeTierPerk(content, holder, messages, skillTree, profileData, layout, branchKey, 1, TIER1_SLOTS[column]);
+            content.add(new GuiMotion.SlotItem(48 + column, branchLabel(messages, branchKey, column)));
         }
+        finishEnter(plugin, holder, inventory, content, effective);
     }
 
-    private static void placeTierPerk(Inventory inventory, SkillTreeHolder holder, MessageUtil messages,
+    private static void finishEnter(RpgServerPlugin plugin, SkillTreeHolder holder, Inventory inventory,
+                                    List<GuiMotion.SlotItem> content, GuiMotion.MotionProfile effective) {
+        if (effective != GuiMotion.MotionProfile.INSTANT && !content.isEmpty()) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(10, 43));
+        }
+        GuiMotion.enter(plugin, holder, inventory, content, effective, false);
+    }
+
+    private static void placeTierPerk(List<GuiMotion.SlotItem> content, SkillTreeHolder holder, MessageUtil messages,
                                       SkillTreeManager skillTree, PlayerProfile profile,
                                       Map<String, Map<Integer, PerkDefinition>> layout,
                                       String branch, int tier, int slot) {
         PerkDefinition perk = layout.getOrDefault(branch, Map.of()).get(tier);
         if (perk == null) {
-            inventory.setItem(slot, createFiller(ArchetypeUtil.glassPane(profile.getArchetype())));
+            content.add(new GuiMotion.SlotItem(slot, createFiller(ArchetypeUtil.glassPane(profile.getArchetype()))));
             return;
         }
         SkillTreeManager.PerkStatus status = skillTree.getPerkStatus(profile, perk);
-        inventory.setItem(slot, createPerkItem(messages, perk, status, profile));
+        content.add(new GuiMotion.SlotItem(slot, createPerkItem(messages, perk, status, profile)));
         if (status == SkillTreeManager.PerkStatus.AVAILABLE) {
             holder.mapSlot(slot, perk.getId());
         }
@@ -154,7 +179,7 @@ public final class SkillTreeGui {
 
     private static void renderLegacyGrid(RpgServerPlugin plugin, Player player, SkillTreeHolder holder,
                                          PlayerProfile profile, SkillTreeManager skillTree,
-                                         MessageUtil messages, Inventory inventory) {
+                                         MessageUtil messages, List<GuiMotion.SlotItem> content) {
         List<PerkDefinition> perks = new ArrayList<>(skillTree.getPerksForArchetype(profile.getArchetype()));
         perks.sort((a, b) -> {
             int tier = Integer.compare(a.getTier(), b.getTier());
@@ -171,7 +196,7 @@ public final class SkillTreeGui {
             }
             int slot = slots[index++];
             SkillTreeManager.PerkStatus status = skillTree.getPerkStatus(profile, perk);
-            inventory.setItem(slot, createPerkItem(messages, perk, status, profile));
+            content.add(new GuiMotion.SlotItem(slot, createPerkItem(messages, perk, status, profile)));
             if (status == SkillTreeManager.PerkStatus.AVAILABLE) {
                 holder.mapSlot(slot, perk.getId());
             }

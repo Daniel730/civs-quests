@@ -42,48 +42,60 @@ public final class PlayerHubGui {
         Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE,
                 plugin.getMessageUtil().parse(plugin.getPluginConfig().getHubTitle()));
         holder.setInventory(inventory);
-        // Skeleton flash before first paint when motion not reduced (full stagger → issue #70).
-        if (!plugin.getConfig().getBoolean("ui.motion.reduced", false)) {
-            int[] contentSlots = new int[CONTENT_END - CONTENT_START + 1];
-            for (int i = 0; i < contentSlots.length; i++) {
-                contentSlots[i] = CONTENT_START + i;
-            }
-            GuiMotion.skeleton(inventory, contentSlots);
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        if (!reduced) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
         }
         player.openInventory(inventory);
-        render(plugin, player, holder);
+        // First open may use a short HUB stagger; tab switches use INSTANT (Emil frequency).
+        render(plugin, player, holder, GuiMotion.MotionProfile.HUB);
     }
 
+    /** Tab switches / re-renders — always INSTANT (high frequency). */
     public static void render(RpgServerPlugin plugin, Player player, PlayerHubHolder holder) {
+        render(plugin, player, holder, GuiMotion.MotionProfile.INSTANT);
+    }
+
+    public static void render(RpgServerPlugin plugin, Player player, PlayerHubHolder holder,
+                              GuiMotion.MotionProfile profile) {
         GuiMotion.cancel(holder);
-        PlayerProfile profile = plugin.getProfileManager().getOrCreate(player);
+        PlayerProfile profileData = plugin.getProfileManager().getOrCreate(player);
         MessageUtil messages = plugin.getMessageUtil();
         PluginConfig config = plugin.getPluginConfig();
         Inventory inventory = holder.getInventory();
+        boolean reduced = GuiMotion.reducedMotion(plugin);
+        GuiMotion.MotionProfile effective = GuiMotion.effectiveProfile(profile, reduced);
 
         inventory.clear();
         holder.clearActions();
 
-        fillBorder(inventory, profile.getArchetype());
+        fillBorder(inventory, profileData.getArchetype());
         renderTabs(holder, messages, config);
         renderFooter(plugin, holder, messages, config);
 
+        List<GuiMotion.SlotItem> content = new ArrayList<>();
         switch (holder.getScreen()) {
-            case PATH_PICKER -> renderPathPickerTab(plugin, player, profile, holder, messages, config);
-            case PATH_DETAIL -> renderPathDetailView(plugin, player, profile, holder, messages, config);
-            case QUEST_TREE -> renderQuestTreeView(plugin, player, profile, holder, messages, config);
-            case TAB -> renderActiveTab(plugin, player, profile, holder, messages, config);
+            case PATH_PICKER -> renderPathPickerTab(plugin, player, profileData, holder, messages, config, content);
+            case PATH_DETAIL -> renderPathDetailView(plugin, player, profileData, holder, messages, config, content);
+            case QUEST_TREE -> renderQuestTreeView(plugin, player, profileData, holder, messages, config, content);
+            case TAB -> renderActiveTab(plugin, player, profileData, holder, messages, config, content);
         }
+
+        if (effective != GuiMotion.MotionProfile.INSTANT && !content.isEmpty()) {
+            GuiMotion.skeleton(inventory, GuiMotion.slotRange(CONTENT_START, CONTENT_END));
+        }
+        GuiMotion.enter(plugin, holder, inventory, content, effective, false);
     }
 
     private static void renderActiveTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                        List<GuiMotion.SlotItem> content) {
         switch (holder.getActiveTab()) {
-            case INICIO -> renderInicioTab(plugin, player, profile, holder, messages, config);
-            case CIVS -> renderCivsTab(plugin, holder, messages, config);
-            case RPG -> renderRpgTab(plugin, player, profile, holder, messages, config);
-            case CONFIG -> renderConfigTab(plugin, player, profile, holder, messages, config);
-            case QUESTS -> renderQuestsTab(plugin, player, profile, holder, messages, config);
+            case INICIO -> renderInicioTab(plugin, player, profile, holder, messages, config, content);
+            case CIVS -> renderCivsTab(plugin, holder, messages, config, content);
+            case RPG -> renderRpgTab(plugin, player, profile, holder, messages, config, content);
+            case CONFIG -> renderConfigTab(plugin, player, profile, holder, messages, config, content);
+            case QUESTS -> renderQuestsTab(plugin, player, profile, holder, messages, config, content);
         }
     }
 
@@ -128,13 +140,14 @@ public final class PlayerHubGui {
     }
 
     private static void renderInicioTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                        List<GuiMotion.SlotItem> content) {
         QuestManager questManager = plugin.getQuestManager();
 
-        inventorySet(holder, 13, createProfileItem(plugin, player, profile, messages, config, questManager));
+        inventorySet(holder, content, 13, createProfileItem(plugin, player, profile, messages, config, questManager));
 
         holder.mapAction(21, PlayerHubHolder.HubClick.subview(PlayerHubHolder.HubScreen.PATH_PICKER));
-        inventorySet(holder, 21, actionItem(Material.MAP,
+        inventorySet(holder, content, 21, actionItem(Material.MAP,
                 messages.parse(config.getHubInicioChoosePath()),
                 List.of(messages.parse(config.getHubInicioChoosePathLore())), true));
 
@@ -145,12 +158,12 @@ public final class PlayerHubGui {
         if (next.isPresent()) {
             Quest quest = next.get();
             holder.mapAction(23, PlayerHubHolder.HubClick.trackQuest(quest.getId()));
-            inventorySet(holder, 23, actionItem(Material.COMPASS,
+            inventorySet(holder, content, 23, actionItem(Material.COMPASS,
                     messages.parse(config.getHubInicioNextQuest()),
                     List.of(messages.parse(config.getHubInicioNextQuestLore()
                             .replace("{quest}", quest.getName()))), true));
         } else {
-            inventorySet(holder, 23, infoItem(Material.GRAY_DYE,
+            inventorySet(holder, content, 23, infoItem(Material.GRAY_DYE,
                     messages.parse(config.getHubInicioNoQuest()),
                     List.of(messages.parse("<dark_gray>Nenhuma missão pendente.</dark_gray>"))));
         }
@@ -158,12 +171,12 @@ public final class PlayerHubGui {
         Quest tracked = questManager.findTrackedQuest(profile);
         if (tracked != null) {
             QuestManager.QuestProgress progress = questManager.getQuestProgress(profile, tracked);
-            inventorySet(holder, 31, createProgressItem(messages, tracked, progress));
+            inventorySet(holder, content, 31, createProgressItem(messages, tracked, progress));
         }
 
         if (plugin.getCivsHook().isEnabled()) {
             holder.mapAction(29, PlayerHubHolder.HubClick.civsMenu("port"));
-            inventorySet(holder, 29, actionItem(Material.ENDER_PEARL,
+            inventorySet(holder, content, 29, actionItem(Material.ENDER_PEARL,
                     messages.parse(config.getHubCivsLocationsTitle()),
                     List.of(messages.parse(config.getHubCivsLocationsLore()),
                             messages.parse("<yellow>▶ Abrir locais Civs</yellow>")), true));
@@ -171,9 +184,10 @@ public final class PlayerHubGui {
     }
 
     private static void renderPathPickerTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                            PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                            PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                            List<GuiMotion.SlotItem> content) {
         QuestManager questManager = plugin.getQuestManager();
-        inventorySet(holder, 4, infoItem(Material.MAP,
+        inventorySet(holder, content, 4, infoItem(Material.MAP,
                 messages.parse("<gold><bold>Escolha seu Caminho</bold></gold>"),
                 List.of(messages.parse("<gray>Clique para ver detalhes antes de aceitar.</gray>"))));
 
@@ -184,11 +198,11 @@ public final class PlayerHubGui {
             Quest path = paths.get(i);
             int slot = slots[i];
             holder.mapAction(slot, PlayerHubHolder.HubClick.openPathDetail(path.getId()));
-            inventorySet(holder, slot, createPathHead(messages, path, icons[i]));
+            inventorySet(holder, content, slot, createPathHead(messages, path, icons[i]));
         }
 
         if (profile.getArchetype() != null && !profile.getArchetype().isBlank()) {
-            inventorySet(holder, 31, infoItem(ArchetypeUtil.glassPane(profile.getArchetype()),
+            inventorySet(holder, content, 31, infoItem(ArchetypeUtil.glassPane(profile.getArchetype()),
                     messages.parse("<gray>Caminho atual:</gray> "
                             + ArchetypeUtil.coloredDisplayName(profile.getArchetype())),
                     List.of(messages.parse("<dark_gray>Outros caminhos ficam bloqueados.</dark_gray>"))));
@@ -196,19 +210,20 @@ public final class PlayerHubGui {
     }
 
     private static void renderPathDetailView(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                             PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                             PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                             List<GuiMotion.SlotItem> content) {
         QuestManager questManager = plugin.getQuestManager();
         String questId = holder.getSelectedPathQuestId();
         Quest path = questId == null ? null : questManager.getQuest(questId);
         if (path == null) {
-            inventorySet(holder, 22, infoItem(Material.BARRIER,
+            inventorySet(holder, content, 22, infoItem(Material.BARRIER,
                     messages.parse("<red>Caminho inválido</red>"),
                     List.of(messages.parse("<gray>Volte e escolha novamente.</gray>"))));
             return;
         }
 
         String archetype = path.getArchetype();
-        inventorySet(holder, 4, infoItem(ArchetypeUtil.glassPane(archetype),
+        inventorySet(holder, content, 4, infoItem(ArchetypeUtil.glassPane(archetype),
                 messages.parse(ArchetypeUtil.coloredDisplayName(archetype) + " — <white>" + path.getName() + "</white>"),
                 List.of(messages.parse("<gray>" + empty(path.getDescription()) + "</gray>"))));
 
@@ -220,7 +235,7 @@ public final class PlayerHubGui {
         } else {
             traitLore.add(messages.parse("<gray>Sem traços de caminho configurados.</gray>"));
         }
-        inventorySet(holder, 20, infoItem(Material.GOLDEN_APPLE,
+        inventorySet(holder, content, 20, infoItem(Material.GOLDEN_APPLE,
                 messages.parse("<gold>Traços do Caminho</gold>"), traitLore));
 
         List<Quest> chain = questManager.getArchetypeStoryQuests(player, profile, archetype);
@@ -236,11 +251,11 @@ public final class PlayerHubGui {
         if (chainLore.isEmpty()) {
             chainLore.add(messages.parse("<gray>• " + path.getName() + "</gray>"));
         }
-        inventorySet(holder, 24, infoItem(Material.WRITABLE_BOOK,
+        inventorySet(holder, content, 24, infoItem(Material.WRITABLE_BOOK,
                 messages.parse("<aqua>Cadeia de Missões</aqua>"), chainLore));
 
         holder.mapAction(31, PlayerHubHolder.HubClick.acceptPath(path.getId()));
-        inventorySet(holder, 31, actionItem(Material.LIME_CONCRETE,
+        inventorySet(holder, content, 31, actionItem(Material.LIME_CONCRETE,
                 messages.parse("<green><bold>Aceitar Caminho</bold></green>"),
                 List.of(messages.parse("<gray>Inicia a missão de entrada e trava outros caminhos.</gray>")), true));
     }
@@ -258,15 +273,16 @@ public final class PlayerHubGui {
     }
 
     private static void renderQuestTreeView(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                            PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                            PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                            List<GuiMotion.SlotItem> content) {
         QuestManager questManager = plugin.getQuestManager();
         String archetype = profile.getArchetype();
-        inventorySet(holder, 4, infoItem(Material.OAK_SAPLING,
+        inventorySet(holder, content, 4, infoItem(Material.OAK_SAPLING,
                 messages.parse(config.getHubRpgQuestTreeTitle()),
                 List.of(messages.parse(config.getHubRpgQuestTreeLore()))));
 
         if (archetype == null || archetype.isBlank()) {
-            inventorySet(holder, 22, infoItem(Material.BARRIER,
+            inventorySet(holder, content, 22, infoItem(Material.BARRIER,
                     messages.parse("<red>Escolha um caminho primeiro</red>"),
                     List.of(messages.parse("<gray>Use Início → Escolher Caminho.</gray>"))));
             return;
@@ -281,42 +297,44 @@ public final class PlayerHubGui {
             int slot = QUEST_TREE_SLOTS[slotIndex++];
             QuestManager.QuestStatus status = questManager.getQuestStatus(player, profile, quest);
             boolean tracked = quest.getId().equals(profile.getTrackedQuestId());
-            inventorySet(holder, slot, createQuestTreeNode(plugin, player, profile, quest, status, tracked));
+            inventorySet(holder, content, slot, createQuestTreeNode(plugin, player, profile, quest, status, tracked));
             mapQuestNodeAction(holder, slot, quest, status, tracked);
         }
     }
 
     private static void renderCivsTab(RpgServerPlugin plugin, PlayerHubHolder holder,
-                                      MessageUtil messages, PluginConfig config) {
+                                      MessageUtil messages, PluginConfig config,
+                                      List<GuiMotion.SlotItem> content) {
         boolean civs = plugin.getCivsHook().isEnabled();
         if (civs) {
-            placeCivsMenuAction(holder, 10, Material.GOLDEN_HELMET, config.getHubCivsTownTitle(),
+            placeCivsMenuAction(holder, content, 10, Material.GOLDEN_HELMET, config.getHubCivsTownTitle(),
                     config.getHubCivsTownLore(), "main");
-            placeCivsMenuAction(holder, 12, Material.ENDER_PEARL, config.getHubCivsLocationsTitle(),
+            placeCivsMenuAction(holder, content, 12, Material.ENDER_PEARL, config.getHubCivsLocationsTitle(),
                     config.getHubCivsLocationsLore(), "port");
-            placeCivsMenuAction(holder, 14, Material.BLUE_BED, config.getHubCivsTownInfoTitle(),
+            placeCivsMenuAction(holder, content, 14, Material.BLUE_BED, config.getHubCivsTownInfoTitle(),
                     config.getHubCivsTownInfoLore(), "select-town");
-            placeCivsMenuAction(holder, 16, Material.BRICKS, config.getHubCivsRegionsTitle(),
+            placeCivsMenuAction(holder, content, 16, Material.BRICKS, config.getHubCivsRegionsTitle(),
                     config.getHubCivsRegionsLore(), "region-list");
-            placeCivsMenuAction(holder, 19, Material.GOLD_INGOT, config.getHubCivsAuctionTitle(),
+            placeCivsMenuAction(holder, content, 19, Material.GOLD_INGOT, config.getHubCivsAuctionTitle(),
                     config.getHubCivsAuctionLore(), "auction-browse");
-            placeCivsMenuAction(holder, 21, Material.ENCHANTING_TABLE, config.getHubCivsSpellsTitle(),
+            placeCivsMenuAction(holder, content, 21, Material.ENCHANTING_TABLE, config.getHubCivsSpellsTitle(),
                     config.getHubCivsSpellsLore(), "class");
-            placeCivsMenuAction(holder, 23, Material.MAP, config.getHubCivsFarmsTitle(),
+            placeCivsMenuAction(holder, content, 23, Material.MAP, config.getHubCivsFarmsTitle(),
                     config.getHubCivsFarmsLore(), "blueprints");
-            placeCivsMenuAction(holder, 25, Material.IRON_SWORD, config.getHubCivsCombatTitle(),
+            placeCivsMenuAction(holder, content, 25, Material.IRON_SWORD, config.getHubCivsCombatTitle(),
                     config.getHubCivsCombatLore(), "class-list");
         } else {
-            inventorySet(holder, 22, infoItem(Material.BARRIER,
+            inventorySet(holder, content, 22, infoItem(Material.BARRIER,
                     messages.parse("<red>Civs indisponível</red>"),
                     List.of(messages.parse("<gray>Integração Civs desligada ou plugin ausente.</gray>"))));
         }
-        inventorySet(holder, 31, infoItem(Material.OAK_SIGN, messages.parse(config.getHubCivsChestShopTitle()),
+        inventorySet(holder, content, 31, infoItem(Material.OAK_SIGN, messages.parse(config.getHubCivsChestShopTitle()),
                 List.of(messages.parse(config.getHubCivsChestShopLore()))));
     }
 
     private static void renderRpgTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                     PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                     PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                     List<GuiMotion.SlotItem> content) {
         SkillTreeManager skillTree = plugin.getSkillTreeManager();
         long unlocked = skillTree.getAllPerks().stream()
                 .filter(p -> skillTree.getPerkStatus(profile, p) == SkillTreeManager.PerkStatus.UNLOCKED)
@@ -324,26 +342,26 @@ public final class PlayerHubGui {
         long total = skillTree.getAllPerks().size();
 
         holder.mapAction(11, PlayerHubHolder.HubClick.subview(PlayerHubHolder.HubScreen.QUEST_TREE));
-        inventorySet(holder, 11, actionItem(Material.OAK_SAPLING,
+        inventorySet(holder, content, 11, actionItem(Material.OAK_SAPLING,
                 messages.parse(config.getHubRpgQuestTreeTitle()),
                 List.of(messages.parse(config.getHubRpgQuestTreeLore())), true));
 
         holder.mapAction(13, PlayerHubHolder.HubClick.command("/rpg perks"));
-        inventorySet(holder, 13, actionItem(Material.NETHER_STAR,
+        inventorySet(holder, content, 13, actionItem(Material.NETHER_STAR,
                 messages.parse(config.getHubRpgPerksTitle()),
                 List.of(messages.parse(config.getHubRpgPerksLore())), true));
 
         holder.mapAction(15, PlayerHubHolder.HubClick.openSkillTree());
-        inventorySet(holder, 15, actionItem(Material.ENCHANTED_BOOK,
+        inventorySet(holder, content, 15, actionItem(Material.ENCHANTED_BOOK,
                 messages.parse("<light_purple><bold>Árvore de Perks</bold></light_purple>"),
                 List.of(messages.parse("<gray>Desbloqueie perks com Essência de Caminho.</gray>")), true));
 
         holder.mapAction(17, PlayerHubHolder.HubClick.openCodex());
-        inventorySet(holder, 17, actionItem(Material.MAP,
+        inventorySet(holder, content, 17, actionItem(Material.MAP,
                 messages.parse("<aqua><bold>Codex</bold></aqua>"),
                 List.of(messages.parse("<gray>POIs e biomas descobertos.</gray>")), true));
 
-        inventorySet(holder, 22, infoItem(Material.EXPERIENCE_BOTTLE,
+        inventorySet(holder, content, 22, infoItem(Material.EXPERIENCE_BOTTLE,
                 messages.parse(config.getHubRpgPerkSummaryTitle()
                         .replace("{unlocked}", String.valueOf(unlocked))
                         .replace("{total}", String.valueOf(total))),
@@ -357,41 +375,42 @@ public final class PlayerHubGui {
             }
             QuestManager.QuestStatus status = plugin.getQuestManager().getQuestStatus(player, profile, quest);
             boolean tracked = quest.getId().equals(profile.getTrackedQuestId());
-            inventorySet(holder, slot, createQuestPreviewItem(plugin, player, profile, quest, status, tracked));
+            inventorySet(holder, content, slot, createQuestPreviewItem(plugin, player, profile, quest, status, tracked));
             mapQuestNodeAction(holder, slot, quest, status, tracked);
             slot++;
         }
 
-        inventorySet(holder, 20, createScheduleStatusItem(plugin, player, profile, messages, config, QuestSchedule.DAILY));
-        inventorySet(holder, 24, createScheduleStatusItem(plugin, player, profile, messages, config, QuestSchedule.WEEKLY));
+        inventorySet(holder, content, 20, createScheduleStatusItem(plugin, player, profile, messages, config, QuestSchedule.DAILY));
+        inventorySet(holder, content, 24, createScheduleStatusItem(plugin, player, profile, messages, config, QuestSchedule.WEEKLY));
 
         holder.mapAction(31, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.OPEN_JOURNAL));
-        inventorySet(holder, 31, actionItem(Material.WRITABLE_BOOK,
+        inventorySet(holder, content, 31, actionItem(Material.WRITABLE_BOOK,
                 messages.parse(config.getHubRpgJournalTitle()),
                 List.of(messages.parse(config.getHubRpgJournalLore())), true));
     }
 
     private static void renderConfigTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                        List<GuiMotion.SlotItem> content) {
         boolean notifications = plugin.getQuestFeedbackService().isNotificationsEnabled(profile);
         boolean bossBar = plugin.getQuestFeedbackService().isBossBarEnabled(profile);
 
         holder.mapAction(20, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.TOGGLE_NOTIFICATIONS));
-        inventorySet(holder, 20, toggleItem(messages, config.getHubConfigNotificationsTitle(),
+        inventorySet(holder, content, 20, toggleItem(messages, config.getHubConfigNotificationsTitle(),
                 config.getHubConfigNotificationsLore(), notifications));
 
         holder.mapAction(24, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.TOGGLE_BOSSBAR));
-        inventorySet(holder, 24, toggleItem(messages, config.getHubConfigBossBarTitle(),
+        inventorySet(holder, content, 24, toggleItem(messages, config.getHubConfigBossBarTitle(),
                 config.getHubConfigBossBarLore(), bossBar));
 
-        inventorySet(holder, 13, infoItem(Material.OAK_SIGN,
+        inventorySet(holder, content, 13, infoItem(Material.OAK_SIGN,
                 messages.parse(config.getHubConfigHintTitle()),
                 List.of(messages.parse(config.getHubConfigHintLore()))));
 
         if (plugin.getPluginConfig().isRebirthEnabled()
                 && plugin.getRebirthService().canRebirth(profile)) {
             holder.mapAction(31, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.OPEN_REBIRTH));
-            inventorySet(holder, 31, actionItem(Material.TOTEM_OF_UNDYING,
+            inventorySet(holder, content, 31, actionItem(Material.TOTEM_OF_UNDYING,
                     messages.parse("<gold>Renascimento</gold>"),
                     List.of(messages.parse("<gray>Reinicie seu caminho mantendo o codex.</gray>"),
                             messages.parse("<yellow>▶ Confirmar renascimento</yellow>")), true));
@@ -399,7 +418,8 @@ public final class PlayerHubGui {
     }
 
     private static void renderQuestsTab(RpgServerPlugin plugin, Player player, PlayerProfile profile,
-                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config) {
+                                        PlayerHubHolder holder, MessageUtil messages, PluginConfig config,
+                                        List<GuiMotion.SlotItem> content) {
         QuestManager questManager = plugin.getQuestManager();
         List<Quest> preview = collectQuestChainPreview(plugin, player, profile);
 
@@ -410,13 +430,13 @@ public final class PlayerHubGui {
             }
             QuestManager.QuestStatus status = questManager.getQuestStatus(player, profile, quest);
             boolean tracked = quest.getId().equals(profile.getTrackedQuestId());
-            inventorySet(holder, slot, createQuestPreviewItem(plugin, player, profile, quest, status, tracked));
+            inventorySet(holder, content, slot, createQuestPreviewItem(plugin, player, profile, quest, status, tracked));
             mapQuestNodeAction(holder, slot, quest, status, tracked);
             slot++;
         }
 
         holder.mapAction(40, PlayerHubHolder.HubClick.of(PlayerHubHolder.HubAction.OPEN_JOURNAL));
-        inventorySet(holder, 40, actionItem(Material.WRITABLE_BOOK,
+        inventorySet(holder, content, 40, actionItem(Material.WRITABLE_BOOK,
                 messages.parse(config.getHubQuestsOpenJournalTitle()),
                 List.of(messages.parse(config.getHubQuestsOpenJournalLore())), true));
     }
@@ -677,10 +697,11 @@ public final class PlayerHubGui {
                         messages.parse("<yellow>▶ Clique para alternar</yellow>")), true);
     }
 
-    private static void placeCivsMenuAction(PlayerHubHolder holder, int slot, Material material,
+    private static void placeCivsMenuAction(PlayerHubHolder holder, List<GuiMotion.SlotItem> content,
+                                            int slot, Material material,
                                             String title, String lore, String menuRef) {
         holder.mapAction(slot, PlayerHubHolder.HubClick.civsMenu(menuRef));
-        inventorySet(holder, slot, actionItem(material,
+        inventorySet(holder, content, slot, actionItem(material,
                 RpgServerPlugin.getInstance().getMessageUtil().parse(title),
                 List.of(RpgServerPlugin.getInstance().getMessageUtil().parse(lore),
                         RpgServerPlugin.getInstance().getMessageUtil().parse("<yellow>▶ Clique para abrir</yellow>")),
@@ -712,6 +733,18 @@ public final class PlayerHubGui {
 
     private static void inventorySet(PlayerHubHolder holder, int slot, ItemStack item) {
         holder.getInventory().setItem(slot, item);
+    }
+
+    /**
+     * Content slots (9–44) are deferred to {@link GuiMotion#enter}; chrome slots paint immediately.
+     */
+    private static void inventorySet(PlayerHubHolder holder, List<GuiMotion.SlotItem> content,
+                                     int slot, ItemStack item) {
+        if (content != null && slot >= CONTENT_START && slot <= CONTENT_END) {
+            content.add(new GuiMotion.SlotItem(slot, item));
+        } else {
+            holder.getInventory().setItem(slot, item);
+        }
     }
 
     private static void fillBorder(Inventory inventory, String playerArchetype) {
