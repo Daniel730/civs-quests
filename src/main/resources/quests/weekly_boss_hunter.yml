@@ -10,6 +10,7 @@ objectives:
     type: custom_mob_kill
     mob: bandit_chief
     amount: 1
+    spawn-on-accept: true
     description: "Derrote o Chefe Bandido"
   - id: cull_zombies
     type: kill_mob

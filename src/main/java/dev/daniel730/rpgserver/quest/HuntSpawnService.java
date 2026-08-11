@@ -33,10 +33,20 @@ public final class HuntSpawnService {
                 continue;
             }
             double radius = plugin.getPluginConfig().getHuntSpawnPartyRadius();
-            if (plugin.getCivsHook().spawnQuestMob(player, mobId, radius)) {
+            int spawnCount = Math.max(1, objective.getAmount());
+            int spawned = 0;
+            for (int i = 0; i < spawnCount; i++) {
+                if (plugin.getCivsHook().spawnQuestMob(player, mobId, radius)) {
+                    spawned++;
+                }
+            }
+            if (spawned > 0) {
                 setCooldown(player, cooldownKey);
+                String label = spawned == 1
+                        ? mobId
+                        : mobId + " ×" + spawned;
                 plugin.getMessageUtil().send(player,
-                        "<red>⚔</red> <white>Alvo apareceu:</white> <yellow>" + mobId + "</yellow>");
+                        "<red>⚔</red> <white>Alvo apareceu:</white> <yellow>" + label + "</yellow>");
             } else {
                 plugin.getMessageUtil().send(player,
                         "<red>Não foi possível invocar o alvo da caçada.</red>");

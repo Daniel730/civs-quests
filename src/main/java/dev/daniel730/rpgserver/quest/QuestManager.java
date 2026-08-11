@@ -875,7 +875,7 @@ public final class QuestManager {
         if (plugin.getVaultHook().isEnabled()) {
             profile.setQuestStartBalance(quest.getId(), plugin.getVaultHook().getBalance(player));
         }
-        plugin.getHuntSpawnService().spawnOnQuestAccept(player, quest);
+        // Hunt spawn runs from startQuest (explicit accept) only — not on auto-start via progress sync.
         plugin.getQuestFeedbackService().refreshBossBar(player);
     }
 
@@ -1310,6 +1310,8 @@ public final class QuestManager {
         profile.addActiveQuest(quest.getId());
         maybeSetArchetype(profile, quest);
         profile.setTrackedQuestId(quest.getId());
+        // Always spawn-on-accept here so orphaned "started" quests (not active) still summon on accept.
+        plugin.getHuntSpawnService().spawnOnQuestAccept(player, quest);
         progressSync.sync(player, true, true);
         plugin.getProfileManager().markDirty(player.getUniqueId());
         plugin.getQuestFeedbackService().refreshBossBar(player);
