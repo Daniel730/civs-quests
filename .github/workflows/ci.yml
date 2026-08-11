@@ -26,9 +26,39 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Daniel730/Civs
-          ref: paper-26.1.2-migration
+          # master includes Paper 26.1.2 events RPG compiles against; phase0 branch
+          # still pins MythicLib 1.6.1 / nocheatplus v1.5 which do not resolve on CI
+          ref: master
           path: Civs-1.11.6
-          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # NoCheatPlus is not resolvable from public Maven (JitPack flake); seed local .m2
+      # the same way README / AGENTS.md document for local builds.
+      - name: Install Civs build stubs (NoCheatPlus)
+        run: |
+          mkdir -p /tmp/ncp
+          curl -fsSL -o /tmp/ncp/NoCheatPlus.jar \
+            https://github.com/Updated-NoCheatPlus/NoCheatPlus/releases/download/v1.5/NoCheatPlus.jar
+          cat > /tmp/ncp/ncp-clean-pom.xml <<'EOF'
+          <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>com.github.Updated-NoCheatPlus.NoCheatPlus</groupId>
+            <artifactId>nocheatplus</artifactId>
+            <version>1.5</version>
+            <packaging>jar</packaging>
+          </project>
+          EOF
+          mvn -B -q install:install-file -Dfile=/tmp/ncp/NoCheatPlus.jar -DpomFile=/tmp/ncp/ncp-clean-pom.xml
+          # Some Civs docs also reference fr.neatmonster:ncpplugin — install same JAR under that coord if needed
+          cat > /tmp/ncp/ncpplugin-pom.xml <<'EOF'
+          <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>fr.neatmonster</groupId>
+            <artifactId>ncpplugin</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <packaging>jar</packaging>
+          </project>
+          EOF
+          mvn -B -q install:install-file -Dfile=/tmp/ncp/NoCheatPlus.jar -DpomFile=/tmp/ncp/ncpplugin-pom.xml
 
       - name: Build Civs JAR
         working-directory: Civs-1.11.6

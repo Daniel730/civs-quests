@@ -105,6 +105,16 @@ Com LP desativado no config, todas as quests ficam abertas (sem filtro por permi
 
 ---
 
+## CI (GitHub Actions)
+
+Workflow: `.github/workflows/ci.yml`.
+
+- Checks out this repo under `rpg-server-plugin/` and `Daniel730/Civs` **`master`** as sibling `Civs-1.11.6/`.
+- Seeds NoCheatPlus into the runner `~/.m2` (same coords as local README install), then `mvn package` Civs and `mvn test` RPG.
+- Semantic PR titles via `amannn/action-semantic-pull-request`; JaCoCo/Codecov upload when a report exists.
+
+---
+
 ## Instalação (Paper)
 
 ### 1. Compilar
